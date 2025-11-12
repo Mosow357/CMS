@@ -1,4 +1,4 @@
-import { Testimonial } from 'src/users/entities/testimonial.entity';
+import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
 import {
   Entity,
   Column,

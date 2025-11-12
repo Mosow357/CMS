@@ -1,6 +1,6 @@
 import { Category } from 'src/categories/entities/category.entity';
 import { Tag } from 'src/tags/entities/tag.entity';
-import { User } from 'src/testimonials/entities/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import {
   Entity,
   Column,
