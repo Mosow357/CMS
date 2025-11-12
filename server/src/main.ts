@@ -1,8 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
+  const logger = new Logger('MAIN')
   const app = await NestFactory.create(AppModule);
 
   // Enable global validation
@@ -14,10 +16,25 @@ async function bootstrap() {
     }),
   );
 
+  const config = new DocumentBuilder()
+    .setTitle('CMS - testimonial')
+    .setDescription('API para gestionar testimonios, usuarios y contenido del CMS.')
+    .setVersion('1.0.0')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, documentFactory, {    
+  swaggerOptions: {      
+    tagsSorter: 'alpha',      
+    operationsSorter: 'alpha'    
+  } 
+});
+
+
   // Enable CORS
   app.enableCors();
 
   await app.listen(process.env.PORT ?? 3000);
+  logger.log(`app running on port http://localhost:${process.env.PORT}`)
   console.log(`Application is running on: http://localhost:${process.env.PORT ?? 3000}`);
 }
 bootstrap();
