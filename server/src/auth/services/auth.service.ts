@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { RegisterInput } from '../dto/register.input';
@@ -45,11 +46,12 @@ export class AuthService {
   }
 
   async register(data: RegisterInput): Promise<RegisterOutput> {
-    let user = await this.userService.findByUsername(data.username);
+    const username = data.username.trim().toLowerCase();
+    let user = await this.userService.findByUsername(username);
     if (user) throw new ConflictException('User already exists');
 
     user = await this.userService.create(data);
-    if (!user) throw new UnauthorizedException('Error creating user');
+    if (!user) throw new ServiceUnavailableException('Error creating user');
 
     return {
       message: 'User registered successfully',
