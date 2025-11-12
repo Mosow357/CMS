@@ -1,5 +1,5 @@
 import { Role } from 'src/common/enums';
-import { Testimonial } from 'src/users/entities/testimonial.entity';
+import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
 import {
   Entity,
   Column,
@@ -14,6 +14,9 @@ import {
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: 'varchar', nullable: false, unique: true })
+  email: string;
 
   @Column({ type: 'varchar', nullable: false })
   username: string;
