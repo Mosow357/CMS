@@ -49,7 +49,6 @@ export class AuthService {
     const username = data.username.trim().toLowerCase();
     let user = await this.userService.findByUsername(username);
     if (user) throw new ConflictException('User already exists');
-
     user = await this.userService.create(data);
     if (!user) throw new ServiceUnavailableException('Error creating user');
 
