@@ -1,0 +1,28 @@
+{
+  "auth": {
+    "login": {
+      "title": "Welcome to Tribu",
+      "subtitle": "Sign in to your account",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "errors": {
+        "invalidEmail": "Invalid email",
+        "required": "This field is required",
+        "invalidCredentials": "Invalid credentials"
+      }
+    },
+    "logout": "Sign out"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}
