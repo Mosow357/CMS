@@ -9,6 +9,7 @@ import { User } from './testimonials/entities/user.entity';
 import { Testimonial } from './users/entities/testimonial.entity';
 import { Tag } from './tags/entities/tag.entity';
 import { Category } from './categories/entities/category.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { Category } from './categories/entities/category.entity';
     TestimonialsModule,
     CategoriesModule,
     TagsModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
