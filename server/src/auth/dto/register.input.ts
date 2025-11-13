@@ -1,26 +1,26 @@
 import {
-  IsString,
-  IsNotEmpty,
-  IsEnum,
-  IsOptional,
-  MinLength,
   IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
 } from 'class-validator';
-import { Role } from '../../common/enums';
+import { Role } from 'src/common/enums';
 
-export class CreateUserDto {
+export class RegisterInput {
   @IsString()
   @IsNotEmpty()
   username: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
   password: string;
-
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
 
   @IsString()
   @IsOptional()
