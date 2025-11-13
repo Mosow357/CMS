@@ -87,7 +87,7 @@ export function LoginForm() {
             </Label>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
+        <CardFooter className="flex flex-col space-y-4 mt-4">
           <Button
             type="submit"
             className="w-full"
@@ -97,7 +97,7 @@ export function LoginForm() {
           </Button>
           <p className="text-sm text-center text-muted-foreground">
             {t("noAccount")}{" "}
-            <a href="#" className="text-primary hover:underline font-medium">
+            <a href="/register" className="text-primary hover:underline font-medium">
               {t("signUp")}
             </a>
           </p>
