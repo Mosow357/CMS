@@ -20,14 +20,16 @@ async function bootstrap() {
     .setTitle('CMS - testimonial')
     .setDescription('API para gestionar testimonios, usuarios y contenido del CMS.')
     .setVersion('1.0.0')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, documentFactory, {    
-  swaggerOptions: {      
-    tagsSorter: 'alpha',      
-    operationsSorter: 'alpha'    
-  } 
-});
+  SwaggerModule.setup('docs', app, documentFactory, {
+    swaggerOptions: {
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha'
+    },
+    jsonDocumentUrl: '/docs/json'
+  });
 
 
   // Enable CORS

@@ -2,17 +2,22 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { loginAction } from "@/lib/actions/auth"
+import { useToast } from "@/hooks/use-toast"
 
 export function LoginForm() {
   const t = useTranslations("auth.login")
+  const router = useRouter()
+  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
     rememberMe: false,
   })
@@ -21,13 +26,34 @@ export function LoginForm() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Aquí irá la lógica de autenticación
-    console.log("Login attempt:", formData)
+    try {
+      const result = await loginAction({
+        username: formData.username,
+        password: formData.password,
+      })
 
-    // Simular delay de autenticación
-    setTimeout(() => {
+      if (result.success) {
+        toast({
+          title: "¡Bienvenido!",
+          description: "Has iniciado sesión correctamente",
+        })
+        router.push("/dashboard")
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Error al iniciar sesión",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error de conexión. Por favor intenta nuevamente.",
+        variant: "destructive",
+      })
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   return (
@@ -39,13 +65,13 @@ export function LoginForm() {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">{t("email")}</Label>
+            <Label htmlFor="username">{t("username") || "Usuario"}</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder={t("emailPlaceholder")}
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              id="username"
+              type="text"
+              placeholder={t("usernamePlaceholder") || "Ingresa tu usuario"}
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               required
               disabled={isLoading}
             />
