@@ -39,10 +39,10 @@ export class Testimonial {
   @Column({ type: 'varchar', nullable: true })
   status: string;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
 
   @ManyToOne(() => User, (user) => user.testimonials)

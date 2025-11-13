@@ -18,7 +18,7 @@ export class Category {
   @Column({ type: 'varchar' })
   description: string;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 
   @OneToMany(() => Testimonial, (testimonial) => testimonial.category)

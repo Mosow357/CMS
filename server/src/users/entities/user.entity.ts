@@ -36,10 +36,10 @@ export class User {
   })
   role: Role;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
 
   @OneToMany(() => Testimonial, (testimonial) => testimonial.user)
