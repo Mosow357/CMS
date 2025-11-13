@@ -9,7 +9,6 @@ import {
   OneToMany,
 } from 'typeorm';
 
-
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
@@ -37,10 +36,10 @@ export class User {
   })
   role: Role;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'datetime' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'datetime' })
   updated_at: Date;
 
   @OneToMany(() => Testimonial, (testimonial) => testimonial.user)

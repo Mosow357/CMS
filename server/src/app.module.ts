@@ -24,7 +24,7 @@ import { AuthModule } from './auth/auth.module';
       password: process.env.DATABASE_PASSWORD || 'postgres',
       database: process.env.DATABASE_NAME || 'cms_db',
       entities: [User, Testimonial, Tag, Category],
-      synchronize: true, 
+      synchronize: true,
     }),
     UsersModule,
     TestimonialsModule,

@@ -13,7 +13,6 @@ import {
   JoinColumn,
 } from 'typeorm';
 
-
 @Entity('testimonials')
 export class Testimonial {
   @PrimaryGeneratedColumn()
@@ -40,10 +39,10 @@ export class Testimonial {
   @Column({ type: 'varchar', nullable: true })
   status: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'datetime' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'datetime' })
   updated_at: Date;
 
   @ManyToOne(() => User, (user) => user.testimonials)
