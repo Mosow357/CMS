@@ -1,16 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsInt, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, IsOptional, IsArray } from 'class-validator';
 
 export class CreateTestimonialDto {
-  @ApiProperty({ example: 1, description: 'User ID' })
-  @IsInt()
+  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000', description: 'User ID' })
+  @IsUUID()
   @IsNotEmpty()
-  user_id: number;
+  user_id: string;
 
-  @ApiProperty({ example: 5, description: 'Category ID', required: false })
-  @IsInt()
+  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174001', description: 'Category ID', required: false })
+  @IsUUID()
   @IsOptional()
-  category_id?: number;
+  category_id?: string;
 
   @ApiProperty({ example: 'Great service!', description: 'Testimonial title' })
   @IsString()
@@ -37,8 +37,8 @@ export class CreateTestimonialDto {
   @IsOptional()
   status?: string;
 
-  @ApiProperty({ example: [1, 2, 3], description: 'Tag IDs', required: false })
+  @ApiProperty({ example: ['123e4567-e89b-12d3-a456-426614174002', '123e4567-e89b-12d3-a456-426614174003'], description: 'Tag IDs', required: false })
   @IsArray()
   @IsOptional()
-  tagIds?: number[];
+  tagIds?: string[];
 }

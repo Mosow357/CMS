@@ -2,14 +2,19 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { registerAction } from "@/lib/actions/auth"
+import { useToast } from "@/hooks/use-toast"
 
 export function RegisterForm() {
   const t = useTranslations("auth.register")
   const commonT = useTranslations("common")
+  const router = useRouter()
+  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
@@ -22,22 +27,59 @@ export function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Validación básica
     if (formData.password !== formData.confirmPassword) {
-      alert(t("errors.passwordMismatch"))
+      toast({
+        title: "Error",
+        description: t("errors.passwordMismatch") || "Las contraseñas no coinciden",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (formData.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "La contraseña debe tener al menos 6 caracteres",
+        variant: "destructive",
+      })
       return
     }
 
     setIsLoading(true)
 
-    // Aquí irá la lógica de registro
-    console.log("Register attempt:", formData)
+    try {
+      const result = await registerAction({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        lastname: formData.lastname,
+      })
 
-    // Simular delay de registro
-    setTimeout(() => {
+      if (result.success) {
+        toast({
+          title: "¡Registro exitoso!",
+          description: "Tu cuenta ha sido creada. Ahora puedes iniciar sesión.",
+        })
+        router.push("/login")
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Error al registrar usuario",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error de conexión. Por favor intenta nuevamente.",
+        variant: "destructive",
+      })
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

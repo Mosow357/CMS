@@ -4,11 +4,10 @@ import {
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { RegisterInput } from '../dto/register.input';
+import { RegisterDto } from '../dto/register.dto';
 import { UsersService } from 'src/users/services/users.service';
 import * as bcrypt from 'bcrypt';
-import { LoginOutput } from '../dto/login.output';
-import { RegisterOutput } from '../dto/register.output';
+import { LoginResponseDto, RegisterResponseDto } from '../dto/auth-response.dto';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -17,7 +16,7 @@ export class AuthService {
     private readonly userService: UsersService,
     private jwtService: JwtService,
   ) {}
-  async login(username: string, password: string): Promise<LoginOutput> {
+  async login(username: string, password: string): Promise<LoginResponseDto> {
     let user = await this.userService.findByUsername(username);
     if (!user) throw new UnauthorizedException('User not does not exist');
 
@@ -45,7 +44,7 @@ export class AuthService {
     };
   }
 
-  async register(data: RegisterInput): Promise<RegisterOutput> {
+  async register(data: RegisterDto): Promise<RegisterResponseDto> {
     const username = data.username.trim().toLowerCase();
     let user = await this.userService.findByUsername(username);
     if (user) throw new ConflictException('User already exists');
