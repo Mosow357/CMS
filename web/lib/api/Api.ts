@@ -81,9 +81,53 @@ export type CreateTagDto = object;
 
 export type UpdateTagDto = object;
 
-export type LoginDto = object;
+export interface LoginDto {
+  /**
+   * Username
+   * @example "johndoe"
+   */
+  username: string;
+  /**
+   * Password
+   * @minLength 6
+   * @example "password123"
+   */
+  password: string;
+}
 
-export type RegisterDto = object;
+export interface RegisterDto {
+  /**
+   * Username
+   * @example "johndoe"
+   */
+  username: string;
+  /**
+   * Email address
+   * @example "john@example.com"
+   */
+  email: string;
+  /**
+   * Password
+   * @minLength 6
+   * @example "password123"
+   */
+  password: string;
+  /**
+   * First name
+   * @example "John"
+   */
+  name?: string;
+  /**
+   * Last name
+   * @example "Doe"
+   */
+  lastname?: string;
+  /**
+   * User role
+   * @example "VISITOR"
+   */
+  role?: "ADMINISTRATOR" | "EDITOR" | "VISITOR";
+}
 
 export type QueryParamsType = Record<string | number, any>;
 export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
