@@ -6,11 +6,11 @@ export class PaginationDto {
     @IsNumber()
     @Min(1)
     @Type(()=>Number)
-    limit?:number
+    limit?:number = 20
     
     @IsOptional()
     @IsNumber()
     @Min(0)
     @Type(()=>Number)
-    offset?:number
+    offset?:number = 0
 }

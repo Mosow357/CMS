@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { TagsService } from '../services/tags.service';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { UpdateTagDto } from '../dto/update-tag.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('tags')
 export class TagsController {
@@ -22,8 +24,8 @@ export class TagsController {
   }
 
   @Get()
-  findAll() {
-    return this.tagsService.findAll();
+  findAll(@Query() param:PaginationDto) {
+    return this.tagsService.findAll(param);
   }
 
   @Get(':id')

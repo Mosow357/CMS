@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { skip } from 'node:test';
 
 
 @Injectable()
@@ -18,10 +20,14 @@ export class TestimonialsService {
     return this.testimonialsRepository.save(testimonial);
   }
 
-  async findAll(): Promise<Testimonial[]> {
+  async findAll(param:PaginationDto): Promise<Testimonial[]> {
+    const {limit,offset} = param
     return this.testimonialsRepository.find({
       relations: ['user', 'category', 'tags'],
-    });
+      skip: offset,
+      take: limit
+    },
+  );
   }
 
   async findOne(id: string): Promise<Testimonial> {

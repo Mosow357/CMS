@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { UpdateTagDto } from '../dto/update-tag.dto';
 import { Tag } from '../entities/tag.entity';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Injectable()
 export class TagsService {
@@ -17,9 +18,12 @@ export class TagsService {
     return this.tagsRepository.save(tag);
   }
 
-  async findAll(): Promise<Tag[]> {
+  async findAll(param:PaginationDto): Promise<Tag[]> {
+    const {limit,offset} = param
     return this.tagsRepository.find({
       relations: ['testimonials'],
+      skip: offset,
+      take: limit
     });
   }
 

@@ -12,6 +12,7 @@ import {
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { TestimonialsService } from '../services/testimonials.service';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Controller('testimonials')
 export class TestimonialsController {
@@ -24,6 +25,7 @@ export class TestimonialsController {
 
   @Get()
   findAll(
+    @Query() param:PaginationDto,
     @Query('userId') userId?: string,
     @Query('categoryId') categoryId?: string,
   ) {
@@ -33,7 +35,7 @@ export class TestimonialsController {
     if (categoryId) {
       return this.testimonialsService.findByCategory(categoryId);
     }
-    return this.testimonialsService.findAll();
+    return this.testimonialsService.findAll(param);
   }
 
   @Get(':id')
