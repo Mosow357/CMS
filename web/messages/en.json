@@ -18,6 +18,32 @@
         "invalidCredentials": "Invalid credentials"
       }
     },
+    "register": {
+      "title": "Join Tribu",
+      "subtitle": "Create your account to get started",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "username": "Username",
+      "usernamePlaceholder": "your_username",
+      "name": "First Name",
+      "namePlaceholder": "John",
+      "lastname": "Last Name",
+      "lastnamePlaceholder": "Doe",
+      "password": "Password",
+      "passwordPlaceholder": "Create a secure password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Repeat your password",
+      "submit": "Create Account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "errors": {
+        "passwordMismatch": "Passwords do not match",
+        "invalidEmail": "Invalid email",
+        "required": "This field is required",
+        "emailExists": "Email already exists",
+        "usernameExists": "Username already exists"
+      }
+    },
     "logout": "Sign out"
   },
   "common": {

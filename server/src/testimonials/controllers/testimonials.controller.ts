@@ -6,7 +6,7 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe,
+  ParseUUIDPipe,
   Query,
 } from '@nestjs/common';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
@@ -28,29 +28,29 @@ export class TestimonialsController {
     @Query('categoryId') categoryId?: string,
   ) {
     if (userId) {
-      return this.testimonialsService.findByUser(parseInt(userId));
+      return this.testimonialsService.findByUser(userId);
     }
     if (categoryId) {
-      return this.testimonialsService.findByCategory(parseInt(categoryId));
+      return this.testimonialsService.findByCategory(categoryId);
     }
     return this.testimonialsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.testimonialsService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTestimonialDto: UpdateTestimonialDto,
   ) {
     return this.testimonialsService.update(id, updateTestimonialDto);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.testimonialsService.remove(id);
   }
 }

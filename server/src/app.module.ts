@@ -1,14 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { UsersModule } from './users/users.module';
 import { TestimonialsModule } from './testimonials/testimonials.module';
 import { CategoriesModule } from './categories/categories.module';
 import { TagsModule } from './tags/tags.module';
-import { User } from './testimonials/entities/user.entity';
-import { Testimonial } from './users/entities/testimonial.entity';
+import { User } from './users/entities/user.entity';
+import { Testimonial } from './testimonials/entities/testimonial.entity';
 import { Tag } from './tags/entities/tag.entity';
 import { Category } from './categories/entities/category.entity';
+import { AuthModule } from './auth/auth.module';
+import { AuthGuard } from './common/guards/auth.guard';
 
 @Module({
   imports: [
@@ -23,12 +26,19 @@ import { Category } from './categories/entities/category.entity';
       password: process.env.DATABASE_PASSWORD || 'postgres',
       database: process.env.DATABASE_NAME || 'cms_db',
       entities: [User, Testimonial, Tag, Category],
-      synchronize: true, 
+      synchronize: true,
     }),
     UsersModule,
     TestimonialsModule,
     CategoriesModule,
     TagsModule,
+    AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}
