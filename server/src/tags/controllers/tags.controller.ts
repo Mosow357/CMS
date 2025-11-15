@@ -12,7 +12,7 @@ import {
 import { TagsService } from '../services/tags.service';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { UpdateTagDto } from '../dto/update-tag.dto';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
 
 @Controller('tags')
 export class TagsController {
@@ -24,7 +24,7 @@ export class TagsController {
   }
 
   @Get()
-  findAll(@Query() param:PaginationDto) {
+  findAll(@Query() param:QueryParamsDto) {
     return this.tagsService.findAll(param);
   }
 

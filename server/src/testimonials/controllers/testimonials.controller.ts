@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
-import { TestimonialsService } from '../services/testimonials.service';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { TestimonialsService } from '../services/testimonials.service'; 
+import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
 
 @Controller('testimonials')
 export class TestimonialsController {
@@ -25,7 +25,7 @@ export class TestimonialsController {
 
   @Get()
   findAll(
-    @Query() param:PaginationDto,
+    @Query() param:QueryParamsDto,
     @Query('userId') userId?: string,
     @Query('categoryId') categoryId?: string,
   ) {

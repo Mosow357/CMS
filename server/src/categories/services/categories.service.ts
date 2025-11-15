@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { Category } from '../entities/category.entity';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
 
 
 @Injectable()
@@ -19,12 +19,15 @@ export class CategoriesService {
     return this.categoriesRepository.save(category);
   }
 
-  async findAll(param:PaginationDto): Promise<Category[]> {
-    const {limit,offset} = param
+  async findAll(param:QueryParamsDto): Promise<Category[]> {
+    const {limit,offset,sort} = param
     return this.categoriesRepository.find({
       relations: ['testimonials'],
       skip: offset,
-      take: limit
+      take: limit,
+      order:{
+        createdAt: sort
+      }
     });
   }
 

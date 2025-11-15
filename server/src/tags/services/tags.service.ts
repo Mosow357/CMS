@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { UpdateTagDto } from '../dto/update-tag.dto';
-import { Tag } from '../entities/tag.entity';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { Tag } from '../entities/tag.entity'; 
+import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
 
 @Injectable()
 export class TagsService {
@@ -18,12 +18,15 @@ export class TagsService {
     return this.tagsRepository.save(tag);
   }
 
-  async findAll(param:PaginationDto): Promise<Tag[]> {
-    const {limit,offset} = param
+  async findAll(param:QueryParamsDto): Promise<Tag[]> {
+    const {limit,offset,sort} = param
     return this.tagsRepository.find({
       relations: ['testimonials'],
       skip: offset,
-      take: limit
+      take: limit,
+      order:{
+        createdAt: sort
+      }
     });
   }
 

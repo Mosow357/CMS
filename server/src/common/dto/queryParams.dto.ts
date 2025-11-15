@@ -1,7 +1,7 @@
 import { Type } from "class-transformer"
-import { IsNumber, IsOptional, Min, } from "class-validator"
+import { IsNumber, IsOptional, IsString, Min, } from "class-validator"
 
-export class PaginationDto {
+export class QueryParamsDto {
     @IsOptional()
     @IsNumber()
     @Min(1)
@@ -13,4 +13,8 @@ export class PaginationDto {
     @Min(0)
     @Type(()=>Number)
     offset?:number = 0
+
+    @IsOptional()
+    @IsString()
+    sort: 'ASC' | 'DESC'
 }
