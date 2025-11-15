@@ -1,3 +1,5 @@
+import Stream from 'stream';
+
 export interface IMediaStorageProvider {
-  upload_stream(stream: ReadableStream, filename: string): Promise<string>;
+  upload_stream(stream: Stream.Readable, filename: string): Promise<string>;
 }
