@@ -43,10 +43,17 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { username } });
   }
 
+  async findOneWithPassword(username: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { username },
+      select: ['id', 'email', 'password'],
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 
-   /* if (updateUserDto.password) {
+    /* if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }*/
 

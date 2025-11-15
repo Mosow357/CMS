@@ -8,10 +8,9 @@ import { AuthModule } from 'src/auth/auth.module';
 import { Category } from 'src/categories/entities/category.entity';
 import { Tag } from 'src/tags/entities/tag.entity';
 import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
-import { RegisterInput } from 'src/auth/dto/register.input';
-import { Role } from 'src/common/enums';
-import { LoginInput } from 'src/auth/dto/login.input';
 import { ConfigModule } from '@nestjs/config';
+import { RegisterDto } from 'src/auth/dto/register.dto';
+import { LoginDto } from 'src/auth/dto/login.dto';
 
 describe('Auth integration', () => {
   let app: INestApplication;
@@ -45,13 +44,12 @@ describe('Auth integration', () => {
 
   it('should register a new user', async () => {
     //arrange
-    const registerDto: RegisterInput = {
+    const registerDto: RegisterDto = {
       password: '1234567',
       username: 'test_1',
       email: 'test_1@test.com',
       lastname: 'test',
       name: 'test',
-      role: Role.VISITOR,
     };
     //act
     const res = await request
@@ -63,13 +61,12 @@ describe('Auth integration', () => {
   });
   it('should throw exception, email not valid', async () => {
     //arrange
-    const registerDto: RegisterInput = {
+    const registerDto: RegisterDto = {
       password: '1234567',
       username: 'test_2',
       email: 'testtest.com',
       lastname: 'test',
       name: 'test',
-      role: Role.VISITOR,
     };
     //act
     const res = await request
@@ -82,17 +79,16 @@ describe('Auth integration', () => {
 
   it('should login and return token', async () => {
     //arrange
-    const loginInput: LoginInput = {
+    const loginInput: LoginDto = {
       password: '1234567',
       username: 'test_3',
     };
-    const registerDto: RegisterInput = {
+    const registerDto: RegisterDto = {
       password: '1234567',
       username: 'test_3',
       email: 'test_3@test.com',
       lastname: 'test',
       name: 'test',
-      role: Role.VISITOR,
     };
     //act
     await request
@@ -110,17 +106,16 @@ describe('Auth integration', () => {
   });
   it('should throw unauthorized exception', async () => {
     //arrange
-    const loginInput: LoginInput = {
+    const loginInput: LoginDto = {
       password: '1234567',
       username: 'test_4',
     };
-    const registerDto: RegisterInput = {
+    const registerDto: RegisterDto = {
       password: '123457',
       username: 'test_4',
       email: 'test_4@test.com',
       lastname: 'test',
       name: 'test',
-      role: Role.VISITOR,
     };
     //act
     await request
