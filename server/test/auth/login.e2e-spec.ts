@@ -11,6 +11,8 @@ import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
 import { ConfigModule } from '@nestjs/config';
 import { RegisterDto } from 'src/auth/dto/register.dto';
 import { LoginDto } from 'src/auth/dto/login.dto';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 
 describe('Auth integration', () => {
   let app: INestApplication;
@@ -32,6 +34,12 @@ describe('Auth integration', () => {
         UsersModule,
         AuthModule,
       ],
+      providers: [
+          {
+            provide: APP_GUARD,
+            useClass: AuthGuard,
+          },
+        ],
     }).compile();
 
     app = moduleRef.createNestApplication();
@@ -129,6 +137,48 @@ describe('Auth integration', () => {
       .send(loginInput);
     //assert
     expect(res.status).toBe(401);
+  });
+
+  it('valikdate token: should return not authorized error', async () => {
+    //act
+    let res = await request
+      .default(app.getHttpServer())
+      .get('/auth/validate-token')
+    //assert
+    expect(res.status).toBe(401);
+  });
+
+  it('validate token: should return 200 code', async () => {
+    //arrange
+    const loginInput: LoginDto = {
+      password: '1234567',
+      username: 'test_5',
+    };
+    const registerDto: RegisterDto = {
+      password: '1234567',
+      username: 'test_5',
+      email: 'test_5@test.com',
+      lastname: 'test',
+      name: 'test',
+    };
+    //act
+    await request
+      .default(app.getHttpServer())
+      .post('/auth/register')
+      .send(registerDto);
+
+    const loginRes = await request
+      .default(app.getHttpServer())
+      .post('/auth/login')
+      .send(loginInput);
+    const token = loginRes.body.token;
+
+    let res = await request
+      .default(app.getHttpServer())
+      .get('/auth/validate-token')
+      .set('Authorization', `Bearer ${token}`);
+    //assert
+    expect(res.status).toBe(200);
   });
 
   afterAll(async () => {
