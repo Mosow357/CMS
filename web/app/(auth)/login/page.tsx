@@ -1,6 +1,7 @@
 import { LoginForm } from "@/components/auth/login-form"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LanguageToggle } from "@/components/language-toggle"
+import Chatbot from "@/components/chatBotGemini"
 
 export default function LoginPage() {
   return (
@@ -10,6 +11,8 @@ export default function LoginPage() {
         <ThemeToggle />
       </div>
       <LoginForm />
+      <Chatbot />
+      
     </div>
   )
 }
