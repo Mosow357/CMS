@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   ServiceUnavailableException,
@@ -9,12 +10,20 @@ import { UsersService } from 'src/users/services/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginResponseDto, RegisterResponseDto } from '../dto/auth-response.dto';
 import { JwtService } from '@nestjs/jwt';
+import { ChangePasswordDto } from '../dto/changePassword.dto';
+import { User } from 'src/users/entities/user.entity';
+import { EncoderService } from './encoder.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(User)
+    private readonly userRepository:Repository<User>,
     private readonly userService: UsersService,
     private jwtService: JwtService,
+    private encoderService: EncoderService
   ) {}
   async login(username: string, password: string): Promise<LoginResponseDto> {
     let user = await this.userService.findByUsername(username);
@@ -55,5 +64,16 @@ export class AuthService {
       message: 'User registered successfully',
       success: true,
     };
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto,user:User):Promise<void>{
+    const {newPassword,oldPassword} = changePasswordDto
+    if(await this.encoderService.checkPassword(oldPassword,newPassword)){
+      user.password = await  this.encoderService.encodePassword(newPassword);
+      this.userRepository.save(user)
+    }else{
+      throw new BadRequestException('Old password does not match')
+    }
+
   }
 }
