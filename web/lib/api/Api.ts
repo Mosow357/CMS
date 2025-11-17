@@ -755,5 +755,19 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @tags Auth
+     * @name AuthControllerValidateToken
+     * @request GET:/auth/validate-token
+     */
+    authControllerValidateToken: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/auth/validate-token`,
+        method: "GET",
+        ...params,
+      }),
   };
 }
