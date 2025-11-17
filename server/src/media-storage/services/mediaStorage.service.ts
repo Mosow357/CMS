@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import type { IMediaStorageProvider } from '../ports/ImediaStorageProvider';
+import { Inject, Injectable } from '@nestjs/common';
 import Stream from 'stream';
+import { IMediaStorageProvider } from '../ports/ImediaStorageProvider';
 
 @Injectable()
 export class MediaStorageService {
-  constructor(private readonly mediaStorageProvider: IMediaStorageProvider) {}
+  constructor(@Inject(IMediaStorageProvider) private readonly mediaStorageProvider: IMediaStorageProvider) {}
 
   async uploadFile(
     fileStream: Stream.Readable,

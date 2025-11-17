@@ -4,7 +4,7 @@ import { MediaStorageService } from './services/mediaStorage.service';
 @Module({
   imports: [],
   controllers: [],
-  providers: [],
+  providers: [MediaStorageService],
   exports: [MediaStorageService],
 })
 export class MediaStorageModule {}

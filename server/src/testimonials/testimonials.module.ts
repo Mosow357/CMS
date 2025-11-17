@@ -5,15 +5,18 @@ import { Testimonial } from './entities/testimonial.entity';
 import { TestimonialsService } from './services/testimonials.service';
 import { AiModule } from 'src/ia/ai.module';
 import { MediaStorageModule } from 'src/media-storage/mediaStorage.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Testimonial]),
-    AiModule,
+    MulterModule.register({
+      dest: './upload',
+    }),
     MediaStorageModule,
   ],
   controllers: [TestimonialsController],
-  providers: [TestimonialsService],
+  providers: [TestimonialsService, MediaStorageModule],
   exports: [TestimonialsService],
 })
 export class TestimonialsModule {}

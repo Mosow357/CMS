@@ -10,6 +10,8 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
@@ -18,6 +20,7 @@ import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Public } from 'src/common/decorators/public.decorator';
 import { CreateTestimonialsService } from '../services/createTestimonial.service';
+import { FileSizeValidationPipe } from 'src/common/pipes/fileSizeValidationPipe';
 
 @Controller('testimonials')
 export class TestimonialsController {
@@ -25,8 +28,9 @@ export class TestimonialsController {
 
   @Post()
   @Public()
+  @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('file'))
-  create(@Body() createTestimonialDto: CreateTestimonialDto,@UploadedFile() file?: Express.Multer.File) {
+  create(@Body() createTestimonialDto: CreateTestimonialDto,@UploadedFile(new FileSizeValidationPipe()) file?: Express.Multer.File) {
     if(createTestimonialDto.media_type == "text" || !file)
       return this.createTestimonialService.createTestimonial(createTestimonialDto);
 

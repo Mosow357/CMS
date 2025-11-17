@@ -23,8 +23,7 @@ export class CreateTestimonialsService {
   ): Promise<Testimonial> {
     const testimonial =
       this.testimonialsRepository.create(createTestimonialDto);
-    testimonial.status =
-      await this.evaluateStatusTestimonialContent(testimonial);
+    testimonial.status = "pending"
     try {
       let objectFilename = this.generateMediaFilename(
         createTestimonialDto.user_id,
@@ -45,8 +44,7 @@ export class CreateTestimonialsService {
   async createTestimonial(createTestimonialDto: CreateTestimonialDto) {
     const testimonial =
       this.testimonialsRepository.create(createTestimonialDto);
-    testimonial.status =
-      await this.evaluateStatusTestimonialContent(testimonial);
+    testimonial.status = "pending"
 
     return this.testimonialsRepository.save(testimonial);
   }
@@ -59,11 +57,5 @@ export class CreateTestimonialsService {
     const sanitizedFilename = originalFilename.replace(/\s+/g, '_');
     return `testimonials/${userId}/${timestamp}_${sanitizedFilename}`;
   }
-  private async evaluateStatusTestimonialContent(
-    testimonial: Testimonial,
-  ): Promise<string> {
-    let aiEvaluationResult =
-      await this.aiService.evaluateTestimonial(testimonial);
-    return aiEvaluationResult;
-  }
+  
 }
