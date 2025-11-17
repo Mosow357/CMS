@@ -10,7 +10,6 @@ import { RegisterDto } from '../dto/register.dto';
 import { UsersService } from 'src/users/services/users.service';
 import * as bcrypt from 'bcrypt';
 import {
-  LoginResponseDto,
   RegisterResponseDto,
 } from '../dto/auth-response.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -19,6 +18,7 @@ import { User } from 'src/users/entities/user.entity';
 import { EncoderService } from './encoder.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { RequestUser } from 'src/common/types/request-user';
 
 @Injectable()
 export class AuthService {
@@ -29,7 +29,7 @@ export class AuthService {
     private jwtService: JwtService,
     private encoderService: EncoderService
   ) {}
-  async login(username: string, password: string): Promise<LoginResponseDto> {
+  async login(username: string, password: string): Promise<RequestUser> {
     let user = await this.userService.findOneWithPassword(username);
     if (!user) throw new UnauthorizedException('User does not exist');
     if (!bcrypt.compareSync(password, user.password))
@@ -45,15 +45,10 @@ export class AuthService {
     const expiredAt = new Date();
     expiredAt.setDate(expiredAt.getDate() + expiresInDays);
     return {
+      ...user,
       token: payload,
-      expiredAt,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
-    };
+      tokenExpiredAt: expiredAt,
+    } as RequestUser;
   }
 
   async register(data: RegisterDto): Promise<RegisterResponseDto> {
