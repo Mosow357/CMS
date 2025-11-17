@@ -76,15 +76,10 @@ export async function loginAction(
     // Revalida para limpiar cualquier dato de sesión cacheado
     revalidatePath('/', 'layout')
 
-    // Determina la redirección según el rol
-    const role = data.user.role
-    const roleRedirects: Record<string, string> = {
-      ADMINISTRATOR: '/admin',
-      EDITOR: '/dashboard',
-      VISITOR: '/dashboard',
-    }
-    const redirectPath = roleRedirects[role] || '/dashboard'
+    // Determina la redirección - siempre redirige al dashboard principal
+    const redirectPath = '/dashboard'
 
+    //debe dirigir a la ruta principal
     return {
       success: true,
       data: {

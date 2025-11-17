@@ -32,12 +32,13 @@ export function LoginForm() {
         password: formData.password,
       })
 
-      if (result.success) {
+      if (result.success && result.data) {
         toast({
           title: "¡Bienvenido!",
           description: "Has iniciado sesión correctamente",
         })
-        router.push("/dashboard")
+        // Usar la ruta de redirección que viene en la respuesta
+        router.push(result.data.redirectPath || "/dashboard")
       } else {
         toast({
           title: "Error",

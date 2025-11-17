@@ -14,12 +14,12 @@ const roleRoutes: Record<string, string[]> = {
 
 // Rutas predeterminadas de redirección para cada rol
 const defaultRolePaths: Record<string, string> = {
-    ADMINISTRATOR: '/admin',
-    EDITOR: '/dashboard',
-    VISITOR: '/dashboard',
+    ADMINISTRATOR: '/dashboard/admin',
+    EDITOR: '/dashboard/editor', 
+    VISITOR: '/dashboard/visitor',
 }
 
-export async function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
 
     // Obtener token y usuario de las cookies
@@ -41,16 +41,13 @@ export async function proxy(request: NextRequest) {
 
     // Si el usuario está autenticado e intenta acceder a rutas de autenticación, redirigir al dashboard
     if (isAuthenticated && isAuthRoute) {
-        const role = user?.role as string
-        const defaultPath = defaultRolePaths[role] || '/dashboard'
-        return NextResponse.redirect(new URL(defaultPath, request.url))
+        return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
     // Si el usuario no está autenticado e intenta acceder a rutas protegidas
     if (!isAuthenticated && !isPublicRoute) {
-        const loginUrl = new URL('/login', request.url)
-        loginUrl.searchParams.set('callbackUrl', pathname)
-        return NextResponse.redirect(loginUrl)
+        // No usar callbackUrl, simplemente redirigir al login
+        return NextResponse.redirect(new URL('/login', request.url))
     }
 
     // Comprobar acceso basado en el rol

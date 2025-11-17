@@ -1,27 +1,55 @@
-import { getSession, hasRole, hasMinimumRole } from '@/lib/actions/session'
-import { redirect } from 'next/navigation'
+'use client'
 
-export default async function Page() {
-  const session = await getSession()
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { getSession } from '@/lib/actions/session'
 
-  if (!session.isValid) {
-    redirect('/login')
-  }
+export default function DashboardPage() {
+  const router = useRouter()
 
-  //   const isAdmin = await hasRole('ADMINISTRATOR')
-  //   if (!isAdmin) {
-  //     redirect('/login')
-  //   }
+  useEffect(() => {
+    const redirectToUserDashboard = async () => {
+      try {
+        const session = await getSession()
+        
+        // Si no hay sesión válida, redirigir al login
+        if (!session.isValid || !session.user) {
+          router.replace('/login')
+          return
+        }
 
-  //   const canEdit = await hasMinimumRole('EDITOR')
-  //   if (!canEdit) {
-  //     redirect('/login')
-  //   }
+        // Redirigir según el rol del usuario
+        switch (session.user.role) {
+          case 'ADMINISTRATOR':
+            router.replace('/dashboard/admin')
+            break
+          case 'EDITOR':
+            router.replace('/dashboard/editor')
+            break
+          case 'VISITOR':
+            router.replace('/dashboard/visitor')
+            break
+          default:
+            // Si el rol no es reconocido, redirigir al visitor por defecto
+            router.replace('/dashboard/visitor')
+        }
+      } catch (error) {
+        console.error('Error al obtener la sesión:', error)
+        // En caso de error, redirigir al login
+        router.replace('/login')
+      }
+    }
 
+    redirectToUserDashboard()
+  }, [router])
+
+  // Mostrar un loading mientras se determina el rol
   return (
-    <>
-      <h2 className="text-2xl font-bold mb-4">Bienvenido {session.user?.username}</h2>
-      <p className="text-muted-foreground">Este es tu panel principal.</p>
-    </>
-  );
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Cargando dashboard...</p>
+      </div>
+    </div>
+  )
 }
