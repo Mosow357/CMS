@@ -21,7 +21,7 @@ export class OrganitationsService {
   async findAll(param:QueryParamsDto): Promise<Organitation[]> {
     const {limit,offset,sort} = param
     return this.organitationRepository.find({
-      relations: ['users'],
+      relations: ['members'],
       skip: offset,
       take: limit,
       order:{
@@ -33,7 +33,7 @@ export class OrganitationsService {
   async findOne(id: string): Promise<Organitation> {
     const organitation = await this.organitationRepository.findOne({
       where: { id },
-      relations: ['users'],
+      relations: ['members'],
     });
     if (!organitation) {
       throw new NotFoundException(`Organitation with ID ${id} not found`);
