@@ -1,13 +1,11 @@
 
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { AuthService } from '../services/auth.service';
 import { LoginResponseDto, RegisterResponseDto } from '../dto/auth-response.dto';
 import { Public } from 'src/common/decorators/public.decorator'; 
 import { ChangePasswordDto } from '../dto/changePassword.dto';
-import { GetUser } from '../decorators/get-user.decorator';
-import { User } from 'src/users/entities/user.entity';
 import { RolesG } from 'src/common/guards/roles.decorator';
 import { UserRole } from 'src/common/types/userRole'; 
 
@@ -29,13 +27,13 @@ export class AuthController {
     return await this.authService.register(registerDto);
   }
 
-  @Post('change_password')
-  @HttpCode(HttpStatus.OK)
+  @Patch('change_password/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
-    @GetUser() user: User
+    @Param('id') username: string
   ): Promise<void> {
-    return await this.authService.changePassword(changePasswordDto, user);
+    return await this.authService.changePassword(changePasswordDto, username);
   }
   @Get('validate-token')
   @RolesG(UserRole.ADMINISTRATOR, UserRole.EDITOR)

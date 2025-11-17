@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -68,14 +69,20 @@ export class AuthService {
     };
   }
 
-  async changePassword(changePasswordDto: ChangePasswordDto,user:User):Promise<void>{
+  async changePassword(changePasswordDto: ChangePasswordDto,username:string):Promise<void>{
     const {newPassword,oldPassword} = changePasswordDto
-    if(await this.encoderService.checkPassword(oldPassword,newPassword)){
-      user.password = await  this.encoderService.encodePassword(newPassword);
-      this.userRepository.save(user)
-    }else{
-      throw new BadRequestException('Old password does not match')
-    }
+    const user = await this.userService.findOneWithPassword(username)
+    
+    if(!user)
+      throw new NotFoundException('Username Not found')
 
+    if(newPassword === oldPassword) 
+      throw new BadRequestException("The new password can't be similar to the old password")
+
+    if(!await this.encoderService.checkPassword(oldPassword,user?.password))
+      throw new BadRequestException('The old password does not match')
+
+    user.password = await  this.encoderService.encodePassword(newPassword);
+    await this.userRepository.save(user)
   }
 }
