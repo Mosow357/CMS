@@ -26,7 +26,7 @@ export class User extends BaseEntity {
   @Column({
     type: 'varchar',
     nullable: false,
-    default: UserRole.VISITOR,
+    default: UserRole.ADMINISTRATOR,
   })
   role: UserRole;
 
