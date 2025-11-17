@@ -14,6 +14,9 @@
       "submit": "Iniciar sesión",
       "noAccount": "¿No tienes cuenta?",
       "signUp": "Regístrate",
+      "common": {
+        "loading": "Cargando..."
+      },
       "errors": {
         "invalidEmail": "Correo electrónico inválido",
         "required": "Este campo es requerido",
