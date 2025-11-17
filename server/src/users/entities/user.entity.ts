@@ -1,7 +1,5 @@
-import { Exclude } from 'class-transformer';
 import { BaseEntity } from 'src/common/entities/base.entity';
-import { UserRole } from 'src/common/types/userRole';
-import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
+import { Organitation } from 'src/organitations/entities/organitation.entity';
 import {
   Entity,
   Column,
@@ -23,13 +21,6 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar' })
   name: string;
 
-  @Column({
-    type: 'varchar',
-    nullable: false,
-    default: UserRole.ADMINISTRATOR,
-  })
-  role: UserRole;
-
-  @OneToMany(() => Testimonial, (testimonial) => testimonial.user)
-  testimonials: Testimonial[];
+  @OneToMany(() => Organitation, (Organitation) => Organitation.members)
+  organitation: Organitation[];
 }
