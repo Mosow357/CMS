@@ -31,7 +31,6 @@ export class AuthService {
   ) {}
   async login(username: string, password: string): Promise<LoginResponseDto> {
     let user = await this.userService.findOneWithPassword(username);
-    console.log(user, '<<<<<<<<<<<<<<<< USER');
     if (!user) throw new UnauthorizedException('User does not exist');
     if (!bcrypt.compareSync(password, user.password))
       throw new UnauthorizedException('Invalid password');
