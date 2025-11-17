@@ -3,6 +3,8 @@
     "login": {
       "title": "Welcome to Tribu",
       "subtitle": "Sign in to your account",
+      "username": "Username",
+      "usernamePlaceholder": "Enter your username",
       "email": "Email",
       "emailPlaceholder": "your@email.com",
       "password": "Password",
@@ -12,6 +14,9 @@
       "submit": "Sign in",
       "noAccount": "Don't have an account?",
       "signUp": "Sign up",
+      "common": {
+        "loading": "Loading..."
+      },
       "errors": {
         "invalidEmail": "Invalid email",
         "required": "This field is required",

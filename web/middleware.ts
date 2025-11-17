@@ -7,9 +7,9 @@ const authRoutes = ['/login', '/register']
 
 // Definir mapeos de rutas basadas en roles
 const roleRoutes: Record<string, string[]> = {
-    ADMINISTRATOR: ['/admin', '/dashboard', '/testimonials', '/users'],
-    EDITOR: ['/dashboard', '/testimonials'],
-    VISITOR: ['/dashboard'],
+    ADMINISTRATOR: ['/dashboard/admin', '/dashboard', '/testimonials', '/users'],
+    EDITOR: ['/dashboard/editor', '/dashboard', '/testimonials'],
+    VISITOR: ['/dashboard/visitor', '/dashboard'],
 }
 
 // Rutas predeterminadas de redirección para cada rol
@@ -54,6 +54,11 @@ export function middleware(request: NextRequest) {
     if (isAuthenticated && user) {
         const userRole = user.role as string
         const allowedRoutes = roleRoutes[userRole] || []
+
+        // Permitir acceso a la página dashboard principal para que pueda hacer la redirección
+        if (pathname === '/dashboard') {
+            return NextResponse.next()
+        }
 
         // Comprobar si la ruta actual requiere un rol específico
         const requiresAuth = !isPublicRoute
