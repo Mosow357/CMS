@@ -8,7 +8,10 @@ import {
 import { RegisterDto } from '../dto/register.dto';
 import { UsersService } from 'src/users/services/users.service';
 import * as bcrypt from 'bcrypt';
-import { LoginResponseDto, RegisterResponseDto } from '../dto/auth-response.dto';
+import {
+  LoginResponseDto,
+  RegisterResponseDto,
+} from '../dto/auth-response.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ChangePasswordDto } from '../dto/changePassword.dto';
 import { User } from 'src/users/entities/user.entity';
@@ -26,9 +29,8 @@ export class AuthService {
     private encoderService: EncoderService
   ) {}
   async login(username: string, password: string): Promise<LoginResponseDto> {
-    let user = await this.userService.findByUsername(username);
-    if (!user) throw new UnauthorizedException('User not does not exist');
-
+    let user = await this.userService.findOneWithPassword(username);
+    if (!user) throw new UnauthorizedException('User does not exist');
     if (!bcrypt.compareSync(password, user.password))
       throw new UnauthorizedException('Invalid password');
 
