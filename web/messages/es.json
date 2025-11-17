@@ -3,6 +3,8 @@
     "login": {
       "title": "Bienvenido a Tribu",
       "subtitle": "Inicia sesión en tu cuenta",
+      "username": "Usuario",
+      "usernamePlaceholder": "Ingresa tu usuario",
       "email": "Correo electrónico",
       "emailPlaceholder": "tu@email.com",
       "password": "Contraseña",
