@@ -30,22 +30,32 @@ export class AuthService {
     private encoderService: EncoderService
   ) {}
   async login(username: string, password: string): Promise<RequestUser> {
-    let user = await this.userService.findOneWithPassword(username);
-    if (!user) throw new UnauthorizedException('User does not exist');
-    if (!bcrypt.compareSync(password, user.password))
+    const user = await this.userService.findOneWithPassword(username);
+    
+    if (!user) {
+      throw new UnauthorizedException('User does not exist');
+    }
+    
+    if (!bcrypt.compareSync(password, user.password)) {
       throw new UnauthorizedException('Invalid password');
+    }
 
     const expiresInDays = 7;
     const expiresIn = `${expiresInDays}d`;
 
-    let payload = this.jwtService.sign(
+    const payload = this.jwtService.sign(
       { id: user.id, username: user.username, role: user.role },
       { expiresIn: expiresIn },
     );
+    
     const expiredAt = new Date();
     expiredAt.setDate(expiredAt.getDate() + expiresInDays);
+    
+    // Remove password from response for security
+    const { password: _, ...userWithoutPassword } = user;
+    
     return {
-      ...user,
+      ...userWithoutPassword,
       token: payload,
       tokenExpiredAt: expiredAt,
     } as RequestUser;
