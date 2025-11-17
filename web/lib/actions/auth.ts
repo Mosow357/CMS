@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { apiClient } from '@/lib/api/client'
 
 export interface LoginCredentials {
@@ -20,6 +21,7 @@ export interface RegisterData {
 export interface AuthResponse {
   token: string
   expiredAt: Date
+  redirectPath: string
   user: {
     id: string
     username: string
@@ -59,6 +61,7 @@ export async function loginAction(
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 días
+      path: '/',
     })
 
     // Guardar el usuario en cookies
@@ -67,11 +70,27 @@ export async function loginAction(
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
+      path: '/',
     })
+
+    // Revalida para limpiar cualquier dato de sesión cacheado
+    revalidatePath('/', 'layout')
+
+    // Determina la redirección según el rol
+    const role = data.user.role
+    const roleRedirects: Record<string, string> = {
+      ADMINISTRATOR: '/admin',
+      EDITOR: '/dashboard',
+      VISITOR: '/dashboard',
+    }
+    const redirectPath = roleRedirects[role] || '/dashboard'
 
     return {
       success: true,
-      data,
+      data: {
+        ...data,
+        redirectPath, // Incluye la ruta de redirección en la respuesta
+      },
     }
   } catch (error: any) {
     console.error('Login error:', error)
@@ -124,32 +143,9 @@ export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies()
   cookieStore.delete('auth_token')
   cookieStore.delete('user')
+
+  // Revalida para limpiar caché de sesión
+  revalidatePath('/', 'layout')
+
   redirect('/login')
-}
-
-export async function getCurrentUser() {
-  try {
-    const cookieStore = await cookies()
-    const userCookie = cookieStore.get('user')
-
-    if (!userCookie) {
-      return null
-    }
-
-    return JSON.parse(userCookie.value)
-  } catch (error) {
-    console.error('Error getting current user:', error)
-    return null
-  }
-}
-
-export async function getAuthToken(): Promise<string | null> {
-  try {
-    const cookieStore = await cookies()
-    const token = cookieStore.get('auth_token')
-    return token?.value || null
-  } catch (error) {
-    console.error('Error getting auth token:', error)
-    return null
-  }
 }
