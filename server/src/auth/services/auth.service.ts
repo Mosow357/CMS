@@ -8,10 +8,10 @@ import { RegisterDto } from '../dto/register.dto';
 import { UsersService } from 'src/users/services/users.service';
 import * as bcrypt from 'bcrypt';
 import {
-  LoginResponseDto,
   RegisterResponseDto,
 } from '../dto/auth-response.dto';
 import { JwtService } from '@nestjs/jwt';
+import { RequestUser } from 'src/common/types/request-user';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +19,7 @@ export class AuthService {
     private readonly userService: UsersService,
     private jwtService: JwtService,
   ) {}
-  async login(username: string, password: string): Promise<LoginResponseDto> {
+  async login(username: string, password: string): Promise<RequestUser> {
     let user = await this.userService.findOneWithPassword(username);
     console.log(user, '<<<<<<<<<<<<<<<< USER');
     if (!user) throw new UnauthorizedException('User does not exist');
@@ -36,15 +36,10 @@ export class AuthService {
     const expiredAt = new Date();
     expiredAt.setDate(expiredAt.getDate() + expiresInDays);
     return {
+      ...user,
       token: payload,
-      expiredAt,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
-    };
+      tokenExpiredAt: expiredAt,
+    } as RequestUser;
   }
 
   async register(data: RegisterDto): Promise<RegisterResponseDto> {

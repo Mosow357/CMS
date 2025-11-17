@@ -2,11 +2,11 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/commo
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { AuthService } from '../services/auth.service';
-import { LoginResponseDto, RegisterResponseDto } from '../dto/auth-response.dto';
-import { Public } from 'src/common/decorators/public.decorator';
-import { Role } from 'src/common/enums';
-import { RolesG } from 'src/common/guards/roles.decorator';
+import { RegisterResponseDto } from '../dto/auth-response.dto';
+//import { Role } from 'src/common/enums';
+import { Public, RolesG } from 'src/common/guards/roles.decorator';
 import { UserRole } from 'src/common/types/userRole';
+import { RequestUser } from 'src/common/types/request-user';
 
 @Controller('auth')
 export class AuthController {
@@ -15,7 +15,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+  async login(@Body() loginDto: LoginDto): Promise<RequestUser> {
     return await this.authService.login(loginDto.username, loginDto.password);
   }
 
