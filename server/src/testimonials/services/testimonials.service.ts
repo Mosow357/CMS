@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
-
+import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
 
 @Injectable()
 export class TestimonialsService {
@@ -13,14 +13,15 @@ export class TestimonialsService {
     private testimonialsRepository: Repository<Testimonial>,
   ) {}
 
-  async create(createTestimonialDto: CreateTestimonialDto): Promise<Testimonial> {
-    const testimonial = this.testimonialsRepository.create(createTestimonialDto);
-    return this.testimonialsRepository.save(testimonial);
-  }
-
-  async findAll(): Promise<Testimonial[]> {
+  async findAll(param: QueryParamsDto): Promise<Testimonial[]> {
+    const { limit, offset, sort } = param;
     return this.testimonialsRepository.find({
       relations: ['user', 'category', 'tags'],
+      skip: offset,
+      take: limit,
+      order: {
+        createdAt: sort,
+      },
     });
   }
 
@@ -49,7 +50,10 @@ export class TestimonialsService {
     });
   }
 
-  async update(id: string, updateTestimonialDto: UpdateTestimonialDto): Promise<Testimonial> {
+  async update(
+    id: string,
+    updateTestimonialDto: UpdateTestimonialDto,
+  ): Promise<Testimonial> {
     const testimonial = await this.findOne(id);
     Object.assign(testimonial, updateTestimonialDto);
     return this.testimonialsRepository.save(testimonial);

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsUUID, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, IsOptional, IsArray, IsEnum } from 'class-validator';
 
 export class CreateTestimonialDto {
   @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000', description: 'User ID' })
@@ -30,6 +30,7 @@ export class CreateTestimonialDto {
   @ApiPropertyOptional({ example: 'image', description: 'Media type (image, video, etc.)', required: false })
   @IsString()
   @IsOptional()
+  @IsEnum(['image', 'video', 'text'])
   media_type?: string;
 
   @ApiPropertyOptional({ example: 'published', description: 'Status (draft, published, etc.)', required: false })

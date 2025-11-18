@@ -8,22 +8,38 @@ import {
   Delete,
   ParseUUIDPipe,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
-import { TestimonialsService } from '../services/testimonials.service';
+import { TestimonialsService } from '../services/testimonials.service'; 
+import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Public } from 'src/common/decorators/public.decorator';
+import { CreateTestimonialsService } from '../services/createTestimonial.service';
+import { FileSizeValidationPipe } from 'src/common/pipes/fileSizeValidationPipe';
 
 @Controller('testimonials')
 export class TestimonialsController {
-  constructor(private readonly testimonialsService: TestimonialsService) {}
+  constructor(private readonly testimonialsService: TestimonialsService,private readonly createTestimonialService:CreateTestimonialsService) {}
 
   @Post()
-  create(@Body() createTestimonialDto: CreateTestimonialDto) {
-    return this.testimonialsService.create(createTestimonialDto);
+  @Public()
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('file'))
+  create(@Body() createTestimonialDto: CreateTestimonialDto,@UploadedFile(new FileSizeValidationPipe()) file?: Express.Multer.File) {
+    if(createTestimonialDto.media_type == "text" || !file)
+      return this.createTestimonialService.createTestimonial(createTestimonialDto);
+
+    return this.createTestimonialService.createTestimonialWithMedia(createTestimonialDto, file.stream, file.originalname);
   }
 
   @Get()
   findAll(
+    @Query() param:QueryParamsDto,
     @Query('userId') userId?: string,
     @Query('categoryId') categoryId?: string,
   ) {
@@ -33,7 +49,7 @@ export class TestimonialsController {
     if (categoryId) {
       return this.testimonialsService.findByCategory(categoryId);
     }
-    return this.testimonialsService.findAll();
+    return this.testimonialsService.findAll(param);
   }
 
   @Get(':id')

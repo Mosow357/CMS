@@ -2,7 +2,21 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { apiClient } from '@/lib/api/client'
+
+// Tipo que devuelve el backend en el login
+interface RequestUser {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+  email: string
+  username: string
+  role: string
+  name: string
+  token: string
+  tokenExpiredAt: Date
+}
 
 export interface LoginCredentials {
   username: string
@@ -20,6 +34,7 @@ export interface RegisterData {
 export interface AuthResponse {
   token: string
   expiredAt: Date
+  redirectPath: string
   user: {
     id: string
     username: string
@@ -45,33 +60,64 @@ export async function loginAction(
   credentials: LoginCredentials
 ): Promise<ActionResponse<AuthResponse>> {
   try {
+    console.log('🔐 Intentando login con:', { username: credentials.username })
+    
     const response = await apiClient.auth.authControllerLogin(
       credentials as any,
       { format: 'json' }
     )
 
-    const data = response.data as unknown as AuthResponse
+    console.log('📡 Respuesta del servidor:', response.data)
+
+    // El backend devuelve directamente el objeto RequestUser con el token incluido
+    const userData = response.data as unknown as RequestUser
+    
+    console.log('👤 Datos del usuario procesados:', {
+      id: userData.id,
+      username: userData.username,
+      role: userData.role,
+      hasToken: !!userData.token
+    })
 
     // Guardar el token en cookies
     const cookieStore = await cookies()
-    cookieStore.set('auth_token', data.token, {
+    cookieStore.set('auth_token', userData.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 días
+      path: '/',
     })
 
-    // Guardar el usuario en cookies
-    cookieStore.set('user', JSON.stringify(data.user), {
+    // Guardar el usuario en cookies (sin el token por seguridad)
+    const { token, tokenExpiredAt, ...userInfo } = userData
+    cookieStore.set('user', JSON.stringify(userInfo), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
+      path: '/',
     })
+    
+    console.log('🍪 Cookies guardadas correctamente')
 
+    // Revalida para limpiar cualquier dato de sesión cacheado
+    revalidatePath('/', 'layout')
+
+    // Determina la redirección - siempre redirige al dashboard principal
+    const redirectPath = '/dashboard'
+    
+    console.log('🎯 Redirigiendo a:', redirectPath)
+
+    //debe dirigir a la ruta principal
     return {
       success: true,
-      data,
+      data: {
+        token: userData.token,
+        expiredAt: userData.tokenExpiredAt,
+        user: userInfo,
+        redirectPath, // Incluye la ruta de redirección en la respuesta
+      },
     }
   } catch (error: any) {
     console.error('Login error:', error)
@@ -124,32 +170,9 @@ export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies()
   cookieStore.delete('auth_token')
   cookieStore.delete('user')
+
+  // Revalida para limpiar caché de sesión
+  revalidatePath('/', 'layout')
+
   redirect('/login')
-}
-
-export async function getCurrentUser() {
-  try {
-    const cookieStore = await cookies()
-    const userCookie = cookieStore.get('user')
-
-    if (!userCookie) {
-      return null
-    }
-
-    return JSON.parse(userCookie.value)
-  } catch (error) {
-    console.error('Error getting current user:', error)
-    return null
-  }
-}
-
-export async function getAuthToken(): Promise<string | null> {
-  try {
-    const cookieStore = await cookies()
-    const token = cookieStore.get('auth_token')
-    return token?.value || null
-  } catch (error) {
-    console.error('Error getting auth token:', error)
-    return null
-  }
 }
