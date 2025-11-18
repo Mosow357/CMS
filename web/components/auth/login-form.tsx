@@ -30,6 +30,7 @@ export function LoginForm() {
       const result = await loginAction({
         username: formData.username,
         password: formData.password,
+        rememberMe: formData.rememberMe,
       })
 
       if (result.success && result.data) {
