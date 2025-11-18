@@ -5,7 +5,6 @@ import { Testimonial } from '../entities/testimonial.entity';
 import { MediaStorageService } from 'src/media-storage/services/mediaStorage.service';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import Stream from 'stream';
-import { AiService } from 'src/ia/services/ai.service';
 
 @Injectable()
 export class CreateTestimonialsService {
@@ -13,7 +12,6 @@ export class CreateTestimonialsService {
     @InjectRepository(Testimonial)
     private testimonialsRepository: Repository<Testimonial>,
     private readonly mediaStorageService: MediaStorageService,
-    private readonly aiService: AiService,
   ) {}
 
   async createTestimonialWithMedia(
@@ -26,7 +24,7 @@ export class CreateTestimonialsService {
     testimonial.status = "pending"
     try {
       let objectFilename = this.generateMediaFilename(
-        createTestimonialDto.user_id,
+        createTestimonialDto.organitation_id,
         filename,
       );
       let publicId = await this.mediaStorageService.uploadFile(

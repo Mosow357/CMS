@@ -14,8 +14,8 @@ import {
 @Entity('testimonials')
 export class Testimonial extends BaseEntity {
 
-  @Column({ type: 'uuid', nullable: false })
-  user_id: string;
+  @Column({ type: 'varchar', nullable: false })
+  organitation_id: string;
 
   @Column({ type: 'uuid' })
   category_id: string;
@@ -35,9 +35,8 @@ export class Testimonial extends BaseEntity {
   @Column({ type: 'varchar', nullable: true })
   status: string;
 
-  @ManyToOne(() => User, (user) => user.testimonials)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  @Column({ type: 'int8', nullable: true })
+  stars_rating: number;
 
   @ManyToOne(() => Category, (category) => category.testimonials)
   @JoinColumn({ name: 'category_id' })

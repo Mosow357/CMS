@@ -44,7 +44,7 @@ export class AuthService {
     const expiresIn = `${expiresInDays}d`;
 
     const payload = this.jwtService.sign(
-      { id: user.id, username: user.username, role: user.role },
+      { id: user.id, username: user.username },
       { expiresIn: expiresIn },
     );
     
@@ -58,7 +58,8 @@ export class AuthService {
       ...userWithoutPassword,
       token: payload,
       tokenExpiredAt: expiredAt,
-    } as RequestUser;
+      organizations: user.userOrganizations
+    };
   }
 
   async register(data: RegisterDto): Promise<RegisterResponseDto> {

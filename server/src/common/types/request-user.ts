@@ -1,5 +1,5 @@
-import { Testimonial } from "src/testimonials/entities/testimonial.entity";
-import { UserRole } from "./userRole";
+import { Organization } from "src/organizations/entities/organization.entity";
+import { UserOrganization } from "src/user_organization/entities/userOrganization.entity";
 
 
 export type RequestUser = {
@@ -8,9 +8,8 @@ export type RequestUser = {
   updatedAt: Date;
   email: string;
   username: string;
-  role: UserRole;
   name: string;
-  testimonials?: Testimonial[];
   token: string;
   tokenExpiredAt: Date;
+  organizations: UserOrganization[]
 };

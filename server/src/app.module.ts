@@ -12,6 +12,9 @@ import { Tag } from './tags/entities/tag.entity';
 import { Category } from './categories/entities/category.entity';
 import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './common/guards/auth.guard';
+import { UserOrganizationModule } from './user_organization/userOrganization.module';
+import { OrganizationModule } from './organizations/organitations.module';
+import { MediaStorageModule } from './media-storage/mediaStorage.module';
 
 @Module({
   imports: [
@@ -35,6 +38,9 @@ import { AuthGuard } from './common/guards/auth.guard';
     CategoriesModule,
     TagsModule,
     AuthModule,
+    UserOrganizationModule,
+    OrganizationModule,
+    MediaStorageModule
   ],
   providers: [
     {

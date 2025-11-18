@@ -1,45 +1,51 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsUUID, IsOptional, IsArray, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, IsOptional, IsArray, IsEnum, MinLength, MaxLength, IsInt, Min, Max } from 'class-validator';
+import { MediaType } from '../enums/mediaType';
+import { TestimonialStatus } from '../enums/testimonialStatus';
+import { Type } from 'class-transformer';
 
 export class CreateTestimonialDto {
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000', description: 'User ID' })
-  @IsUUID()
-  @IsNotEmpty()
-  user_id: string;
-
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174001', description: 'Category ID', required: false })
-  @IsUUID()
-  @IsOptional()
-  category_id?: string;
-
-  @ApiProperty({ example: 'Great service!', description: 'Testimonial title' })
+  
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Organization ID is required' })
+  organitation_id: string;
+
+  @IsUUID('4', { message: 'Category ID must be a valid UUID' })
+  @IsNotEmpty({ message: 'Category ID is required' })
+  category_id: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Title is required' })
+  @MinLength(3, { message: 'Title must be at least 3 characters long' })
+  @MaxLength(255, { message: 'Title cannot exceed 255 characters' })
   title: string;
 
-  @ApiPropertyOptional({ example: 'Amazing experience...', description: 'Testimonial content', required: false })
   @IsString()
-  @IsOptional()
-  content?: string;
+  @IsNotEmpty({ message: 'Content is required' })
+  content: string;
 
-  @ApiPropertyOptional({ example: 'https://example.com/image.jpg', description: 'Media URL', required: false })
-  @IsString()
   @IsOptional()
+  @IsString()
+  @MaxLength(500, { message: 'Media URL cannot exceed 500 characters' })
   media_url?: string;
 
-  @ApiPropertyOptional({ example: 'image', description: 'Media type (image, video, etc.)', required: false })
-  @IsString()
   @IsOptional()
-  @IsEnum(['image', 'video', 'text'])
-  media_type?: string;
+  @IsEnum(MediaType, { message: 'Media type must be: image, video or audio' })
+  media_type: MediaType;
 
-  @ApiPropertyOptional({ example: 'published', description: 'Status (draft, published, etc.)', required: false })
-  @IsString()
   @IsOptional()
-  status?: string;
+  @IsEnum(TestimonialStatus, { message: 'Status must be: pending, approved, rejected or published' })
+  status?: TestimonialStatus;
 
-  @ApiProperty({ example: ['123e4567-e89b-12d3-a456-426614174002', '123e4567-e89b-12d3-a456-426614174003'], description: 'Tag IDs', required: false })
-  @IsArray()
   @IsOptional()
+  @IsInt({ message: 'Rating must be an integer' })
+  @Min(1, { message: 'Minimum rating is 1' })
+  @Max(5, { message: 'Maximum rating is 5' })
+  @Type(() => Number)
+  stars_rating?: number;
+
+  @IsOptional()
+  @IsArray({ message: 'Tags must be an array' })
+  @IsUUID('4', { each: true, message: 'Each tag must be a valid UUID' })
   tagIds?: string[];
 }
