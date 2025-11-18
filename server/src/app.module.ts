@@ -12,6 +12,7 @@ import { Tag } from './tags/entities/tag.entity';
 import { Category } from './categories/entities/category.entity';
 import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './common/guards/auth.guard';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AuthGuard } from './common/guards/auth.guard';
     CategoriesModule,
     TagsModule,
     AuthModule,
+    NotificationsModule,
   ],
   providers: [
     {
