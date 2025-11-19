@@ -7,7 +7,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { UserRole } from 'src/common/types/userRole';
+import { OrganizationRole } from 'src/common/types/userRole';
 
 export class RegisterDto {
   @ApiProperty({
@@ -54,10 +54,10 @@ export class RegisterDto {
 
   @ApiPropertyOptional({
     description: 'User role',
-    enum: UserRole,
-    example: UserRole.VISITOR,
+    enum: OrganizationRole,
+    example: OrganizationRole.ADMINISTRATOR,
   })
-  @IsEnum(UserRole)
+  @IsEnum(OrganizationRole)
   @IsOptional()
-  role?: UserRole;
+  role?: OrganizationRole;
 }

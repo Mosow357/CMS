@@ -6,8 +6,8 @@ import { AuthService } from '../services/auth.service';
 import { RegisterResponseDto } from '../dto/auth-response.dto'; 
 import { ChangePasswordDto } from '../dto/changePassword.dto';
 import { Public, RolesG } from 'src/common/guards/roles.decorator';
-import { UserRole } from 'src/common/types/userRole';   
 import { RequestUser } from 'src/common/types/request-user'; 
+import { OrganizationRole } from 'src/common/types/userRole';
 
 @Controller('auth')
 export class AuthController {
@@ -36,7 +36,7 @@ export class AuthController {
     return await this.authService.changePassword(changePasswordDto, username);
   }
   @Get('validate-token')
-  @RolesG(UserRole.ADMINISTRATOR, UserRole.EDITOR)
+  @RolesG(OrganizationRole.ADMINISTRATOR, OrganizationRole.EDITOR)
   @HttpCode(HttpStatus.OK)
   async validateToken(): Promise<{ success: boolean }> {
     // Guard will handle the validation

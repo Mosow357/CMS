@@ -15,6 +15,7 @@ import { AuthGuard } from './common/guards/auth.guard';
 import { UserOrganizationModule } from './user_organization/userOrganization.module';
 import { OrganizationModule } from './organizations/organitations.module';
 import { MediaStorageModule } from './media-storage/mediaStorage.module';
+import { Organization } from './organizations/entities/organization.entity';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { MediaStorageModule } from './media-storage/mediaStorage.module';
       username: process.env.DATABASE_USER || 'postgres',
       password: process.env.DATABASE_PASSWORD || 'postgres',
       database: process.env.DATABASE_NAME || 'cms_db',
-      entities: [User, Testimonial, Tag, Category],
+      autoLoadEntities: true,
       synchronize: true,
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     }),

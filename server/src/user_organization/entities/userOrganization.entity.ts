@@ -1,4 +1,5 @@
 import { BaseEntity } from "src/common/entities/base.entity";
+import { OrganizationRole } from "src/common/types/userRole";
 import { Organization } from "src/organizations/entities/organization.entity";
 import { User } from "src/users/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
@@ -13,7 +14,7 @@ export class UserOrganization extends BaseEntity {
     organizationId: string;
 
     @Column()
-    role: string;
+    role: OrganizationRole; // e.g., 'admin', 'editor'
 
      @ManyToOne(() => User, user => user.userOrganizations)
     @JoinColumn({ name: 'userId' })
