@@ -1,9 +1,11 @@
 import { BaseEntity } from 'src/common/entities/base.entity';
-import { Organitation } from 'src/organitations/entities/organitation.entity';
+import { UserOrganization } from 'src/user_organization/entities/userOrganization.entity';
 import {
   Entity,
   Column,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 
 @Entity('users')
@@ -21,6 +23,6 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar' })
   name: string;
 
-  @OneToMany(() => Organitation, (Organitation) => Organitation.members)
-  organitation: Organitation[];
+  @OneToMany(() => UserOrganization, userOrg => userOrg.user)
+  userOrganizations: UserOrganization[];
 }

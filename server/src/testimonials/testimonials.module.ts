@@ -3,9 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TestimonialsController } from './controllers/testimonials.controller';
 import { Testimonial } from './entities/testimonial.entity';
 import { TestimonialsService } from './services/testimonials.service';
-import { AiModule } from 'src/ia/ai.module';
 import { MediaStorageModule } from 'src/media-storage/mediaStorage.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { CreateTestimonialsService } from './services/createTestimonial.service';
+import { MediaStorageService } from 'src/media-storage/services/mediaStorage.service';
+import { MockMediaStorageProviderImpl } from 'src/media-storage/adapters/mockMediaStorageProviderImpl';
 
 @Module({
   imports: [
@@ -16,7 +18,7 @@ import { MulterModule } from '@nestjs/platform-express';
     MediaStorageModule,
   ],
   controllers: [TestimonialsController],
-  providers: [TestimonialsService, MediaStorageModule],
+  providers: [TestimonialsService, MockMediaStorageProviderImpl,MediaStorageService,CreateTestimonialsService],
   exports: [TestimonialsService],
 })
 export class TestimonialsModule {}

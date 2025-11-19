@@ -21,6 +21,7 @@ interface RequestUser {
 export interface LoginCredentials {
   username: string
   password: string
+  rememberMe?: boolean
 }
 
 export interface RegisterData {
@@ -63,7 +64,7 @@ export async function loginAction(
     console.log('🔐 Intentando login con:', { username: credentials.username })
     
     const response = await apiClient.auth.authControllerLogin(
-      credentials as any,
+      { username: credentials.username, password: credentials.password },
       { format: 'json' }
     )
 
@@ -71,7 +72,7 @@ export async function loginAction(
 
     // El backend devuelve directamente el objeto RequestUser con el token incluido
     const userData = response.data as unknown as RequestUser
-    
+
     console.log('👤 Datos del usuario procesados:', {
       id: userData.id,
       username: userData.username,
@@ -79,26 +80,25 @@ export async function loginAction(
       hasToken: !!userData.token
     })
 
-    // Guardar el token en cookies
-    const cookieStore = await cookies()
-    cookieStore.set('auth_token', userData.token, {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 días
+      sameSite: 'lax' as const,
       path: '/',
-    })
+    }
+
+    if (credentials.rememberMe) {
+      (cookieOptions as any).maxAge = 60 * 60 * 24 * 7
+    }
+
+    // Guardar el token en cookies
+    const cookieStore = await cookies()
+    cookieStore.set('auth_token', userData.token, cookieOptions)
 
     // Guardar el usuario en cookies (sin el token por seguridad)
     const { token, tokenExpiredAt, ...userInfo } = userData
-    cookieStore.set('user', JSON.stringify(userInfo), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
-    })
-    
+    cookieStore.set('user', JSON.stringify(userInfo), cookieOptions)
+
     console.log('🍪 Cookies guardadas correctamente')
 
     // Revalida para limpiar cualquier dato de sesión cacheado
@@ -106,7 +106,7 @@ export async function loginAction(
 
     // Determina la redirección - siempre redirige al dashboard principal
     const redirectPath = '/dashboard'
-    
+
     console.log('🎯 Redirigiendo a:', redirectPath)
 
     //debe dirigir a la ruta principal

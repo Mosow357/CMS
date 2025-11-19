@@ -23,19 +23,31 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find({
-      relations: ['testimonials'],
-    });
+    return this.usersRepository.find();
   }
 
   async findOne(id: string): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['testimonials'],
     });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+    return user;
+  }
+
+  async findOneWithOrganizations(id: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: {
+      userOrganizations: {
+        organization: true
+      }
+    }});
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
     return user;
   }
 

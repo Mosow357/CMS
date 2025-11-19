@@ -1,0 +1,17 @@
+import { BaseEntity } from 'src/common/entities/base.entity';
+import { UserOrganization } from 'src/user_organization/entities/userOrganization.entity';
+import {
+  Entity,
+  Column,
+  OneToMany,
+} from 'typeorm';
+
+@Entity('Organizations')
+export class Organization extends BaseEntity {
+
+  @Column({ type: 'varchar', nullable: false })
+  name: string;
+
+  @OneToMany(() => UserOrganization, userOrg => userOrg.organization)
+  userOrganizations: UserOrganization[];
+}

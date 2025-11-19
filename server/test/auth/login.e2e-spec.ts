@@ -13,6 +13,10 @@ import { RegisterDto } from 'src/auth/dto/register.dto';
 import { LoginDto } from 'src/auth/dto/login.dto';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from 'src/common/guards/auth.guard';
+import { Organization } from 'src/organizations/entities/organization.entity';
+import { OrganizationModule } from 'src/organizations/organitations.module';
+import { UserOrganization } from 'src/user_organization/entities/userOrganization.entity';
+import { UserOrganizationModule } from 'src/user_organization/userOrganization.module';
 
 describe('Auth integration', () => {
   let app: INestApplication;
@@ -28,10 +32,12 @@ describe('Auth integration', () => {
           type: 'sqlite',
           database: ':memory:',
           dropSchema: true,
-          entities: [User, Testimonial, Tag, Category],
+          entities: [User, Testimonial, Tag, Category,Organization,UserOrganization],
           synchronize: true,
         }),
         UsersModule,
+        OrganizationModule,
+        UserOrganizationModule,
         AuthModule,
       ],
       providers: [

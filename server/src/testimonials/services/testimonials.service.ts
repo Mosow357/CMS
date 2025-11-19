@@ -36,10 +36,10 @@ export class TestimonialsService {
     return testimonial;
   }
 
-  async findByUser(userId: string): Promise<Testimonial[]> {
+  async findByOrganitation(organitationId: string): Promise<Testimonial[]> {
     return this.testimonialsRepository.find({
-      where: { user_id: userId },
-      relations: ['user', 'category', 'tags'],
+      where: { organitation_id: organitationId },
+      relations: ['category', 'tags'],
     });
   }
 
