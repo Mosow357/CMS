@@ -3,9 +3,7 @@ import { UserOrganization } from 'src/user_organization/entities/userOrganizatio
 import {
   Entity,
   Column,
-  OneToMany,
-  ManyToMany,
-  JoinTable,
+  OneToMany, 
 } from 'typeorm';
 
 @Entity('users')

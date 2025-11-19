@@ -23,8 +23,8 @@ export class organizationsController {
     return this.organizationsService.create(createorganizationDto);
   }
 
-  @Get()
-  findAllUserOrganization(@Query() userId:string) {
+  @Get(':userId')
+  findAllUserOrganization(@Param('userId') userId:string) {
     return this.organizationsService.findAllUserOrganization(userId);
   }
 
