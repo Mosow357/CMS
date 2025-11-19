@@ -68,15 +68,15 @@ const data = {
         },
         {
           title: "Testimonios",
-          url: "/dashboard/admin/testimonials",
+          url: "/dashboard/testimonials",
         },
         {
           title: "Categorias",
-          url: "/dashboard/admin/categories",
+          url: "/dashboard/categories",
         },
         {
           title: "Settings",
-          url: "/dashboard/admin/settings",
+          url: "/dashboard/settings",
         },
       ],
     },

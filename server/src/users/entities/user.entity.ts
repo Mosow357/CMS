@@ -3,7 +3,7 @@ import { UserOrganization } from 'src/user_organization/entities/userOrganizatio
 import {
   Entity,
   Column,
-  OneToMany, 
+  OneToMany,
 } from 'typeorm';
 
 @Entity('users')

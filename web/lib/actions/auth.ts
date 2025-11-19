@@ -62,15 +62,11 @@ export async function loginAction(
 ): Promise<ActionResponse<AuthResponse>> {
   try {
     console.log('🔐 Intentando login con:', { username: credentials.username })
-    
+
     const response = await apiClient.auth.authControllerLogin(
       { username: credentials.username, password: credentials.password },
       { format: 'json' }
     )
-
-    console.log('📡 Respuesta del servidor:', response.data)
-
-    // El backend devuelve directamente el objeto RequestUser con el token incluido
     const userData = response.data as unknown as RequestUser
 
     console.log('👤 Datos del usuario procesados:', {

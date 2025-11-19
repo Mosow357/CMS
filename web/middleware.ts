@@ -6,24 +6,14 @@ const publicRoutes = ['/login', '/register']
 const authRoutes = ['/login', '/register']
 
 // Definir mapeos de rutas basadas en roles
-const roleRoutes: Record<string, string[]> = {
-    ADMINISTRATOR: ['/dashboard/admin', '/dashboard', '/testimonials', '/users'],
-    EDITOR: ['/dashboard/editor', '/dashboard', '/testimonials'],
-    VISITOR: ['/dashboard/visitor', '/dashboard'],
-}
 
-// Rutas predeterminadas de redirección para cada rol
-const defaultRolePaths: Record<string, string> = {
-    ADMINISTRATOR: '/dashboard/admin',
-    EDITOR: '/dashboard/editor', 
-    VISITOR: '/dashboard/visitor',
-}
+
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
 
     // Obtener token y usuario de las cookies
-    const token = request.cookies.get('auth_token')?.value
+   /* const token = request.cookies.get('auth_token')?.value
     const userCookie = request.cookies.get('user')?.value
 
     let user: { role: string } | null = null
@@ -73,7 +63,7 @@ export function middleware(request: NextRequest) {
         }
     }
 
-    return NextResponse.next()
+    return NextResponse.next()*/
 }
 
 // Configurar en qué rutas se ejecuta el middleware
