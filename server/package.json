@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "db:diagram": "typeorm-uml ormconfig.json -d diagram.png"
+    "db:diagram": "typeorm-uml ormconfig.json -d diagram.png --color class.ArrowColor=#5c6bc0 --color class.BorderColor=#3949ab --color class.BackgroundColor=#dcdcdc --color column=#e0e0e0"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateOrganizationDto {
   @ApiProperty({
@@ -9,4 +9,20 @@ export class CreateOrganizationDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @ApiPropertyOptional({
+      description: 'Description of the Organization',
+      example: 'This is my organization',
+    })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @ApiPropertyOptional({
+      description: "Organization's logo",
+      example: 'www.mylogo.png',
+    })
+  @IsString() 
+  @IsOptional()
+  logoUrl?: string;
 }
