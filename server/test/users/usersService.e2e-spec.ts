@@ -107,7 +107,20 @@ describe('UsersService integration', () => {
     it('should returns user with password', async () => {
         const foundUser = await service.findOneWithPassword(mockUser.username);
         expect(foundUser).toBeDefined();
+        expect(foundUser?.id).toBe(mockUser.id);
         expect(foundUser?.password).toBeDefined();
+    });
+    it('should returns user, find with email', async () => {
+        const foundUser = await service.findByUsernameOrEmail(mockUser.email);
+        expect(foundUser).toBeDefined();
+        expect(foundUser?.id).toBe(mockUser.id);
+        expect(foundUser?.password).toBeUndefined();
+    });
+    it('should returns user, find with username', async () => {
+        const foundUser = await service.findByUsernameOrEmail(mockUser.username);
+        expect(foundUser).toBeDefined();
+        expect(foundUser?.id).toBe(mockUser.id);
+        expect(foundUser?.password).toBeUndefined();
     });
   })
 });
