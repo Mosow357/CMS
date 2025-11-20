@@ -18,6 +18,9 @@ export class Organization extends BaseEntity {
  @Column({ type: 'varchar', nullable: true })
   logoUrl: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  questionText: string;
+
   @OneToMany(() => UserOrganization, userOrg => userOrg.organization)
   userOrganizations: UserOrganization[];
 }

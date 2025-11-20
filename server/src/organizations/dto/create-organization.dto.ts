@@ -17,4 +17,13 @@ export class CreateOrganizationDto {
   @IsString()
   @IsOptional()
   description: string;
+
+  @ApiProperty({
+    description: 'Question text displayed to the end user (editable by admin)',
+    example: 'What did you think of this experience?',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  questionText: string;
 }
