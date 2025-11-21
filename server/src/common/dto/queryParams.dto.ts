@@ -6,13 +6,13 @@ export class QueryParamsDto {
     @IsNumber()
     @Min(1)
     @Type(()=>Number)
-    limit?:number = 20
+    page?:number = 20
     
     @IsOptional()
     @IsNumber()
     @Min(0)
     @Type(()=>Number)
-    offset?:number = 0
+    itemsPerPage?:number = 0
 
     @IsOptional()
     @IsString()

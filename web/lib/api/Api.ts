@@ -22,54 +22,11 @@ export interface CreateUserDto {
   email?: string | null;
   /** @example "Doe" */
   lastname?: string | null;
-  /** @example "ADMINISTRATOR" */
-  role: "ADMINISTRATOR" | "EDITOR" | "VISITOR" | null;
 }
 
 export type UpdateUserDto = object;
 
-export interface CreateTestimonialDto {
-  /**
-   * User ID
-   * @example "123e4567-e89b-12d3-a456-426614174000"
-   */
-  user_id: string;
-  /**
-   * Category ID
-   * @example "123e4567-e89b-12d3-a456-426614174001"
-   */
-  category_id?: string;
-  /**
-   * Testimonial title
-   * @example "Great service!"
-   */
-  title: string;
-  /**
-   * Testimonial content
-   * @example "Amazing experience..."
-   */
-  content?: string;
-  /**
-   * Media URL
-   * @example "https://example.com/image.jpg"
-   */
-  media_url?: string;
-  /**
-   * Media type (image, video, etc.)
-   * @example "image"
-   */
-  media_type?: string;
-  /**
-   * Status (draft, published, etc.)
-   * @example "published"
-   */
-  status?: string;
-  /**
-   * Tag IDs
-   * @example ["123e4567-e89b-12d3-a456-426614174002","123e4567-e89b-12d3-a456-426614174003"]
-   */
-  tagIds?: string[];
-}
+export type CreateTestimonialDto = object;
 
 export type UpdateTestimonialDto = object;
 
@@ -124,10 +81,34 @@ export interface RegisterDto {
   lastname?: string;
   /**
    * User role
-   * @example "VISITOR"
+   * @example "ADMINISTRATOR"
    */
-  role?: "ADMINISTRATOR" | "EDITOR" | "VISITOR";
+  role?: "ADMINISTRATOR" | "EDITOR";
 }
+
+export interface ChangePasswordDto {
+  /**
+   * Old Password
+   * @example "oldPassword1234"
+   */
+  oldPassword: string;
+  /**
+   * New Password
+   * @minLength 6
+   * @example "NewPassword1234"
+   */
+  newPassword: string;
+}
+
+export interface CreateOrganizationDto {
+  /**
+   * Name of the Organization
+   * @example "Organization_1"
+   */
+  name: string;
+}
+
+export type UpdateOrganizationDto = object;
 
 export type QueryParamsType = Record<string | number, any>;
 export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
@@ -502,7 +483,7 @@ export class Api<
      */
     testimonialsControllerFindAll: (
       query: {
-        userId: string;
+        organitationId: string;
         categoryId: string;
       },
       params: RequestParams = {},
@@ -760,6 +741,26 @@ export class Api<
      * No description
      *
      * @tags Auth
+     * @name AuthControllerChangePassword
+     * @request PATCH:/auth/change_password/{id}
+     */
+    authControllerChangePassword: (
+      id: string,
+      data: ChangePasswordDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/auth/change_password/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Auth
      * @name AuthControllerValidateToken
      * @request GET:/auth/validate-token
      */
@@ -767,6 +768,90 @@ export class Api<
       this.request<void, any>({
         path: `/auth/validate-token`,
         method: "GET",
+        ...params,
+      }),
+  };
+  organizations = {
+    /**
+     * No description
+     *
+     * @tags organizations
+     * @name OrganizationsControllerCreate
+     * @request POST:/organizations
+     */
+    organizationsControllerCreate: (
+      data: CreateOrganizationDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/organizations`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags organizations
+     * @name OrganizationsControllerFindAllUserOrganization
+     * @request GET:/organizations
+     */
+    organizationsControllerFindAllUserOrganization: (
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/organizations`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags organizations
+     * @name OrganizationsControllerFindOne
+     * @request GET:/organizations/{id}
+     */
+    organizationsControllerFindOne: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/organizations/${id}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags organizations
+     * @name OrganizationsControllerUpdate
+     * @request PATCH:/organizations/{id}
+     */
+    organizationsControllerUpdate: (
+      id: string,
+      data: UpdateOrganizationDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/organizations/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags organizations
+     * @name OrganizationsControllerRemove
+     * @request DELETE:/organizations/{id}
+     */
+    organizationsControllerRemove: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/organizations/${id}`,
+        method: "DELETE",
         ...params,
       }),
   };
