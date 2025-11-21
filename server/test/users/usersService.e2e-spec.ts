@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken, TypeOrmModule } from "@nestjs/typeorm";
 import { Category } from "src/categories/entities/category.entity";
+import { OrganizationRole } from "src/common/types/userRole";
 import { Organization } from "src/organizations/entities/organization.entity";
 import { OrganizationModule } from "src/organizations/organitations.module";
 import { Tag } from "src/tags/entities/tag.entity";
@@ -64,16 +65,16 @@ describe('UsersService integration', () => {
     mockUser = await service.create(dto);
     expect(mockUser).toBeDefined();
     // Create a mock organization and link to user
-    const org = orgRepo.create({name: "Organization1"});
+    const org = orgRepo.create({name: "Organization1",description:"Org 1 description",questionText:""});
     await orgRepo.save(org);
     await userOrgRepo.save({
         organizationId: org.id,
         userId: mockUser.id,
-        role: "admin"
+        role: OrganizationRole.ADMINISTRATOR
     });
 
     //Create another organization standalone
-    const org2 = orgRepo.create({name: "Organization2"});
+    const org2 = orgRepo.create({name: "Organization2",description:"Org 2 description",questionText:""});
     await orgRepo.save(org2);
   })
   afterAll(async () => {
