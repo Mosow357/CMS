@@ -14,7 +14,10 @@ export class TestimonialsService {
   ) {}
 
   async findAll(param: QueryParamsDto): Promise<Testimonial[]> {
-    const { limit, offset, sort } = param;
+    const { page = 1, itemsPerPage = 20, sort = 'ASC' } = param;
+    const limit = itemsPerPage;
+    const offset = (page - 1) * itemsPerPage;
+    
     return this.testimonialsRepository.find({
       relations: ['user', 'category', 'tags'],
       skip: offset,
