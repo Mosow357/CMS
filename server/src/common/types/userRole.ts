@@ -1,4 +1,4 @@
 export enum OrganizationRole {
-  ADMINISTRATOR = 'ADMINISTRATOR',
-  EDITOR = 'EDITOR',
+  ADMINISTRATOR = 'admin',
+  EDITOR = 'editor',
 }

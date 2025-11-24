@@ -11,18 +11,19 @@ export class CreateOrganizationDto {
   name: string;
 
   @ApiPropertyOptional({
-      description: 'Description of the Organization',
-      example: 'This is my organization',
+      description: 'Name of the Organization',
+      example: 'Organization_1 is focused on delivering quality products.',
     })
   @IsString()
   @IsOptional()
-  description?: string;
+  description: string;
 
   @ApiPropertyOptional({
-      description: "Organization's logo",
-      example: 'www.mylogo.png',
-    })
-  @IsString() 
+    description: 'Question text displayed to the end user (editable by admin)',
+    example: 'What did you think of this experience?',
+    required: false,
+  })
+  @IsString()
   @IsOptional()
-  logoUrl?: string;
+  questionText: string;
 }

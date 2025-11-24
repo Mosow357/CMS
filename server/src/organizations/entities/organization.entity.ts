@@ -12,12 +12,14 @@ export class Organization extends BaseEntity {
   @Column({ type: 'varchar', nullable: false })
   name: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  description?: string;
+  @Column({ type: 'varchar', nullable: false })
+  description: string;
 
  @Column({ type: 'varchar', nullable: true })
-  logoUrl?: string;
+  logoUrl: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  questionText: string;
 
   @OneToMany(() => UserOrganization, userOrg => userOrg.organization)
   userOrganizations: UserOrganization[];
