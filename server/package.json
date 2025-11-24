@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "db:diagram": "typeorm-uml ormconfig.json -d diagram.png --color class.ArrowColor=#5c6bc0 --color class.BorderColor=#3949ab --color class.BackgroundColor=#dcdcdc --color column=#e0e0e0"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -62,6 +63,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "typeorm-uml": "^1.6.5",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },

@@ -1,5 +1,4 @@
 import { BaseEntity } from 'src/common/entities/base.entity';
-import { Organization } from 'src/organizations/entities/organization.entity';
 import { UserOrganization } from 'src/user_organization/entities/userOrganization.entity';
 import {
   Entity,
