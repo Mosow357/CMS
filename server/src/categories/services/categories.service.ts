@@ -20,7 +20,10 @@ export class CategoriesService {
   }
 
   async findAll(param:QueryParamsDto): Promise<Category[]> {
-    const {limit,offset,sort} = param
+    const { page = 1, itemsPerPage = 20, sort = 'ASC' } = param;
+    const limit = itemsPerPage;
+    const offset = (page - 1) * itemsPerPage;
+    
     return this.categoriesRepository.find({
       relations: ['testimonials'],
       skip: offset,

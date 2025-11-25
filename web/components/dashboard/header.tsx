@@ -3,6 +3,8 @@
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "./sidebar";
+import { ThemeToggle } from "@/components/theme-toggle"
+import { LanguageToggle } from "@/components/language-toggle"
 
 export default function Header() {
     return (
@@ -19,6 +21,10 @@ export default function Header() {
             </Sheet>
 
             <h1 className="text-lg font-semibold">Dashboard</h1>
+            <div className="absolute right-4 flex gap-2">
+                <LanguageToggle />
+                <ThemeToggle />
+            </div>
         </header>
     );
 }

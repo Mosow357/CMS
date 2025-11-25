@@ -1,10 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { NavLinks } from "./nav-links";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Building2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { TeamSwitcher } from "./team-switcher";
+
 
 interface SidebarProps {
   open: boolean;
@@ -33,42 +34,19 @@ export default function Sidebar({ open, setOpen, isMobile }: SidebarProps) {
           {open ? <ChevronLeft /> : <ChevronRight />}
         </Button>
       )}
-
-      {/* LOGO + NOMBRE */}
-      <div
-        className={`
-          flex items-center gap-3 px-4 mb-10
-          ${isMobile ? "mt-4" : "mt-6"}
-        `}
-      >
-        {/* LOGO animado */}
-        <motion.div
-          animate={{ scale: open ? 1 : 0.8 }}
-          transition={{ duration: 0.25 }}
-          className="shrink-0"
-        >
-          <Image
-            src="/logo.webp"
-            width={open ? 40 : 40}
-            height={open ? 40 : 40}
-            alt="Logo"
-            className="rounded-full"
-          />
-        </motion.div>
-
-        {/* TEXTO visible solo si open = true */}
-        {open && (
-          <motion.span
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-2xl font-semibold"
-          >
-            CMS
-          </motion.span>
-        )}
-      </div>
+      
+      {/* TEAM SWITCHER */}
+      <TeamSwitcher
+        collapsed={open}
+        teams={[
+          { name: "Organización Principal", logo: Building2, plan: "Pro" },
+          { name: "Mi ONG", logo: Building2, plan: "Free" },
+        ]}
+      />
 
       <NavLinks collapsed={!open} />
+
+
     </motion.aside>
   );
 }

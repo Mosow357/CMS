@@ -23,15 +23,12 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find({
-      relations: ['testimonials'],
-    });
+    return this.usersRepository.find();
   }
 
   async findOne(id: string): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['testimonials'],
     });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -39,14 +36,35 @@ export class UsersService {
     return user;
   }
 
-  async findByUsername(username: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { username } });
+  async findOneWithOrganizations(id: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: {
+      userOrganizations: {
+        organization: true
+      }
+    }});
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return user;
   }
+
+  async findByUsernameOrEmail(value: string): Promise<User | null> {
+  return this.usersRepository.findOne({
+    where: [
+      { username: value },
+      { email: value },
+    ],
+  });
+}
 
   async findOneWithPassword(username: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { username },
-      select: ['id', 'createdAt', 'updatedAt', 'email', 'username', 'password', 'name'],
+      relations:{userOrganizations:{user:true,organization:true}},
+      select: ['id', 'createdAt', 'updatedAt', 'email', 'username', 'password', 'name','userOrganizations'],
     });
   }
 

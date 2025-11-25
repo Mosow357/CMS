@@ -6,7 +6,6 @@ import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
 import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
 
-
 @Injectable()
 export class TestimonialsService {
   constructor(
@@ -14,22 +13,19 @@ export class TestimonialsService {
     private testimonialsRepository: Repository<Testimonial>,
   ) {}
 
-  async create(createTestimonialDto: CreateTestimonialDto): Promise<Testimonial> {
-    const testimonial = this.testimonialsRepository.create(createTestimonialDto);
-    return this.testimonialsRepository.save(testimonial);
-  }
-
-  async findAll(param:QueryParamsDto): Promise<Testimonial[]> {
-    const {limit,offset,sort} = param
+  async findAll(param: QueryParamsDto): Promise<Testimonial[]> {
+    const { page = 1, itemsPerPage = 20, sort = 'ASC' } = param;
+    const limit = itemsPerPage;
+    const offset = (page - 1) * itemsPerPage;
+    
     return this.testimonialsRepository.find({
       relations: ['user', 'category', 'tags'],
       skip: offset,
       take: limit,
-      order:{
-        createdAt: sort
-      }
-    },
-  );
+      order: {
+        createdAt: sort,
+      },
+    });
   }
 
   async findOne(id: string): Promise<Testimonial> {
@@ -43,10 +39,10 @@ export class TestimonialsService {
     return testimonial;
   }
 
-  async findByUser(userId: string): Promise<Testimonial[]> {
+  async findByOrganitation(organitationId: string): Promise<Testimonial[]> {
     return this.testimonialsRepository.find({
-      where: { user_id: userId },
-      relations: ['user', 'category', 'tags'],
+      where: { organitation_id: organitationId },
+      relations: ['category', 'tags'],
     });
   }
 
@@ -57,7 +53,10 @@ export class TestimonialsService {
     });
   }
 
-  async update(id: string, updateTestimonialDto: UpdateTestimonialDto): Promise<Testimonial> {
+  async update(
+    id: string,
+    updateTestimonialDto: UpdateTestimonialDto,
+  ): Promise<Testimonial> {
     const testimonial = await this.findOne(id);
     Object.assign(testimonial, updateTestimonialDto);
     return this.testimonialsRepository.save(testimonial);

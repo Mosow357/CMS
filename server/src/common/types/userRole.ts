@@ -1,5 +1,4 @@
-export enum UserRole {
-  ADMINISTRATOR = 'ADMINISTRATOR',
-  EDITOR = 'EDITOR',
-  VISITOR = 'VISITOR',
+export enum OrganizationRole {
+  ADMINISTRATOR = 'admin',
+  EDITOR = 'editor',
 }
