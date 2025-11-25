@@ -5,9 +5,9 @@ import { SpaceForm } from '@/components/forms/space-form'
 export default async function Page() {
   const session = await getSession()
 
-  if (!session.isValid) {
-    redirect('/login')
-  }
+  // if (!session.isValid) {
+  //   redirect('/login')
+  // }
 
   //   const isAdmin = await hasRole('ADMINISTRATOR')
   //   if (!isAdmin) {
