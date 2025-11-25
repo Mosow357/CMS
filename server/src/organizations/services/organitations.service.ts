@@ -1,13 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
+import { DataSource, Repository } from 'typeorm';
 import { CreateOrganizationDto } from '../dto/create-organization.dto';
 import { UpdateOrganizationDto } from '../dto/update-organization.dto';
 import { Organization } from '../entities/organization.entity';
 import { UserOrganization } from 'src/user_organization/entities/userOrganization.entity';
 import { User } from 'src/users/entities/user.entity';
 import { OrganizationRole } from 'src/common/types/userRole';
+import { AddUserOrganizationDto } from '../dto/add-userOrganiztion.dto';
 
 @Injectable()
 export class OrganizationsService {
@@ -16,6 +16,7 @@ export class OrganizationsService {
     private organizationRepository: Repository<Organization>,
     @InjectRepository(UserOrganization)
     private userOrganizationRepository: Repository<UserOrganization>,
+    private dataSource: DataSource,
   ) { }
 
   async create(createOrganizationDto: CreateOrganizationDto, user: User): Promise<Organization> {
@@ -34,7 +35,7 @@ export class OrganizationsService {
     return organization
   }
 
-  async findAllUserOrganization(userId: string): Promise<Organization[]> {
+  async findUserOrganizations(userId: string): Promise<Organization[]> {
     const organizations = await this.organizationRepository.find({
       relations: {
         userOrganizations: {
@@ -54,7 +55,7 @@ export class OrganizationsService {
   async findOne(id: string): Promise<Organization> {
     const organization = await this.organizationRepository.findOne({
       where: { id },
-      relations: ['members'],
+      relations: ['userOrganizations'],
     });
     if (!organization) {
       throw new NotFoundException(`Organization with ID ${id} not found`);
@@ -71,5 +72,122 @@ export class OrganizationsService {
   async remove(id: string): Promise<void> {
     const organization = await this.findOne(id);
     await this.organizationRepository.remove(organization);
+  }
+  //? ====================== USER ORGANIZATION =====================
+  async addUserOrganization(addDto: AddUserOrganizationDto): Promise<UserOrganization> {
+    const existsOrganization = await this.organizationRepository.findOne({ where: { id: addDto.organizationId }});
+    if (!existsOrganization) throw new NotFoundException('Organization not found');
+
+    const existsUserInOrg = await this.userOrganizationRepository.findOne({
+      where: { organizationId: addDto.organizationId, userId: addDto.userId },
+    });
+    if (existsUserInOrg) throw new ConflictException('User already member of the organization');
+
+    const toSave = this.userOrganizationRepository.create({
+      userId: addDto.userId,
+      organizationId: addDto.organizationId,
+      role: addDto.role ?? OrganizationRole.EDITOR,
+    });
+    const saved = await this.userOrganizationRepository.save(toSave);
+
+    return saved;
+  }
+
+   async changeUserRole(
+    organizationId: string,
+    targetUserId: string,
+    newRole: OrganizationRole,
+    user:User
+  ): Promise<UserOrganization> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    if (user.id === targetUserId) {
+      throw new BadRequestException("Administrators cannot change their own role");
+    }
+    try {
+      const membership = await queryRunner.manager.findOne(UserOrganization, {
+        where: { organizationId, userId: targetUserId },
+      });
+      if (!membership) {
+        throw new NotFoundException('User is not a member of the organization');
+      }
+      
+      const currentUser = await queryRunner.manager.findOne(UserOrganization, {
+        where: { organizationId, userId: user.id },
+      }); 
+      if (currentUser?.role === OrganizationRole.EDITOR) {
+        throw new BadRequestException("The current user doesn't have permissions to change the role");
+      }
+
+      if (membership.role === newRole) {
+        await queryRunner.commitTransaction();
+        return membership;
+      }
+
+      // If demoting an admin, ensure org will still have at least one admin
+      if (membership.role === OrganizationRole.ADMINISTRATOR && newRole !== OrganizationRole.ADMINISTRATOR) {
+        const adminCount = await queryRunner.manager.count(UserOrganization, {
+          where: { organizationId, role: OrganizationRole.ADMINISTRATOR },
+        });
+        if (adminCount <= 1) {
+          throw new ConflictException('Cannot remove the last administrator of the organization');
+        }
+      }
+
+      membership.role = newRole;
+      const saved = await queryRunner.manager.save(membership); 
+
+      await queryRunner.commitTransaction();
+      return saved;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async removeUserFromOrganization(
+    organizationId: string,
+    targetUserId: string,
+    actorUserId?: string,
+  ): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const membership = await queryRunner.manager.findOne(UserOrganization, {
+        where: { organizationId, userId: targetUserId },
+      });
+
+      if (!membership) {
+        throw new NotFoundException('User is not a member of the organization');
+      }
+
+      // If removing an admin, ensure we don't remove last admin
+      if (membership.role === OrganizationRole.ADMINISTRATOR) {
+        const adminCount = await queryRunner.manager.count(UserOrganization, {
+          where: { organizationId, role: OrganizationRole.ADMINISTRATOR },
+        });
+        if (adminCount <= 1) {
+          throw new ConflictException('Cannot remove the last administrator of the organization');
+        }
+      }
+
+      //removing themselves
+      // if (actorUserId === targetUserId) throw new BadRequestException('Admins cannot remove themselves');
+
+      await queryRunner.manager.remove(membership);
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
