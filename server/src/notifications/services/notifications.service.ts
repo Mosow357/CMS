@@ -8,4 +8,8 @@ export class NotificationsService {
         private readonly emailProvider: EmailProviderService,
         private readonly emailTemplate: EmailTemplateService,
     ) {}
+
+    async sendEmailTo(email:string, organizationName:string){
+
+    }
 }
