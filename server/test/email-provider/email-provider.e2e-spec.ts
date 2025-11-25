@@ -2,52 +2,49 @@ import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
 import { Test } from "@nestjs/testing";
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { getRepositoryToken, TypeOrmModule } from "@nestjs/typeorm";
 import { AuthGuard } from "src/common/guards/auth.guard";
+import { WelcomeEmailTemplate } from "src/notifications/email-templates/welcome.template";
 import { NotificationsModule } from "src/notifications/notifications.module";
+import { NotificationsService } from "src/notifications/services/notifications.service";
 
 describe('Notifications integration', () => {
-  let app: INestApplication;
-  let emailProviderService: any;
+    let app: INestApplication;
+    let emailProviderService: NotificationsService;
 
-  beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({
-          envFilePath: '.env',
-          isGlobal: true,
-        }),
-        TypeOrmModule.forRoot({
-          type: 'sqlite',
-          database: ':memory:',
-          dropSchema: true,
-          autoLoadEntities: true,
-          synchronize: true,
-        }),
-        NotificationsModule
-      ],
-      providers: [
-          {
-            provide: APP_GUARD,
-            useClass: AuthGuard,
-          },
-        ],
-    }).compile();
+    beforeAll(async () => {
+        const moduleRef = await Test.createTestingModule({
+            imports: [
+                ConfigModule.forRoot({
+                    envFilePath: '.env',
+                    isGlobal: true,
+                }),
+                TypeOrmModule.forRoot({
+                    type: 'sqlite',
+                    database: ':memory:',
+                    dropSchema: true,
+                    autoLoadEntities: true,
+                    synchronize: true,
+                }),
+                NotificationsModule
+            ],
+        }).compile();
 
-    app = moduleRef.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, transform: true }),
-    );
-
-    await app.init();
-  });
-
-  describe('EmailProviderService', () => {
-    it('should send an email', async () => {
-      const emailProviderService = app.get('EmailProviderService');
-      const response = await emailProviderService.sendEmail()
-        
+        app = moduleRef.createNestApplication();
+        app.useGlobalPipes(
+            new ValidationPipe({ whitelist: true, transform: true }),
+        );
+        emailProviderService = moduleRef.get(NotificationsService);
+        await app.init();
     });
-  })
 
+    describe('EmailProviderService', () => {
+        it('should send a welcome email', async () => {
+            const emailProviderService = app.get(NotificationsService);
+            let emailPayload = new WelcomeEmailTemplate("cms391547@gmail.com","Test User");
+            const response = await emailProviderService.sendNotificationWithTemplate(emailPayload)
+            expect(response).toBeDefined();
+            expect(response.statusCode).toBe(202);
+        });
+    })
 });
