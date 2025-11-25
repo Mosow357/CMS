@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Widget de Testimonios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .demo-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-section h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+
+        .demo-section h3 {
+            color: #374151;
+            margin: 30px 0 15px;
+            font-size: 1.3rem;
+        }
+
+        .widget-container {
+            margin: 30px 0;
+            border: 2px dashed #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            background: #f9fafb;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 25px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: 'HTML';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #3b82f6;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .option-card {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .option-card strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .option-card span {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge.new {
+            background: #10b981;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Widget de Testimonios</h1>
+            <p>Integración fácil y profesional para tu sitio web</p>
+        </div>
+
+        <!-- Demo 1: Método Programático -->
+        <div class="demo-section">
+            <h2>1. Método Programático <span class="badge">Recomendado</span></h2>
+            <p>Inicializa el widget con JavaScript para máximo control.</p>
+
+            <div class="options-grid">
+                <div class="option-card">
+                    <strong>Theme:</strong>
+                    <span>light</span>
+                </div>
+                <div class="option-card">
+                    <strong>Card Layout:</strong>
+                    <span>base</span>
+                </div>
+                <div class="option-card">
+                    <strong>Font Size:</strong>
+                    <span>medium</span>
+                </div>
+                <div class="option-card">
+                    <strong>Auto Resize:</strong>
+                    <span>enabled</span>
+                </div>
+            </div>
+
+            <div class="widget-container">
+                <div id="testimonial-wall-1"></div>
+            </div>
+
+            <div class="code-block">
+                &lt;!-- 1. Contenedor --&gt;
+                &lt;div id="testimonial-wall"&gt;&lt;/div&gt;
+
+                &lt;!-- 2. Cargar el widget --&gt;
+                &lt;script src="http://localhost:3000/testimonial-widget.js"&gt;&lt;/script&gt;
+
+                &lt;!-- 3. Inicializar --&gt;
+                &lt;script&gt;
+                TestimonialWall.init({
+                container: '#testimonial-wall',
+                organizationId: 'org-123',
+                theme: 'light',
+                card: 'base',
+                fontSize: 'medium',
+                autoResize: true
+                });
+                &lt;/script&gt;
+            </div>
+        </div>
+
+        <!-- Demo 2: Data Attributes (Auto-init) -->
+        <div class="demo-section">
+            <h2>2. Data Attributes <span class="badge new">Más Fácil</span></h2>
+            <p>Usa atributos HTML para configuración automática (sin JavaScript adicional).</p>
+
+            <div class="options-grid">
+                <div class="option-card">
+                    <strong>Theme:</strong>
+                    <span>dark</span>
+                </div>
+                <div class="option-card">
+                    <strong>Card Layout:</strong>
+                    <span>minimal</span>
+                </div>
+                <div class="option-card">
+                    <strong>Font Size:</strong>
+                    <span>small</span>
+                </div>
+            </div>
+
+            <div class="widget-container">
+                <div data-testimonial-wall-auto data-organization-id="org-123" data-theme="dark" data-card="minimal"
+                    data-font-size="small"></div>
+            </div>
+
+            <div class="code-block">
+                &lt;!-- Cargar el widget --&gt;
+                &lt;script src="http://localhost:3000/testimonial-widget.js"&gt;&lt;/script&gt;
+
+                &lt;!-- El widget se inicializa automáticamente --&gt;
+                &lt;div
+                data-testimonial-wall-auto
+                data-organization-id="org-123"
+                data-theme="dark"
+                data-card="minimal"
+                data-font-size="small"
+                &gt;&lt;/div&gt;
+            </div>
+        </div>
+
+        <!-- Demo 3: Card Detailed con Color Personalizado -->
+        <div class="demo-section">
+            <h2>3. Personalización Avanzada</h2>
+            <p>Card detailed con color personalizado y fuente grande.</p>
+
+            <div class="options-grid">
+                <div class="option-card">
+                    <strong>Theme:</strong>
+                    <span>light</span>
+                </div>
+                <div class="option-card">
+                    <strong>Card Layout:</strong>
+                    <span>detailed</span>
+                </div>
+                <div class="option-card">
+                    <strong>Font Size:</strong>
+                    <span>large</span>
+                </div>
+                <div class="option-card">
+                    <strong>Color:</strong>
+                    <span>#10b981 (green)</span>
+                </div>
+            </div>
+
+            <div class="widget-container">
+                <div id="testimonial-wall-3"></div>
+            </div>
+
+            <div class="code-block">
+                &lt;div id="testimonial-wall"&gt;&lt;/div&gt;
+                &lt;script src="http://localhost:3000/testimonial-widget.js"&gt;&lt;/script&gt;
+                &lt;script&gt;
+                TestimonialWall.init({
+                container: '#testimonial-wall',
+                organizationId: 'org-123',
+                theme: 'light',
+                card: 'detailed',
+                fontSize: 'large',
+                color: '#10b981'
+                });
+                &lt;/script&gt;
+            </div>
+        </div>
+
+        <!-- Documentación -->
+        <div class="demo-section">
+            <h2>📚 Documentación</h2>
+
+            <h3>Opciones de Configuración</h3>
+            <ul class="feature-list">
+                <li><strong>container</strong> (string|element) - Selector CSS o elemento DOM</li>
+                <li><strong>organizationId</strong> (string) - ID de tu organización (requerido)</li>
+                <li><strong>theme</strong> (string) - 'light' o 'dark' (default: 'light')</li>
+                <li><strong>card</strong> (string) - 'base', 'minimal', o 'detailed' (default: 'base')</li>
+                <li><strong>fontSize</strong> (string) - 'small', 'medium', o 'large' (default: 'medium')</li>
+                <li><strong>color</strong> (string) - Color primario en formato hex (opcional)</li>
+                <li><strong>autoResize</strong> (boolean) - Ajustar altura automáticamente (default: true)</li>
+                <li><strong>minHeight</strong> (string) - Altura mínima del iframe (default: '400px')</li>
+            </ul>
+
+            <h3>Características del Widget</h3>
+            <ul class="feature-list">
+                <li>Auto-resize inteligente del iframe</li>
+                <li>Indicador de carga animado</li>
+                <li>Soporte para múltiples instancias en la misma página</li>
+                <li>Inicialización automática con data attributes</li>
+                <li>API JavaScript completa</li>
+                <li>Sin dependencias externas</li>
+                <li>Responsive y mobile-friendly</li>
+            </ul>
+
+            <h3>Métodos de la API</h3>
+            <div class="code-block">
+                // Inicializar widget
+                const widget = TestimonialWall.init(config);
+
+                // Crear instancia sin inicializar
+                const widget = TestimonialWall.create(config);
+                widget.init();
+
+                // Destruir widget
+                widget.destroy();
+
+                // Versión del widget
+                console.log(TestimonialWall.version);
+            </div>
+        </div>
+    </div>
+
+    <!-- Cargar el widget -->
+    <script src="http://localhost:3000/testimonial-widget.js"></script>
+
+    <!-- Inicializar demos programáticos -->
+    <script>
+        // Demo 1: Light theme, base card
+        TestimonialWall.init({
+            container: '#testimonial-wall-1',
+            organizationId: 'org-123',
+            theme: 'light',
+            card: 'base',
+            fontSize: 'medium'
+        });
+
+        // Demo 3: Detailed card con color personalizado
+        TestimonialWall.init({
+            container: '#testimonial-wall-3',
+            organizationId: 'org-123',
+            theme: 'light',
+            card: 'detailed',
+            fontSize: 'large',
+            color: '#10b981'
+        });
+
+        // Demo 2 se inicializa automáticamente con data attributes
+    </script>
+</body>
+
+</html>
