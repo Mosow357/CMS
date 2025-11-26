@@ -1,19 +1,23 @@
 "use client"
 
-import { Languages } from "lucide-react";
-import { useTransition } from "react";
-import { useTranslation } from "@/components/providers/translation-provider";
+import { Languages } from "lucide-react"
+import { useTransition } from "react"
 
 export function LanguageToggle() {
-  const [isPending, startTransition] = useTransition();
-  const { locale, setLocale } = useTranslation();
+  const [isPending, startTransition] = useTransition()
 
   const toggleLanguage = () => {
     startTransition(() => {
-      const newLocale = locale === "es" ? "en" : "es";
-      setLocale(newLocale);
-    });
-  };
+      const currentLocale = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('NEXT_LOCALE='))
+        ?.split('=')[1] || 'es';
+
+      const newLocale = currentLocale === 'es' ? 'en' : 'es';
+      document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
+      window.location.reload();
+    })
+  }
 
   return (
     <button
@@ -24,5 +28,5 @@ export function LanguageToggle() {
     >
       <Languages className="h-5 w-5" />
     </button>
-  );
+  )
 }

@@ -17,8 +17,8 @@
   --popover: #ffffff;
   --popover-foreground: #0f111a;
 
-  --primary: #66f9c4;
-  --primary-foreground: #0f111a;
+  --primary: #66f9c4; /* Background color button */
+  --primary-foreground: #0f111a; /* Text color  button*/
 
   --secondary: #f3f4f6;
   --secondary-foreground: #bfc4cc;
@@ -49,8 +49,8 @@
   --popover: #0f111a;
   --popover-foreground: #ffffff;
 
-  --primary: #66f9c4;
-  --primary-foreground: #0f111a;
+  --primary: #66f9c4; /* Background color button */
+  --primary-foreground: #0f111a; /* Text color  button*/
 
   --secondary: #1f2937;
   --secondary-foreground: #bfc4cc;

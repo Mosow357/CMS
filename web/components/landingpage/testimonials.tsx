@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useTranslation } from "@/components/providers/translation-provider";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Card,
   CardHeader,
@@ -51,8 +51,8 @@ const sampleTestimonials: Testimonial[] = [
     },
     date: "May 20, 2025",
     rating: 3,
-  mediaUrl: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-mediaType: "video",
+    mediaUrl: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    mediaType: "video",
   },
   {
     id: "3",
@@ -94,8 +94,8 @@ mediaType: "video",
     },
     date: "Feb 28, 2025",
     rating: 2,
-      mediaUrl: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-mediaType: "video",
+    mediaUrl: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    mediaType: "video",
   },
   {
     id: "6",
@@ -108,7 +108,7 @@ mediaType: "video",
     },
     date: "Jan 22, 2025",
     rating: 1,
-      mediaUrl:
+    mediaUrl:
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
     mediaType: "image",
   },
@@ -138,8 +138,8 @@ mediaType: "video",
     },
     date: "Nov 30, 2024",
     rating: 4,
-       mediaUrl: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-mediaType: "video",
+    mediaUrl: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    mediaType: "video",
   },
   {
     id: "9",
@@ -177,50 +177,46 @@ function Stars({ n = 5 }: { n?: number }) {
 }
 
 export function TestimonialsGrid() {
-  const { locale, t } = useTranslation();
-  const text = {
-    title: (t.testimonials_title as string) || "",
-    subtitle: (t.testimonials_subtitle as string) || "",
-    seeMore: (t.testimonials_seeMore as string) || "",
-  };
+  const t = useTranslations("landing");
+  const locale = useLocale() as "es" | "en";
 
   return (
     <section className="w-full max-w-6xl mx-auto px-4 py-12">
       <div className="max-w-3xl mx-auto text-center mb-8">
-        <h2 className="text-3xl md:text-4xl font-bold">{text.title}</h2>
-        <p className="text-foreground/80 mt-2">{text.subtitle}</p>
+        <h2 className="text-3xl md:text-4xl font-bold">{t("testimonials_title")}</h2>
+        <p className="text-foreground/80 mt-2">{t("testimonials_subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sampleTestimonials.map((t) => (
+        {sampleTestimonials.map((testimonial) => (
           <Card
-            key={t.id}
+            key={testimonial.id}
             className="overflow-hidden rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-700 transition-all duration-350 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(102,249,196,0.16)] hover:border-4 hover:border-primary/40 hover:bg-[rgba(102,249,196,0.02)]"
           >
             <CardHeader className="flex items-center gap-4 px-6 py-4">
               <img
-                src={t.avatar}
-                alt={`${t.name} avatar`}
+                src={testimonial.avatar}
+                alt={`${testimonial.name} avatar`}
                 className="w-12 h-12 rounded-full object-cover"
               />
               <div className="flex-1 min-w-0">
-                <CardTitle className="text-sm">{t.name}</CardTitle>
-                <CardDescription className="text-xs">{t.role}</CardDescription>
+                <CardTitle className="text-sm">{testimonial.name}</CardTitle>
+                <CardDescription className="text-xs">{testimonial.role}</CardDescription>
               </div>
             </CardHeader>
 
             {/* ✅ Media agregada sin tocar estilos */}
-            {t.mediaUrl && (
+            {testimonial.mediaUrl && (
               <div className="w-full h-48 bg-black rounded-md overflow-hidden mt-3">
-                {t.mediaType === "video" ? (
+                {testimonial.mediaType === "video" ? (
                   <video
-                    src={t.mediaUrl}
+                    src={testimonial.mediaUrl}
                     className="w-full h-full object-cover"
                     controls
                   />
                 ) : (
                   <img
-                    src={t.mediaUrl}
+                    src={testimonial.mediaUrl}
                     className="w-full h-full object-cover"
                   />
                 )}
@@ -229,22 +225,22 @@ export function TestimonialsGrid() {
 
             <CardContent className="px-6 py-4">
               <p className="text-sm text-foreground/90 leading-relaxed">
-                {t.text[locale]}
+                {testimonial.text[locale]}
               </p>
             </CardContent>
 
             <CardFooter className="px-6 py-4">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-3">
-                  <Stars n={t.rating ?? 5} />
-                  <span className="text-xs text-gray-400">{t.date}</span>
+                  <Stars n={testimonial.rating ?? 5} />
+                  <span className="text-xs text-gray-400">{testimonial.date}</span>
                 </div>
                 <a
                   href="#"
                   className="text-sm font-semibold underline underline-offset-2"
                   onClick={(e) => e.preventDefault()}
                 >
-                  {text.seeMore}
+                  {t("testimonials_seeMore")}
                 </a>
               </div>
             </CardFooter>

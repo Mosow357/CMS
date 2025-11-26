@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useTranslation } from "@/components/providers/translation-provider";
+import { useTranslations } from "next-intl";
 
 interface LandingProps {
   reverse?: boolean;
@@ -36,10 +36,10 @@ export default function LandingSection({
   showCardButton2 = false,
   i18nPrefix,
 }: LandingProps) {
-  const { t: i18n } = useTranslation();
+  const t = useTranslations("landing");
   const prefix = i18nPrefix || "ls1";
 
-  const V = (prop?: string, key?: string) => prop ?? ((key ? (i18n as any)[key] : undefined) ?? "");
+  const V = (prop?: string, key?: string) => prop ?? (key ? t(key as any) : "");
 
   const textOrder = reverse ? "md:order-2" : "md:order-1";
   const cardOrder = reverse ? "md:order-1" : "md:order-2";
@@ -55,7 +55,7 @@ export default function LandingSection({
           <h2 className="text-4xl font-bold mb-6">{V(title, `${prefix}_title`)}</h2>
           <p className="text-foreground/80 mb-8">{V(description, `${prefix}_desc`)}</p>
           {showMainButton && (
-            <button className="bg-primary text-white px-6 py-3 rounded-lg font-semibold">{V(buttonText, `${prefix}_button`)}</button>
+            <button className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold">{V(buttonText, `${prefix}_button`)}</button>
           )}
         </div>
 
@@ -71,8 +71,8 @@ export default function LandingSection({
           <p className="text-foreground/80 mt-2">{V(cardSubtitle, `${prefix}_cardSubtitle`)}</p>
 
           <div className="flex gap-4 mt-6">
-            {showCardButton1 && <button className="flex-1 bg-primary text-white px-4 py-3 rounded-lg font-semibold">{V(cardButton1, `${prefix}_cardButton1`)}</button>}
-            {showCardButton2 && <button className="flex-1 bg-secondary px-4 py-3 rounded-lg font-semibold">{V(cardButton2, `${prefix}_cardButton2`)}</button>}
+            {showCardButton1 && <button className="flex-1 bg-primary text-primary-foreground px-4 py-3 rounded-lg font-semibold">{V(cardButton1, `${prefix}_cardButton1`)}</button>}
+            {showCardButton2 && <button className="flex-1 bg-secondary text-secondary-foreground px-4 py-3 rounded-lg font-semibold">{V(cardButton2, `${prefix}_cardButton2`)}</button>}
           </div>
         </div>
       </div>

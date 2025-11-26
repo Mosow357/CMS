@@ -1,25 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useTranslation } from "@/components/providers/translation-provider";
+import { useTranslations } from "next-intl";
 
 export default function Navbar() {
-  const { t } = useTranslation();
+  const t = useTranslations("landing");
 
   const text = {
-    features: (t.features as string) || "",
-    pricing: (t.pricing as string) || "",
-    resources: (t.resources as string) || "",
-    blog: (t.blog as string) || "",
-    login: (t.login as string) || "",
-    signup: (t.signup as string) || "",
+    features: t("features"),
+    pricing: t("pricing"),
+    resources: t("resources"),
+    blog: t("blog"),
+    login: t("login"),
+    signup: t("signup"),
   };
 
   return (
     <nav className="w-full backdrop-blur-md border-b border-[#BFC4CC]/30 fixed top-0 z-50 bg-[#FFFFFF]/70 dark:bg-[#0F111A]/70 p-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4 relative">
-        
+
         {/* 🟦 Logo */}
         <div className="flex-shrink-0 absolute left-6">
           <Link href="/" className="inline-flex items-center">

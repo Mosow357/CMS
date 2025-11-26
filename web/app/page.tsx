@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useRef } from "react";
 import { motion, useScroll, useTransform, Variants } from "framer-motion";
 import { TestimonialsGrid } from "@/components/landingpage/testimonials";
 import LandingSection from "@/components/landingpage/landing-section";
 import TestimonialBlock from "@/components/landingpage/testimonialblock";
-import { useTranslation } from "@/components/providers/translation-provider";
+import { useTranslations } from "next-intl";
 import Navbar from "@/components/landingpage/navbar";
+
+import { LanguageToggle } from '@/components/language-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 /* ---------------------------
    Small UI helpers
@@ -61,76 +64,63 @@ const cardHover =
    Main component
    ---------------------------*/
 export default function Home() {
-  type Locale = "es" | "en";
-
-  // Use a flexible translations type (all values are strings).
-  // This avoids listing every key while still keeping t strongly-typed as an object of strings.
-  const { t, locale } = useTranslation();
-
-  // Parallax: useScroll + useTransform
-  const refParallax = useRef(null);
-  const { scrollY } = useScroll({ target: refParallax });
-  // small parallax transforms (these values son ajustables)
-  const parallaxY = useTransform(scrollY, [0, 500], [0, -40]);
-  const parallaxYmedium = useTransform(scrollY, [0, 700], [0, -90]);
+  const t = useTranslations("landing");
 
   // Landing section editable objects (edit here to change content per section)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ls1 = {
-    tag: (t.ls1_tag as string) || "Configuración rápida",
-    title: (t.ls1_title as string) || "Una página de destino específica",
-    description:
-      (t.ls1_desc as string) ||
-      "Crea una página de destino exclusiva para tu negocio. Comparte fácilmente el enlace por correo electrónico, redes sociales o incluso SMS.",
-    buttonText: (t.ls1_button as string) || "Comenzar ahora",
+    tag: t("ls1_tag"),
+    title: t("ls1_title"),
+    description: t("ls1_desc"),
+    buttonText: t("ls1_button"),
     image: "/img-landing-section.jpg",
-    cardTitle: (t.ls1_cardTitle as string) || "¿Querés dejar tu opinión?",
-    cardSubtitle: (t.ls1_cardSubtitle as string) || "Tu feedback nos ayuda a mejorar",
-    cardButton1: (t.ls1_cardButton1 as string) || "Enviar video",
-    cardButton2: (t.ls1_cardButton2 as string) || "Enviar mensaje",
+    cardTitle: t("ls1_cardTitle"),
+    cardSubtitle: t("ls1_cardSubtitle"),
+    cardButton1: t("ls1_cardButton1"),
+    cardButton2: t("ls1_cardButton2"),
     showCardButton1: true,
     showCardButton2: true,
     reverse: false,
     i18nPrefix: "ls1",
   } as any;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ls2 = {
-    tag: (t.ls2_tag as string) || "Fácil de gestionar",
-    title: (t.ls2_title as string) || "Un panel de control para gestionar todos los testimonios",
-    description: (t.ls2_desc as string) || "Nuestra nueva herramienta acelera tu flujo de trabajo.",
-    buttonText: (t.ls2_button as string) || "Pruébalo Gratis!",
+    tag: t("ls2_tag"),
+    title: t("ls2_title"),
+    description: t("ls2_desc"),
+    buttonText: t("ls2_button"),
     image: "/panel-landing-section.png",
     reverse: true,
     i18nPrefix: "ls2",
   } as any;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ls3 = {
-    tag: (t.ls3_tag as string) || "Seguimiento de las métricas",
-    title: (t.ls3_title as string) || "Comprende el rendimiento de los testimonios en vídeo.",
-    description:
-      (t.ls3_desc as string) ||
-      "Realiza un seguimiento de las métricas, ayuda a tu equipo a analizar el rendimiento y destaca los mejores videos.",
-    buttonText: (t.ls3_button as string) || "Ver métricas",
+    tag: t("ls3_tag"),
+    title: t("ls3_title"),
+    description: t("ls3_desc"),
+    buttonText: t("ls3_button"),
     image: "/overview-landing-section.png",
     reverse: false,
     i18nPrefix: "ls3",
   } as any;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ls4 = {
-    tag: (t.ls4_tag as string) || "Más pruebas sociales",
-    title: (t.ls4_title as string) || "No solo testimonios en texto y vídeo",
-    description:
-      (t.ls4_desc as string) ||
-      "Trae testimonios desde redes sociales, plataformas de vídeo y sitios de reseñas.",
-    buttonText: (t.ls4_button as string) || "Descubrir",
+    tag: t("ls4_tag"),
+    title: t("ls4_title"),
+    description: t("ls4_desc"),
+    buttonText: t("ls4_button"),
     image: "/social-media-landing-section.png",
     reverse: true,
     i18nPrefix: "ls4",
   } as any;
 
   return (
-    <main ref={refParallax} className="relative min-h-screen text-center overflow-y-auto bg-background text-foreground">
+    <main className="relative min-h-screen text-center overflow-y-auto bg-background text-foreground">
       {/* NAVBAR STICKY BLUR */}
-       <Navbar />
+      <Navbar />
 
       {/* HERO */}
       <section className="relative pt-36 pb-20 px-6">
@@ -141,20 +131,20 @@ export default function Home() {
           viewport={{ once: true, amount: 0.2 }}
           className="max-w-4xl mx-auto"
         >
-            <motion.h1 variants={fadeUp} className="text-5xl sm:text-6xl font-extrabold leading-tight mb-6 text-foreground">
-            {(t.title as string) || ""}
+          <motion.h1 variants={fadeUp} className="text-5xl sm:text-6xl font-extrabold leading-tight mb-6 text-foreground">
+            {t("title")}
           </motion.h1>
 
           <motion.p variants={fadeUp} className="text-lg text-foreground/80 mb-8 max-w-2xl mx-auto">
-            {(t.description as string) || ""}
+            {t("description")}
           </motion.p>
 
           <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 justify-center">
             <div className="group">
-              <FancyButton variant="primary">{(t.tryFree as string) || ""}</FancyButton>
+              <FancyButton variant="primary">{t("tryFree")}</FancyButton>
             </div>
             <div>
-              <FancyButton variant="ghost">{(t.contact as string) || ""}</FancyButton>
+              <FancyButton variant="ghost">{t("contact")}</FancyButton>
             </div>
           </motion.div>
 
@@ -193,11 +183,11 @@ export default function Home() {
       </section>
 
       <section className="max-w-3xl mx-auto text-center mb-12 px-6">
-          <motion.h3 initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-4xl font-bold mb-4 text-foreground">
-          {(t.afterVideoTitle as string) || ""}
+        <motion.h3 initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-4xl font-bold mb-4 text-foreground">
+          {t("afterVideoTitle")}
         </motion.h3>
         <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.1 }} className="text-foreground/80">
-          {(t.afterVideoDescription as string) || ""}
+          {t("afterVideoDescription")}
         </motion.p>
       </section>
 
@@ -207,8 +197,8 @@ export default function Home() {
       <section className="px-6 mb-12">
         <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
           <motion.div variants={fadeUp} className="max-w-4xl mx-auto mb-6">
-            <h4 className="text-2xl font-bold text-foreground">{(t.testimonials_title as string) || ""}</h4>
-            <p className="text-foreground/80">{(t.testimonials_subtitle as string) || ""}</p>
+            <h4 className="text-2xl font-bold text-foreground">{t("testimonials_title")}</h4>
+            <p className="text-foreground/80">{t("testimonials_subtitle")}</p>
           </motion.div>
 
           <motion.div variants={fadeUp}>
@@ -238,17 +228,17 @@ export default function Home() {
       {/* FINAL CTA */}
       <section className="w-screen py-24 px-6" style={{ background: 'linear-gradient(45deg, var(--color-primary) 0%, var(--color-primary-foreground) 100%)' }}>
         <div className="max-w-4xl mx-auto text-center">
-          <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-4xl font-bold mb-4 text-white drop-shadow-[0_6px_12px_rgba(0,0,0,0.25)]">{(t.cta_headline as string) || ""}</motion.h2>
+          <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-4xl font-bold mb-4 text-white drop-shadow-[0_6px_12px_rgba(0,0,0,0.25)]">{t("cta_headline")}</motion.h2>
 
-          <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.08 }} className="text-foreground/80 max-w-2xl mx-auto">{(t.cta_paragraph as string) || ""}</motion.p>
+          <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.08 }} className="text-foreground/80 max-w-2xl mx-auto">{t("cta_paragraph")}</motion.p>
 
           <motion.div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <FancyButton variant="primary">{(t.cta_start_free as string) || ""}</FancyButton>
-            <FancyButton variant="ghost">{(t.cta_talk_us as string) || ""}</FancyButton>
+            <FancyButton variant="primary">{t("cta_start_free")}</FancyButton>
+            <FancyButton variant="ghost">{t("cta_talk_us")}</FancyButton>
           </motion.div>
 
           <div className="mt-6 text-sm text-foreground/80">
-            <a href="#precios" className="underline">{(t.cta_pricing_link as string) || ""}</a>
+            <a href="#precios" className="underline">{t("cta_pricing_link")}</a>
           </div>
         </div>
       </section>
@@ -261,16 +251,16 @@ export default function Home() {
               <span className="text-2xl" style={{ color: 'var(--color-primary)' }}>👍</span>
               Testimonial
             </h3>
-            <p className="text-foreground/80 mt-2">{(t.footer_desc as string) || ""}</p>
+            <p className="text-foreground/80 mt-2">{t("footer_desc")}</p>
           </div>
 
           <div>
             <h4 className="font-semibold mb-3 text-foreground">Recursos</h4>
             <ul className="space-y-2 text-foreground/80">
-              <li>{(t.footer_resources_centro as string) || ""}</li>
-              <li>{(t.footer_resources_blog as string) || ""}</li>
-              <li>{(t.footer_resources_stories as string) || ""}</li>
-              <li>{(t.footer_resources_privacy as string) || ""}</li>
+              <li>{t("footer_resources_centro")}</li>
+              <li>{t("footer_resources_blog")}</li>
+              <li>{t("footer_resources_stories")}</li>
+              <li>{t("footer_resources_privacy")}</li>
             </ul>
           </div>
 
@@ -278,6 +268,8 @@ export default function Home() {
             <p className="text-sm text-foreground/80">© {new Date().getFullYear()} Testimonial — All rights reserved</p>
           </div>
         </div>
+        <LanguageToggle />
+        <ThemeToggle />
       </footer>
     </main>
   );

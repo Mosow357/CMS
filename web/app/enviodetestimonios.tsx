@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useTranslation } from "@/components/providers/translation-provider";
+import { useTranslations } from "next-intl";
 
 export default function EnvioDeTestimoniosPage() {
   const [testimonial, setTestimonial] = useState("");
@@ -15,12 +15,10 @@ export default function EnvioDeTestimoniosPage() {
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-
-  // ✅ NUEVO: LOGO
   const [logo, setLogo] = useState<File | null>(null);
   const [useDefaultLogo, setUseDefaultLogo] = useState(true);
 
-  const { t } = useTranslation();
+  const t = useTranslations("testimonialForm");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,31 +35,25 @@ export default function EnvioDeTestimoniosPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex items-start justify-center py-16 px-6">
       <div className="w-full max-w-3xl">
-
-
-        {/* ✅ FORMULARIO ORIGINAL ABAJO */}
         <form
           onSubmit={handleSubmit}
           className="space-y-6 bg-card p-6 rounded-lg border-2 border-primary/30 shadow-lg"
         >
           <div>
             <Label className="text-left mb-2 text-primary uppercase font-semibold">
-              {(t.envio_testimonial_label as string) || "Tu testimonio"}
+              {t("testimonial_label")}
             </Label>
             <textarea
               value={testimonial}
               onChange={(e) => setTestimonial(e.target.value)}
-              placeholder={
-                (t.envio_testimonial_placeholder as string) ||
-                "Escribe tu experiencia aquí..."
-              }
+              placeholder={t("testimonial_placeholder")}
               className="w-full min-h-[140px] rounded-md border border-input bg-transparent px-3 py-2 text-base text-foreground placeholder:text-foreground/80 uppercase"
             />
           </div>
 
           <div>
             <Label className="text-left mb-2 text-primary uppercase font-semibold">
-              {(t.envio_rating_label as string) || "Calificación"}
+              {t("rating_label")}
             </Label>
             <div className="flex items-center gap-2">
               {[1, 2, 3, 4, 5].map((n) => (
@@ -70,9 +62,8 @@ export default function EnvioDeTestimoniosPage() {
                   type="button"
                   aria-label={`${n} estrellas`}
                   onClick={() => setRating(n)}
-                  className={`text-2xl transition-colors ${
-                    n <= rating ? "text-yellow-400" : "text-foreground/80"
-                  }`}
+                  className={`text-2xl transition-colors ${n <= rating ? "text-yellow-400" : "text-foreground/80"
+                    }`}
                 >
                   {n <= rating ? "★" : "☆"}
                 </button>
@@ -82,36 +73,36 @@ export default function EnvioDeTestimoniosPage() {
 
           <div>
             <Label className="text-left mb-2 text-primary uppercase font-semibold">
-              {(t.envio_name_label as string) || "Tu nombre"}
+              {t("name_label")}
             </Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={(t.envio_name_label as string) || "Tu nombre"}
+              placeholder={t("name_label")}
             />
           </div>
 
           <div>
             <Label className="text-left mb-2 text-primary uppercase font-semibold">
-              {(t.envio_email_label as string) || "Tu email"}
+              {t("email_label")}
             </Label>
             <Input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={(t.envio_email_label as string) || "tu@email.com"}
+              placeholder={t("email_label")}
               type="email"
             />
           </div>
 
           <Label className="text-left mb-2 font-semibold uppercase text-primary">
-            {t.envio_file_label}
+            {t("file_label")}
           </Label>
 
           <label
             htmlFor="fileUpload"
             className="cursor-pointer w-full flex items-center justify-center py-3 rounded-md bg-primary text-primary-foreground font-semibold transition hover:opacity-90"
           >
-            {t.envio_file_button}
+            {t("file_button")}
           </label>
 
           <input
@@ -124,22 +115,16 @@ export default function EnvioDeTestimoniosPage() {
 
           {file && (
             <p className="text-sm text-foreground/70 mt-2">
-              {t.envio_file_selected}: <strong>{file.name}</strong>
+              {t("file_selected")}: <strong>{file.name}</strong>
             </p>
           )}
 
           <div className="flex items-center justify-between">
             <div className="text-sm text-foreground/80">
-              {sent
-                ? (t.envio_sent_message as string) ||
-                  "Gracias — tu testimonio fue enviado."
-                : (t.envio_optional_note as string) ||
-                  "Todos los campos son opcionales; usa un nombre si quieres aparecer públicamente."}
+              {sent ? t("sent_message") : t("optional_note")}
             </div>
             <Button type="submit" disabled={submitting}>
-              {submitting
-                ? "Enviando..."
-                : (t.envio_submit as string) || "Enviar testimonio"}
+              {submitting ? "Enviando..." : t("submit")}
             </Button>
           </div>
         </form>

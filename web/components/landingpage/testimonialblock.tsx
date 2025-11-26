@@ -1,9 +1,9 @@
 "use client";
 
-import { useTranslation } from "@/components/providers/translation-provider";
+import { useTranslations } from "next-intl";
 
 export default function TestimonialBlock() {
-  const { t } = useTranslation();
+  const t = useTranslations("landing");
 
   return (
     <section className="w-full flex justify-center px-6 py-20">
@@ -20,8 +20,8 @@ export default function TestimonialBlock() {
 
         {/* Texto */}
         <p className="mt-6 text-xl leading-relaxed font-semibold">
-          {(t.tb_text1 as string) || ""} {" "}
-          <span className="bg-yellow-200/70 dark:bg-yellow-400/30 px-1">{(t.tb_highlight as string) || ""}</span>
+          {t("tb_text1")} {" "}
+          <span className="bg-yellow-200/70 dark:bg-yellow-400/30 px-1">{t("tb_highlight")}</span>
         </p>
 
         {/* Usuario */}
@@ -33,15 +33,15 @@ export default function TestimonialBlock() {
           />
 
           <div>
-            <p className="font-bold text-lg">{(t.tb_name as string) || ""}</p>
-            <p className="text-foreground/80 text-sm">{(t.tb_role as string) || ""}</p>
+            <p className="font-bold text-lg">{t("tb_name")}</p>
+            <p className="text-foreground/80 text-sm">{t("tb_role")}</p>
           </div>
         </div>
 
         {/* Badge */}
         <div className="absolute bottom-5 right-6 flex items-center gap-2 opacity-80">
           <span className="inline-flex items-center justify-center bg-indigo-600 dark:bg-indigo-500 text-white rounded-full w-5 h-5 text-xs">👍</span>
-          <span className="text-sm font-medium">{(t.tb_badge as string) || ""}</span>
+          <span className="text-sm font-medium">{t("tb_badge")}</span>
         </div>
       </div>
     </section>
