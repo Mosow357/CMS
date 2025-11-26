@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import TranslationProvider from "@/components/providers/translation-provider";
+import Navbar from "@/components/landingpage/navbar";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tribu",
-  description: "Aplicación Tribu",
+  title: "WebApp",
+  description: "WebApp",
 };
 
 export default function RootLayout({
@@ -29,7 +33,20 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider>
-          {children}
+          {/* Translation provider centraliza idioma */}
+          <TranslationProvider>
+          {/* 🔹 Navbar arriba */}
+          <Navbar />
+
+          {/* 🔹 Contenido principal */}
+          <main className="min-h-screen">{children}</main>
+
+          {/* 🔹 Toggle de tema e idioma abajo a la derecha */}
+          <div className="fixed bottom-4 right-4 flex gap-2 z-50">
+            <LanguageToggle />
+            <ThemeToggle />
+          </div>
+          </TranslationProvider>
         </ThemeProvider>
       </body>
     </html>

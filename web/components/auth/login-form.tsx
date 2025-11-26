@@ -95,7 +95,7 @@ export function LoginForm() {
           >
             {isLoading ? t("common.loading") : t("submit")}
           </Button>
-          <p className="text-sm text-center text-muted-foreground">
+          <p className="text-sm text-center text-foreground/80">
             {t("noAccount")}{" "}
             <a href="#" className="text-primary hover:underline font-medium">
               {t("signUp")}

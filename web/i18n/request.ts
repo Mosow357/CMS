@@ -7,6 +7,7 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
-    messages: (await import(`../messages/${locale}.json`)).default
+    // Load the TS modules we keep in `web/i18n` (en.ts / es.ts)
+    messages: (await import(`../i18n/${locale}`)).default
   };
 });
