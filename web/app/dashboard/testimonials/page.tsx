@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { mockDashboardTestimonials, DashboardTestimonial } from '@/lib/mockDashboardTestimonials'
@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast'
 import { CheckCircle2, Clock, Eye, XCircle, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-export default function TestimonialsPage() {
+export function TestimonialsContent() {
   const searchParams = useSearchParams()
   const status = searchParams.get('status')
   const { toast } = useToast()
@@ -114,7 +114,7 @@ export default function TestimonialsPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-0">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold mb-2">{getTitle()}</h1>
@@ -162,19 +162,20 @@ export default function TestimonialsPage() {
                     className={`border-b last:border-0 transition-colors hover:bg-muted/30 ${index % 2 === 0 ? 'bg-background' : 'bg-muted/10'
                       }`}
                   >
+
                     <td className="p-4">
                       <div>
-                        <div className="font-medium">{testimonial.title}</div>
-                        <div className="text-sm text-muted-foreground line-clamp-1">
+                        <div className="font-medium text-xs">{testimonial.title}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-1">
                           {testimonial.content}
                         </div>
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td className="p-4 mx-2">
                       <div className="flex items-center gap-3">
                         <UserAvatar name={testimonial.author.name} size="xs" />
                         <div>
-                          <div className="text-sm font-medium">
+                          <div className="text-xs font-medium">
                             {testimonial.author.name}
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -184,19 +185,19 @@ export default function TestimonialsPage() {
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="text-sm">{testimonial.category.name}</span>
+                      <span className="text-xs">{testimonial.category.name}</span>
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-1">
                         <span className="text-yellow-500">★</span>
-                        <span className="text-sm font-medium">
+                        <span className="text-xs font-medium">
                           {testimonial.stars_rating}
                         </span>
                       </div>
                     </td>
                     <td className="p-4">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium ${getStatusBadgeColor(
                           testimonial.status
                         )}`}
                       >
@@ -205,11 +206,18 @@ export default function TestimonialsPage() {
                       </span>
                     </td>
                     <td className="p-4">
-                      <span className="text-sm text-muted-foreground">
+                      {/* <span className="text-xs text-muted-foreground">
                         {new Date(testimonial.created_at).toLocaleDateString('es-ES', {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric',
+                        })}
+                      </span> */}
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(testimonial.created_at).toLocaleDateString('es-ES', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: '2-digit',
                         })}
                       </span>
                     </td>
@@ -228,5 +236,13 @@ export default function TestimonialsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function TestimonialsPage() {
+  return (
+    <Suspense fallback={<div>Cargando testimonios...</div>}>
+      <TestimonialsContent />
+    </Suspense>
   )
 }

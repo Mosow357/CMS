@@ -16,7 +16,7 @@ export const mockCurrentUser: MockUser = {
     email: 'admin@example.com',
     username: 'admin',
     name: 'Admin User',
-    role: 'editor', // Cambiar a 'editor' para probar permisos de editor
+    role: 'admin', // Cambiar a 'editor' para probar permisos de editor
     organizationId: 'org-techstart'
 }
 

@@ -76,7 +76,7 @@ export default function CategoriesPage() {
     ]
 
     return (
-        <div className="p-6">
+        <div className="p-0">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold mb-2">Categorías y Clasificación</h1>
                 <p className="text-muted-foreground">

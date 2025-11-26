@@ -43,7 +43,7 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="p-6">
+        <div className="p-0">
             <div className="mb-6">
                 <h1 className="text-3xl font-bold mb-2">Perfil de Usuario</h1>
                 <p className="text-muted-foreground">
