@@ -1,12 +1,4 @@
 import { AppSidebar } from "@/components/dashboard/sidebar/app-sidebar";
-// import {
-//   Breadcrumb,
-//   BreadcrumbItem,
-//   BreadcrumbLink,
-//   BreadcrumbList,
-//   BreadcrumbPage,
-//   BreadcrumbSeparator,
-// } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -15,7 +7,7 @@ import {
 } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
-// import { DynamicBreadcrumb } from "@/components/dashboard/dynamicBreadcrumb";
+import { DynamicBreadcrumb } from "@/components/dashboard/dynamicBreadcrumb";
 
 export default function LayoutPage({ children }: { children: React.ReactNode }) {
   return (
@@ -29,20 +21,8 @@ export default function LayoutPage({ children }: { children: React.ReactNode }) 
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"
             />
-            {/* <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb> */}
-            {/* <DynamicBreadcrumb /> */}
+
+            <DynamicBreadcrumb />
 
 
           </div>
