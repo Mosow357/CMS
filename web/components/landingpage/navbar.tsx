@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
+
+import { LanguageToggle } from '@/components/language-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
+
 export default function Navbar() {
   const t = useTranslations("landing");
 
@@ -52,6 +56,8 @@ export default function Navbar() {
           >
             {text.signup}
           </Link>
+          <LanguageToggle />
+          <ThemeToggle />
         </div>
       </div>
     </nav>

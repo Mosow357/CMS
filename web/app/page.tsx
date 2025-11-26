@@ -8,8 +8,6 @@ import TestimonialBlock from "@/components/landingpage/testimonialblock";
 import { useTranslations } from "next-intl";
 import Navbar from "@/components/landingpage/navbar";
 
-import { LanguageToggle } from '@/components/language-toggle';
-import { ThemeToggle } from '@/components/theme-toggle';
 
 /* ---------------------------
    Small UI helpers
@@ -268,8 +266,6 @@ export default function Home() {
             <p className="text-sm text-foreground/80">© {new Date().getFullYear()} Testimonial — All rights reserved</p>
           </div>
         </div>
-        <LanguageToggle />
-        <ThemeToggle />
       </footer>
     </main>
   );
