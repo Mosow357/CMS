@@ -3,19 +3,14 @@
 import * as React from "react"
 import {
   AudioWaveform,
-  BookOpen,
-  Bot,
   Command,
-  Frame,
   GalleryVerticalEnd,
-  Map,
-  PieChart,
   Settings2,
   SquareTerminal,
 } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 import { NavMain } from "@/components/dashboard/sidebar/nav-main";
-import { NavProjects } from "@/components/dashboard/sidebar/nav-projects";
 import { NavUser } from "@/components/dashboard/sidebar/nav-user";
 import { TeamSwitcher } from "@/components/dashboard/sidebar/team-switcher";
 import {
@@ -27,154 +22,96 @@ import {
 } from "@/components/ui/sidebar";
 
 import { SidebarLogo } from "@/components/dashboard/sidebar/sidebar-logo";
-// import { SidebarMenu } from "@/components/ui/sidebar";
-
-
-
-// This is sample data.
-const data = {
-  user: {
-    name: "Admin user",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
-  navMain: [
-    {
-      title: "Menu Dashboard",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "Dashboard",
-          url: "/dashboard/admin",
-        },
-        {
-          title: "Testimonios",
-          url: "/dashboard/testimonials",
-        },
-        {
-          title: "Categorias",
-          url: "/dashboard/categories",
-        },
-        {
-          title: "Settings",
-          url: "/dashboard/settings",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-}
+import { getTestimonialStats } from "@/lib/mockDashboardTestimonials";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const stats = getTestimonialStats()
+  const pathname = usePathname()
+
+  const data = {
+    user: {
+      name: "Admin user",
+      email: "m@example.com",
+      avatar: "/avatars/shadcn.jpg",
+    },
+    teams: [
+      {
+        name: "Acme Inc",
+        logo: GalleryVerticalEnd,
+        plan: "Enterprise",
+      },
+      {
+        name: "Acme Corp.",
+        logo: AudioWaveform,
+        plan: "Startup",
+      },
+      {
+        name: "Evil Corp.",
+        logo: Command,
+        plan: "Free",
+      },
+    ],
+    navMain: [
+      {
+        title: "Testimonios",
+        url: "#",
+        icon: SquareTerminal,
+        isActive: pathname.startsWith("/dashboard/testimonials"),
+        items: [
+          {
+            title: "Todos",
+            url: "/dashboard/testimonials",
+            badge: stats.total
+          },
+          {
+            title: "Pendientes",
+            url: "/dashboard/testimonials?status=pending",
+            badge: stats.pending
+          },
+          {
+            title: "Aprobados",
+            url: "/dashboard/testimonials?status=approved",
+            badge: stats.approved
+          },
+          {
+            title: "Publicados",
+            url: "/dashboard/testimonials?status=published",
+            badge: stats.published
+          },
+          {
+            title: "Rechazados",
+            url: "/dashboard/testimonials?status=rejected",
+            badge: stats.rejected
+          },
+        ],
+      },
+      {
+        title: "Configuraciones",
+        url: "#",
+        icon: Settings2,
+        isActive: pathname.startsWith("/dashboard/categories") || pathname.startsWith("/dashboard/embed"),
+        items: [
+          {
+            title: "Categorias",
+            url: "/dashboard/categories",
+          },
+          {
+            title: "Muro",
+            url: "/dashboard/embed",
+          },
+        ],
+      },
+    ],
+  }
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarLogo src="/logo.webp" alt="My CMS" /> 
+        <SidebarLogo src="/logo.webp" alt="My CMS" />
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

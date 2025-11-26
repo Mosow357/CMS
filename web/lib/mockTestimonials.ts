@@ -14,7 +14,6 @@ const techStartTestimonials = [
             name: 'Laura Chen',
             email: 'laura@techstart.io',
             title: 'Founder & CEO',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Laura'
         },
         category: {
             name: 'Startup',
@@ -35,7 +34,6 @@ const techStartTestimonials = [
             name: 'David Park',
             email: 'david@techstart.io',
             title: 'CTO',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David'
         },
         category: {
             name: 'Soporte',
@@ -56,7 +54,6 @@ const techStartTestimonials = [
             name: 'Sofia Ramirez',
             email: 'sofia@techstart.io',
             title: 'Head of Engineering',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sofia'
         },
         category: {
             name: 'Tecnología',
@@ -77,7 +74,6 @@ const techStartTestimonials = [
             name: 'Marcus Johnson',
             email: 'marcus@techstart.io',
             title: 'CFO',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus'
         },
         category: {
             name: 'Finanzas',
@@ -102,7 +98,6 @@ const eduLearnTestimonials = [
             name: 'Ana Martínez',
             email: 'ana@edulearn.com',
             title: 'Profesora de Matemáticas',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=AnaMartinez'
         },
         category: {
             name: 'Educación',
@@ -123,7 +118,6 @@ const eduLearnTestimonials = [
             name: 'Carmen López',
             email: 'carmen@gmail.com',
             title: 'Madre de familia',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Carmen'
         },
         category: {
             name: 'Padres',
@@ -144,7 +138,6 @@ const eduLearnTestimonials = [
             name: 'Roberto Sánchez',
             email: 'roberto@outlook.com',
             title: 'Estudiante → Developer',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Roberto'
         },
         category: {
             name: 'Estudiantes',
@@ -165,7 +158,6 @@ const eduLearnTestimonials = [
             name: 'Dr. Miguel Torres',
             email: 'miguel@edulearn.com',
             title: 'Director Académico',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Miguel'
         },
         category: {
             name: 'Instituciones',
@@ -186,7 +178,6 @@ const eduLearnTestimonials = [
             name: 'Elena Rodríguez',
             email: 'elena@gmail.com',
             title: 'Estudiante Senior',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elena'
         },
         category: {
             name: 'Adultos Mayores',
