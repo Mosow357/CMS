@@ -1,29 +1,24 @@
 import { Category } from 'src/categories/entities/category.entity';
+import { BaseEntity } from 'src/common/entities/base.entity';
 import { Tag } from 'src/tags/entities/tag.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   ManyToMany,
   JoinTable,
   JoinColumn,
 } from 'typeorm';
 
-
 @Entity('testimonials')
-export class Testimonial {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class Testimonial extends BaseEntity {
 
-  @Column({ type: 'integer', nullable: false })
-  user_id: number;
+  @Column({ type: 'varchar', nullable: false })
+  organitation_id: string;
 
-  @Column({ type: 'integer' })
-  category_id: number;
+  @Column({ type: 'uuid' })
+  category_id: string;
 
   @Column({ type: 'varchar', nullable: false })
   title: string;
@@ -40,15 +35,8 @@ export class Testimonial {
   @Column({ type: 'varchar', nullable: true })
   status: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  created_at: Date;
-
-  @UpdateDateColumn({ type: 'timestamp' })
-  updated_at: Date;
-
-  @ManyToOne(() => User, (user) => user.testimonials)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  @Column({ type: 'int8', nullable: true })
+  stars_rating: number;
 
   @ManyToOne(() => Category, (category) => category.testimonials)
   @JoinColumn({ name: 'category_id' })

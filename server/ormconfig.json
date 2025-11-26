@@ -1,0 +1,14 @@
+{
+  "_comentario": "ARCHIVO DE AYUDA PARA GENERAR diagramas en base a las entities de dist: typeorm-uml",
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "postgres",
+  "password": "postgres",
+  "database": "cms_testimonial",
+  "synchronize": false,
+  "logging": true,
+  "entities": ["dist/**/*.entity.js"],
+  "migrations": ["dist/database/migrations/*.js"],
+  "subscribers": ["dist/subscriber/**/*.js"]
+}

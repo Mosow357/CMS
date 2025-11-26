@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { UpdateTagDto } from '../dto/update-tag.dto';
-import { Tag } from '../entities/tag.entity';
+import { Tag } from '../entities/tag.entity'; 
+import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
 
 @Injectable()
 export class TagsService {
@@ -17,13 +18,22 @@ export class TagsService {
     return this.tagsRepository.save(tag);
   }
 
-  async findAll(): Promise<Tag[]> {
+  async findAll(param:QueryParamsDto): Promise<Tag[]> {
+    const { page = 1, itemsPerPage = 20, sort = 'ASC' } = param;
+    const limit = itemsPerPage;
+    const offset = (page - 1) * itemsPerPage;
+    
     return this.tagsRepository.find({
       relations: ['testimonials'],
+      skip: offset,
+      take: limit,
+      order:{
+        createdAt: sort
+      }
     });
   }
 
-  async findOne(id: number): Promise<Tag> {
+  async findOne(id: string): Promise<Tag> {
     const tag = await this.tagsRepository.findOne({
       where: { id },
       relations: ['testimonials'],
@@ -34,13 +44,13 @@ export class TagsService {
     return tag;
   }
 
-  async update(id: number, updateTagDto: UpdateTagDto): Promise<Tag> {
+  async update(id: string, updateTagDto: UpdateTagDto): Promise<Tag> {
     const tag = await this.findOne(id);
     Object.assign(tag, updateTagDto);
     return this.tagsRepository.save(tag);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const tag = await this.findOne(id);
     await this.tagsRepository.remove(tag);
   }

@@ -3,6 +3,8 @@
     "login": {
       "title": "Bienvenido a Tribu",
       "subtitle": "Inicia sesión en tu cuenta",
+      "username": "Usuario",
+      "usernamePlaceholder": "Ingresa tu usuario",
       "email": "Correo electrónico",
       "emailPlaceholder": "tu@email.com",
       "password": "Contraseña",
@@ -12,10 +14,39 @@
       "submit": "Iniciar sesión",
       "noAccount": "¿No tienes cuenta?",
       "signUp": "Regístrate",
+      "common": {
+        "loading": "Cargando..."
+      },
       "errors": {
         "invalidEmail": "Correo electrónico inválido",
         "required": "Este campo es requerido",
         "invalidCredentials": "Credenciales inválidas"
+      }
+    },
+    "register": {
+      "title": "Únete a Tribu",
+      "subtitle": "Crea tu cuenta para comenzar",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "tu@email.com",
+      "username": "Usuario",
+      "usernamePlaceholder": "tu_usuario",
+      "name": "Nombre",
+      "namePlaceholder": "Juan",
+      "lastname": "Apellido",
+      "lastnamePlaceholder": "Pérez",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Crea una contraseña segura",
+      "confirmPassword": "Confirmar Contraseña",
+      "confirmPasswordPlaceholder": "Repite tu contraseña",
+      "submit": "Crear Cuenta",
+      "haveAccount": "¿Ya tienes cuenta?",
+      "signIn": "Inicia sesión",
+      "errors": {
+        "passwordMismatch": "Las contraseñas no coinciden",
+        "invalidEmail": "Correo electrónico inválido",
+        "required": "Este campo es requerido",
+        "emailExists": "Este correo ya está registrado",
+        "usernameExists": "Este usuario ya existe"
       }
     },
     "logout": "Cerrar sesión"

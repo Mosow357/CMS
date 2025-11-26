@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { Category } from '../entities/category.entity';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
+import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
 
 
 @Injectable()
@@ -18,13 +19,22 @@ export class CategoriesService {
     return this.categoriesRepository.save(category);
   }
 
-  async findAll(): Promise<Category[]> {
+  async findAll(param:QueryParamsDto): Promise<Category[]> {
+    const { page = 1, itemsPerPage = 20, sort = 'ASC' } = param;
+    const limit = itemsPerPage;
+    const offset = (page - 1) * itemsPerPage;
+    
     return this.categoriesRepository.find({
       relations: ['testimonials'],
+      skip: offset,
+      take: limit,
+      order:{
+        createdAt: sort
+      }
     });
   }
 
-  async findOne(id: number): Promise<Category> {
+  async findOne(id: string): Promise<Category> {
     const category = await this.categoriesRepository.findOne({
       where: { id },
       relations: ['testimonials'],
@@ -35,13 +45,13 @@ export class CategoriesService {
     return category;
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
     const category = await this.findOne(id);
     Object.assign(category, updateCategoryDto);
     return this.categoriesRepository.save(category);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const category = await this.findOne(id);
     await this.categoriesRepository.remove(category);
   }
