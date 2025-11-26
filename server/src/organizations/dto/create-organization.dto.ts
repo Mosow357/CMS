@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateOrganizationDto {
@@ -10,7 +10,7 @@ export class CreateOrganizationDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
       description: 'Name of the Organization',
       example: 'Organization_1 is focused on delivering quality products.',
     })
@@ -18,7 +18,7 @@ export class CreateOrganizationDto {
   @IsOptional()
   description: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Question text displayed to the end user (editable by admin)',
     example: 'What did you think of this experience?',
     required: false,

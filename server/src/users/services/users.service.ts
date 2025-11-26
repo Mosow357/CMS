@@ -51,14 +51,20 @@ export class UsersService {
     return user;
   }
 
-  async findByUsername(username: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { username } });
-  }
+  async findByUsernameOrEmail(value: string): Promise<User | null> {
+  return this.usersRepository.findOne({
+    where: [
+      { username: value },
+      { email: value },
+    ],
+  });
+}
 
   async findOneWithPassword(username: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { username },
-      select: ['id', 'createdAt', 'updatedAt', 'email', 'username', 'password', 'name'],
+      relations:{userOrganizations:{user:true,organization:true}},
+      select: ['id', 'createdAt', 'updatedAt', 'email', 'username', 'password', 'name','userOrganizations'],
     });
   }
 

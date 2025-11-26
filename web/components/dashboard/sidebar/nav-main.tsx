@@ -29,12 +29,13 @@ export function NavMain({
     items?: {
       title: string
       url: string
+      badge?: string | number
     }[]
   }[]
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Menu</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -57,8 +58,13 @@ export function NavMain({
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
+                        <a href={subItem.url} className="flex justify-between items-center">
                           <span>{subItem.title}</span>
+                          {subItem.badge && (
+                            <span className="ml-auto text-xs font-medium text-muted-foreground px-2 py-0.5 rounded-full bg-muted">
+                              {subItem.badge}
+                            </span>
+                          )}
                         </a>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
