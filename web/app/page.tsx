@@ -6,7 +6,7 @@ import { TestimonialsGrid } from "@/components/landingpage/testimonials";
 import LandingSection from "@/components/landingpage/landing-section";
 import TestimonialBlock from "@/components/landingpage/testimonialblock";
 import { useTranslation } from "@/components/providers/translation-provider";
-
+import Navbar from "@/components/landingpage/navbar";
 
 /* ---------------------------
    Small UI helpers
@@ -130,7 +130,8 @@ export default function Home() {
   return (
     <main ref={refParallax} className="relative min-h-screen text-center overflow-y-auto bg-background text-foreground">
       {/* NAVBAR STICKY BLUR */}
-     
+       <Navbar />
+
       {/* HERO */}
       <section className="relative pt-36 pb-20 px-6">
         <motion.div
