@@ -24,7 +24,6 @@ export class JoinUserToOrganizationService {
       organizationId: input.organizationId,
       role: input.role ?? OrganizationRole.EDITOR,
     });
-
     return userOrganization;
   }
 }

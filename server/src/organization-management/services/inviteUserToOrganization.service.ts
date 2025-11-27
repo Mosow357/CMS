@@ -4,6 +4,7 @@ import { OrganizationsService } from "src/organizations/services/organizations.s
 import { UserOrganizationService } from "src/user_organization/services/userOrganization.service";
 import { InviteUserToOrganizationDto } from "../dto/inviteUserToOrganization.dto";
 import { UsersService } from "src/users/services/users.service";
+import { InvitationEmailTemplate } from "src/notifications/email-templates/invitation.template";
 
 @Injectable()
 export class inviteUserToOrganizationService {
@@ -24,8 +25,18 @@ export class inviteUserToOrganizationService {
 
         const existsUserInOrg = await this.userOrganizationService.findUserOrganization(invitedUser.id, input.organizationId);
         if (existsUserInOrg) throw new ConflictException('User already member of the organization');
+        
+        let notification:InvitationEmailTemplate = new InvitationEmailTemplate({
+            organizationName: existsOrganization.name,
+            toEmail: invitedUser.email,
+            token: this.generateToken(),
+            username: invitedUser.username
+        });
+        
+        await this.notificationService.sendNotificationWithTemplate(notification);
+    }
 
-        //TODO:Implements template in notification module for organization invite
-        //await this.notificationService.sendNotificationWithTemplate();
+    private generateToken(): string {
+        return Math.random().toString(36).substr(2, 8).toUpperCase();
     }
 }
