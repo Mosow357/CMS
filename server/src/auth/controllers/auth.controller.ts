@@ -28,7 +28,7 @@ export class AuthController {
     return await this.authService.register(registerDto);
   }
 
-  @Patch('change_password/:id')
+  @Patch('change_password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
