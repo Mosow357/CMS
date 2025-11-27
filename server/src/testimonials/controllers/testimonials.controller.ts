@@ -39,13 +39,10 @@ export class TestimonialsController {
   }
 
   @Get()
-  findAll(
-    @Query() param:QueryParamsDto,
-    @Query('organitationId') organitationId?: string,
-    @Query('categoryId') categoryId?: string,
-  ) {
-    if (organitationId) {
-      return this.testimonialsService.findByOrganitation(organitationId);
+  findAll(@Query() param:QueryParamsDto) {
+ const { organizationId, categoryId } = param;
+    if (organizationId) {
+      return this.testimonialsService.findByOrganitation(organizationId,param);
     }
     if (categoryId) {
       return this.testimonialsService.findByCategory(categoryId);

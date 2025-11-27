@@ -14,20 +14,21 @@ export class TestimonialsService {
   ) {}
 
   async findAll(param: QueryParamsDto): Promise<Testimonial[]> {
-    const { page = 1, itemsPerPage = 20, sort = 'ASC' } = param;
+    const { page = 1, itemsPerPage = 20, sort = 'ASC',status } = param;
     const limit = itemsPerPage;
     const offset = (page - 1) * itemsPerPage;
     
     return this.testimonialsRepository.find({
-      relations: ['user', 'category', 'tags'],
+      relations: ['category', 'tags'],
       skip: offset,
       take: limit,
       order: {
         createdAt: sort,
       },
+      where: status ? { status } : undefined,
     });
   }
-
+  
   async findOne(id: string): Promise<Testimonial> {
     const testimonial = await this.testimonialsRepository.findOne({
       where: { id },
@@ -38,10 +39,11 @@ export class TestimonialsService {
     }
     return testimonial;
   }
-
-  async findByOrganitation(organitationId: string): Promise<Testimonial[]> {
+  
+  async findByOrganitation(organitationId: string, param:QueryParamsDto): Promise<Testimonial[]> {
+    const {status} = param
     return this.testimonialsRepository.find({
-      where: { organitation_id: organitationId },
+      where: status ? { status,organitation_id: organitationId } : {organitation_id: organitationId},
       relations: ['category', 'tags'],
     });
   }
@@ -49,7 +51,7 @@ export class TestimonialsService {
   async findByCategory(categoryId: string): Promise<Testimonial[]> {
     return this.testimonialsRepository.find({
       where: { category_id: categoryId },
-      relations: ['user', 'category', 'tags'],
+      relations: ['category', 'tags'],
     });
   }
 
