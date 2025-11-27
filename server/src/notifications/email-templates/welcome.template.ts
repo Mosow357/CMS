@@ -1,22 +1,18 @@
+import { WELCOME_TEMPLATE_ID } from "../constants/templatesId";
 import { EmailNotificationBase } from "./emailNotificationBase";
 
-export class WelcomeEmailTemplate implements EmailNotificationBase{
-    recipentEmail: string;
-    username: string;
-    templateId: string;
-    variables: object;
-    subject?: string;
-    html?: string | undefined;
-    text?: string | undefined;
-    metadata?: Record<string, unknown> | undefined;
-
-    constructor(to: string, username: string) {
-        this.recipentEmail = to;
+export class WelcomeEmailTemplate extends EmailNotificationBase{
+    
+    constructor(toEmail: string, username: string, token: string){
+        super();
+        this.recipentEmail = toEmail;
         this.username = username;
-        this.templateId = "z86org8dnp0lew13";
-        this.subject = "Welcome to " + "CMS" + "!";
+
+        this.templateId = WELCOME_TEMPLATE_ID;
+        this.subject = "Welcome to CMS!";
         this.variables = {
             username: username,
+            token: token
         };
     }
 }
