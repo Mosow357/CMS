@@ -15,6 +15,12 @@ import {
 export class Testimonial extends BaseEntity {
 
   @Column({ type: 'varchar', nullable: false })
+  client_name: string;
+
+  @Column({ type: 'varchar', nullable: false })
+  client_email: string;
+
+  @Column({ type: 'varchar', nullable: false })
   organitation_id: string;
 
   @Column({ type: 'uuid' })

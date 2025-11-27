@@ -11,7 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { OrganizationsService } from '../services/organitations.service';
+import { OrganizationsService } from '../services/organizations.service';
 import { CreateOrganizationDto } from '../dto/create-organization.dto';
 import { UpdateOrganizationDto } from '../dto/update-organization.dto';
 import { GetUser } from 'src/common/decorators/get-user.decorator';

@@ -8,6 +8,7 @@ import { ChangePasswordDto } from '../dto/changePassword.dto';
 import { Public, RolesG } from 'src/common/guards/roles.decorator';
 import { RequestUser } from 'src/common/types/request-user'; 
 import { OrganizationRole } from 'src/common/types/userRole';
+import { GetUser } from 'src/common/decorators/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -27,16 +28,15 @@ export class AuthController {
     return await this.authService.register(registerDto);
   }
 
-  @Patch('change_password/:id')
+  @Patch('change-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
-    @Param('id') username: string
+    @GetUser() user
   ): Promise<void> {
-    return await this.authService.changePassword(changePasswordDto, username);
+    return await this.authService.changePassword(changePasswordDto, user.username);
   }
   @Get('validate-token')
-  @RolesG(OrganizationRole.ADMINISTRATOR, OrganizationRole.EDITOR)
   @HttpCode(HttpStatus.OK)
   async validateToken(): Promise<{ success: boolean }> {
     // Guard will handle the validation

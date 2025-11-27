@@ -13,7 +13,7 @@ export class UserOrganization extends BaseEntity {
     @Column()
     organizationId: string;
 
-    // Sqlite does not support enum type, so using varchar with check instead (testing friendly)
+    // Sqlite does not support enum type, so using varchar with check instead (testing and local environment friendly)
     @Column({ type: 'varchar' })
     @Check(`role IN ('admin', 'editor')`)
     role: OrganizationRole; // e.g., 'admin', 'editor'

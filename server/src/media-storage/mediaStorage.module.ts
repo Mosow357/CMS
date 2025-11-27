@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MediaStorageService } from './services/mediaStorage.service';
-import { MockMediaStorageProviderImpl } from './adapters/mockMediaStorageProviderImpl';
+import { cloudinaryProviderImpl } from './adapters/cloudinaryProviderImpl';
 
 @Module({
   imports: [],
   controllers: [],
-  providers: [MockMediaStorageProviderImpl,MediaStorageService, ],
+  providers: [cloudinaryProviderImpl,MediaStorageService],
   exports: [MediaStorageService],
 })
 export class MediaStorageModule {}

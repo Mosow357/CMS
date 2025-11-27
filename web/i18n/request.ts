@@ -7,6 +7,7 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
+    // Load the JSON messages from web/messages
     messages: (await import(`../messages/${locale}.json`)).default
   };
 });

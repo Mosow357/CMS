@@ -7,7 +7,6 @@ import { MediaStorageModule } from 'src/media-storage/mediaStorage.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { CreateTestimonialsService } from './services/createTestimonial.service';
 import { MediaStorageService } from 'src/media-storage/services/mediaStorage.service';
-import { MockMediaStorageProviderImpl } from 'src/media-storage/adapters/mockMediaStorageProviderImpl';
 
 @Module({
   imports: [
@@ -18,7 +17,7 @@ import { MockMediaStorageProviderImpl } from 'src/media-storage/adapters/mockMed
     MediaStorageModule,
   ],
   controllers: [TestimonialsController],
-  providers: [TestimonialsService, MockMediaStorageProviderImpl,MediaStorageService,CreateTestimonialsService],
+  providers: [TestimonialsService,MediaStorageService,CreateTestimonialsService],
   exports: [TestimonialsService],
 })
 export class TestimonialsModule {}
