@@ -5,6 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import Navbar from "@/components/landingpage/navbar";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function EnvioDeTestimoniosPage() {
   const [testimonial, setTestimonial] = useState("");
@@ -15,6 +26,7 @@ export default function EnvioDeTestimoniosPage() {
   const [sent, setSent] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   // ✅ LOGO RANDOM (tipo avatar) - Moved to useEffect for hydration safety
   useEffect(() => {
@@ -31,6 +43,13 @@ export default function EnvioDeTestimoniosPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Validate required fields
+    if (!testimonial || !rating || !name || !email) {
+      setError(t("all_fields_required"));
+      setSubmitting(false);
+      return;
+    }
+    setError(null);
     setSubmitting(true);
 
     const payload = { testimonial, rating, name, email, file };
@@ -43,10 +62,9 @@ export default function EnvioDeTestimoniosPage() {
 
   return (
     <div className="mt-20">
+      <Navbar simple={true} />
       <div className="min-h-screen bg-background text-foreground flex items-start justify-center py-16 px-6 ">
         <div className="w-full max-w-3xl ">
-
-
 
           {/* ✅ FORMULARIO */}
           <form
@@ -145,9 +163,7 @@ export default function EnvioDeTestimoniosPage() {
 
             <div className="flex items-center justify-between">
               <div className="text-sm text-foreground/80">
-                {sent
-                  ? t("sent_message")
-                  : t("optional_note")}
+                {t("optional_note")}
               </div>
               <Button type="submit" disabled={submitting}>
                 {submitting
@@ -158,6 +174,37 @@ export default function EnvioDeTestimoniosPage() {
           </form>
         </div>
       </div>
+
+      <AlertDialog open={!!error} onOpenChange={() => setError(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Error</AlertDialogTitle>
+            <AlertDialogDescription>{error}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setError(null)}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={sent} onOpenChange={() => setSent(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¡Gracias!</AlertDialogTitle>
+            <AlertDialogDescription>{t("sent_message")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => {
+              setSent(false);
+              setTestimonial("");
+              setRating(5);
+              setName("");
+              setEmail("");
+              setFile(null);
+            }}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

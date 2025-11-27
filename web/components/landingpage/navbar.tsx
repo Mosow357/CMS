@@ -7,7 +7,11 @@ import { useTranslations } from "next-intl";
 import { LanguageToggle } from '@/components/language-toggle';
 import { ThemeToggle } from '@/components/theme-toggle';
 
-export default function Navbar() {
+interface NavbarProps {
+  simple?: boolean;
+}
+
+export default function Navbar({ simple = false }: NavbarProps) {
   const t = useTranslations("landing");
 
   const text = {
@@ -36,26 +40,30 @@ export default function Navbar() {
 
         {/* 🟥 Botones */}
         <div className="absolute right-6 flex items-center gap-4">
-          <Link
-            href="/enviodetestimonios"
-            className="font-medium text-[#0F111A] dark:text-[#FFFFFF] hover:text-[#66F9C4] transition"
-          >
-            Enviar testimonio
-          </Link>
+          {!simple && (
+            <>
+              <Link
+                href="/enviodetestimonios"
+                className="font-medium text-[#0F111A] dark:text-[#FFFFFF] hover:text-[#66F9C4] transition"
+              >
+                Enviar testimonio
+              </Link>
 
-          <Link
-            href="/login"
-            className="font-medium text-[#0F111A] dark:text-[#FFFFFF] hover:text-[#66F9C4] transition"
-          >
-            {text.login}
-          </Link>
+              <Link
+                href="/login"
+                className="font-medium text-[#0F111A] dark:text-[#FFFFFF] hover:text-[#66F9C4] transition"
+              >
+                {text.login}
+              </Link>
 
-          <Link
-            href="/signup"
-            className="px-5 py-2 bg-[#66F9C4] text-[#0F111A] font-medium rounded-lg hover:bg-[#55dfad] transition"
-          >
-            {text.signup}
-          </Link>
+              <Link
+                href="/signup"
+                className="px-5 py-2 bg-[#66F9C4] text-[#0F111A] font-medium rounded-lg hover:bg-[#55dfad] transition"
+              >
+                {text.signup}
+              </Link>
+            </>
+          )}
           <LanguageToggle />
           <ThemeToggle />
         </div>

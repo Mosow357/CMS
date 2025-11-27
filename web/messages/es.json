@@ -130,10 +130,11 @@
     "email_label": "Tu email",
     "title_label": "Tu título / Empresa",
     "submit": "Enviar testimonio",
-    "sent_message": "Gracias — tu testimonio fue enviado.",
+    "sent_message": "Tu formulario fue enviado con exito!",
     "optional_note": "Todos los campos son opcionales; usa un nombre si quieres aparecer públicamente.",
     "file_label": "Adjuntar video o imagen",
     "file_button": "📎 Subir archivo",
-    "file_selected": "Archivo seleccionado"
+    "file_selected": "Archivo seleccionado",
+    "all_fields_required": "Por favor, completa todos los campos requeridos."
   }
 }
