@@ -36,7 +36,6 @@ export class AuthController {
     return await this.authService.changePassword(changePasswordDto, username);
   }
   @Get('validate-token')
-  @RolesG(OrganizationRole.ADMINISTRATOR, OrganizationRole.EDITOR)
   @HttpCode(HttpStatus.OK)
   async validateToken(): Promise<{ success: boolean }> {
     // Guard will handle the validation
