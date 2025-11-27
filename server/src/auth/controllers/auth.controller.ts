@@ -8,6 +8,7 @@ import { ChangePasswordDto } from '../dto/changePassword.dto';
 import { Public, RolesG } from 'src/common/guards/roles.decorator';
 import { RequestUser } from 'src/common/types/request-user'; 
 import { OrganizationRole } from 'src/common/types/userRole';
+import { GetUser } from 'src/common/decorators/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -31,9 +32,9 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
-    @Param('id') username: string
+    @GetUser() user
   ): Promise<void> {
-    return await this.authService.changePassword(changePasswordDto, username);
+    return await this.authService.changePassword(changePasswordDto, user.username);
   }
   @Get('validate-token')
   @HttpCode(HttpStatus.OK)
