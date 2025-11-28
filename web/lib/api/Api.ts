@@ -11,22 +11,73 @@
  */
 
 export interface CreateUserDto {
-  /** @example "John12" */
+  /**
+   * Unique username for the user account.
+   * @example "John12"
+   */
   username: string;
   /**
    * @minLength 6
    * @example "JohnDOE1234"
    */
   password: string;
-  /** @example "John" */
+  /**
+   * Email address of the user. Optional field.
+   * @example "john@example.com"
+   */
   email?: string | null;
+  /**
+   * First name of the user.
+   * @example "John"
+   */
+  name?: string | null;
   /** @example "Doe" */
   lastname?: string | null;
 }
 
 export type UpdateUserDto = object;
 
-export type CreateTestimonialDto = object;
+export interface CreateTestimonialDto {
+  /**
+   * ID of the organization submitting the testimonial.
+   * @example "org_12345"
+   */
+  organitation_id: string;
+  /**
+   * Category ID associated with the testimonial. Must be a valid UUID v4.
+   * @example "c0f9c216-2e9d-49b9-836f-3c40a0d7f023"
+   */
+  category_id: string;
+  /**
+   * Title of the testimonial (between 3 and 255 characters).
+   * @minLength 3
+   * @maxLength 255
+   * @example "Amazing service!"
+   */
+  title: string;
+  /**
+   * Main content of the testimonial.
+   * @example "The experience was incredible and the staff was very helpful."
+   */
+  content: string;
+  /**
+   * Type of media attached to the testimonial.
+   * @example "text"
+   */
+  media_type?: "image" | "video" | "text" | null;
+  /**
+   * Star rating for the testimonial. Must be an integer between 1 and 5.
+   * @min 1
+   * @max 5
+   * @example 5
+   */
+  stars_rating?: number;
+  /**
+   * List of tag IDs associated with the testimonial.
+   * @example ["ec97b2a3-5b9e-4c11-8ec9-2f7b4e9af8d4","57c4c242-9f67-4d7a-b122-33cf10c1e3d0"]
+   */
+  tagIds?: string[];
+}
 
 export type UpdateTestimonialDto = object;
 
@@ -79,11 +130,6 @@ export interface RegisterDto {
    * @example "Doe"
    */
   lastname?: string;
-  /**
-   * User role
-   * @example "ADMINISTRATOR"
-   */
-  role?: "ADMINISTRATOR" | "EDITOR";
 }
 
 export interface ChangePasswordDto {
@@ -106,9 +152,23 @@ export interface CreateOrganizationDto {
    * @example "Organization_1"
    */
   name: string;
+  /**
+   * Name of the Organization
+   * @example "Organization_1 is focused on delivering quality products."
+   */
+  description?: string;
+  /**
+   * Question text displayed to the end user (editable by admin)
+   * @example "What did you think of this experience?"
+   */
+  questionText?: string;
 }
 
 export type UpdateOrganizationDto = object;
+
+export type AddUserOrganizationDto = object;
+
+export type ChangeRoleDto = object;
 
 export type QueryParamsType = Record<string | number, any>;
 export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
@@ -146,8 +206,10 @@ export interface ApiConfig<SecurityDataType = unknown> {
   customFetch?: typeof fetch;
 }
 
-export interface HttpResponse<D extends unknown, E extends unknown = unknown>
-  extends Response {
+export interface HttpResponse<
+  D extends unknown,
+  E extends unknown = unknown,
+> extends Response {
   data: D;
   error: E;
 }
@@ -742,15 +804,14 @@ export class Api<
      *
      * @tags Auth
      * @name AuthControllerChangePassword
-     * @request PATCH:/auth/change_password/{id}
+     * @request PATCH:/auth/change-password
      */
     authControllerChangePassword: (
-      id: string,
       data: ChangePasswordDto,
       params: RequestParams = {},
     ) =>
       this.request<void, any>({
-        path: `/auth/change_password/${id}`,
+        path: `/auth/change-password`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
@@ -795,10 +856,10 @@ export class Api<
      * No description
      *
      * @tags organizations
-     * @name OrganizationsControllerFindAllUserOrganization
+     * @name OrganizationsControllerFindUserOrganizations
      * @request GET:/organizations
      */
-    organizationsControllerFindAllUserOrganization: (
+    organizationsControllerFindUserOrganizations: (
       params: RequestParams = {},
     ) =>
       this.request<void, any>({
@@ -851,6 +912,65 @@ export class Api<
     organizationsControllerRemove: (id: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/organizations/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags organizations
+     * @name OrganizationsControllerAddUserToOrganization
+     * @request POST:/organizations/{orgId}/users
+     */
+    organizationsControllerAddUserToOrganization: (
+      orgId: string,
+      data: AddUserOrganizationDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/organizations/${orgId}/users`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags organizations
+     * @name OrganizationsControllerChangeUserRole
+     * @request PATCH:/organizations/{orgId}/users/{userId}/role
+     */
+    organizationsControllerChangeUserRole: (
+      orgId: string,
+      userId: string,
+      data: ChangeRoleDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/organizations/${orgId}/users/${userId}/role`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags organizations
+     * @name OrganizationsControllerRemoveUserFromOrganization
+     * @request DELETE:/organizations/{orgId}/users/{userId}
+     */
+    organizationsControllerRemoveUserFromOrganization: (
+      orgId: string,
+      userId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/organizations/${orgId}/users/${userId}`,
         method: "DELETE",
         ...params,
       }),
