@@ -6,6 +6,7 @@ import { Test } from "@nestjs/testing";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Category } from "src/categories/entities/category.entity";
 import { AuthGuard } from "src/common/guards/auth.guard";
+import { MediaStorageModule } from "src/media-storage/mediaStorage.module";
 import { Organization } from "src/organizations/entities/organization.entity";
 import { Tag } from "src/tags/entities/tag.entity";
 import { CreateTestimonialDto } from "src/testimonials/dto/create-testimonial.dto";
@@ -30,9 +31,10 @@ describe('Testimonials integration', () => {
           type: 'sqlite',
           database: ':memory:',
           dropSchema: true,
-          entities: [User, Testimonial, Tag, Category, Organization,UserOrganization],
+          autoLoadEntities: true,
           synchronize: true,
         }),
+        MediaStorageModule,
         TestimonialsModule,
         JwtModule
       ],

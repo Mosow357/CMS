@@ -10,4 +10,8 @@ export class EncoderService{
     async checkPassword(oldPassword:string,newPassword:string):Promise<boolean>{
         return bcrypt.compareSync(oldPassword,newPassword) 
     }
+    async encodeToken(token:string):Promise<string>{
+        const salt = await bcrypt.genSalt()
+        return bcrypt.hashSync(token,salt)
+    }
 }

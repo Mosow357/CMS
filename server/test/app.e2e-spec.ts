@@ -4,6 +4,7 @@ import { APP_GUARD } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { Test } from "@nestjs/testing";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { AppModule } from "src/app.module";
 import { AuthModule } from "src/auth/auth.module";
 import { CategoriesModule } from "src/categories/categories.module";
 import { Category } from "src/categories/entities/category.entity";
@@ -25,26 +26,10 @@ describe('Testimonials integration', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({
-          envFilePath: '.env',
-          isGlobal: true,
-        }),
-        TypeOrmModule.forRoot({
-          type: 'sqlite',
-          database: ':memory:',
-          dropSchema: true,
-          entities: [User, Testimonial, Tag, Category, Organization, UserOrganization],
-          synchronize: true,
-        }),
-        UsersModule,
-        TestimonialsModule,
-        CategoriesModule,
-        TagsModule,
-        AuthModule,
-        OrganizationModule,
-        MediaStorageModule,
-      ],
+      imports: [ConfigModule.forRoot({
+        envFilePath: '.env',
+        isGlobal: true,
+      }), AppModule]
     }).compile();
 
     app = moduleRef.createNestApplication();
@@ -55,10 +40,10 @@ describe('Testimonials integration', () => {
     await app.init();
   });
   it('should run the app', async () => {
-        
-        const res = await request
-          .default(app.getHttpServer())
-          .get('/')
-          expect(res.status).toBe(404);
-      });
+
+    const res = await request
+      .default(app.getHttpServer())
+      .get('/')
+    expect(res.status).toBe(404);
+  });
 });

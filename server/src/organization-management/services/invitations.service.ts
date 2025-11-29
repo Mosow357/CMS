@@ -1,16 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Invitations } from "../entities/invitations.entity";
+import { Invitation } from "../entities/invitations.entity";
 import { Repository } from "typeorm";
 
 
 @Injectable()
 export class InvitationsService {
-    constructor(@InjectRepository(Invitations)
-        private categoriesRepository: Repository<Invitations>,){} 
+    constructor(@InjectRepository(Invitation)
+        private invitationRepository: Repository<Invitation>,){} 
     
-    async createInvitation(invitationData: Partial<Invitations>): Promise<Invitations> {
-        const invitation = this.categoriesRepository.create(invitationData);
-        return this.categoriesRepository.save(invitation);
+    async createInvitation(invitationData: Partial<Invitation>): Promise<Invitation> {
+        const invitation = this.invitationRepository.create(invitationData);
+        return this.invitationRepository.save(invitation);
+    }
+    async findByHashedToken(hashedToken: string): Promise<Invitation | null> {
+        return this.invitationRepository.findOne({ where: { token_hashed: hashedToken } });
     }
 }

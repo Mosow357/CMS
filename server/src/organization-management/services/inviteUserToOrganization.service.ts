@@ -7,6 +7,8 @@ import { UsersService } from "src/users/services/users.service";
 import { InvitationEmailTemplate } from "src/notifications/email-templates/invitation.template";
 import { InvitationsService } from "./invitations.service";
 import { createHash, randomBytes } from "crypto";
+import { EncoderService } from "src/common/services/encoder.service";
+import { OrganizationRole } from "src/common/types/userRole";
 
 @Injectable()
 export class inviteUserToOrganizationService {
@@ -15,7 +17,8 @@ export class inviteUserToOrganizationService {
         private readonly userOrganizationService: UserOrganizationService,
         private readonly userService: UsersService,
         private readonly invitationService: InvitationsService,
-        private readonly notificationService: NotificationsService
+        private readonly notificationService: NotificationsService,
+        private readonly encoderService: EncoderService,
     ) { }
 
     async execute(input: InviteUserToOrganizationDto) {
@@ -28,7 +31,7 @@ export class inviteUserToOrganizationService {
         const existsUserInOrg = await this.userOrganizationService.findUserOrganization(invitedUser.id, input.organizationId);
         if (existsUserInOrg) throw new ConflictException('User already member of the organization');
 
-        const { token, hashedToken } = this.generateToken();
+        const { token, hashedToken } = await this.generateToken();
 
         let notification: InvitationEmailTemplate = new InvitationEmailTemplate({
             organizationName: organization.name,
@@ -41,7 +44,7 @@ export class inviteUserToOrganizationService {
 
         await this.invitationService.createInvitation({
             organizationId: organization.id,
-            role_asigned: input.role,
+            role_asigned: input.role || OrganizationRole.EDITOR,
             expires_at: expiresAt,
             used_at: null,
             user_id: invitedUser.id,
@@ -51,9 +54,9 @@ export class inviteUserToOrganizationService {
         return this.notificationService.sendNotificationWithTemplate(notification);
     }
 
-    private generateToken() {
+    private async generateToken() {
         const token = randomBytes(32).toString('hex');
-        const hashedToken = createHash('sha256').update(token).digest('hex');
+        const hashedToken = await this.encoderService.encodeToken(token);
         return {hashedToken,token};
     }
 }
