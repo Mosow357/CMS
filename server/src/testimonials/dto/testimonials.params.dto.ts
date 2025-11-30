@@ -6,7 +6,7 @@ import { QueryParamsDto } from "src/common/dto/queryParams.dto";
 export class TestimonialsParamsDto extends QueryParamsDto {
   @ApiProperty({
     description: 'ID of the organization to get testimonials.',
-    example: 'org_12345',
+    example: '61dd833b-54df-407e-b9e7-b8e1a5484c8d',
     type: 'string',
   })
   @IsString()

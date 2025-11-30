@@ -30,7 +30,7 @@ export class QueryParamsDto {
     itemsPerPage?:number = 10
 
     @ApiProperty({
-        description: 'Items per page.',
+        description: 'Sort items by date.',
         example: 'ASC',
         type: 'string',
         default:'ASC'
