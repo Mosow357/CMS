@@ -16,7 +16,7 @@ export class OrganizationManagementController {
     }
     @Get('invite')
     @HttpCode(HttpStatus.OK)
-    async acceptInvitation(@Query() token:string) {
+    async acceptInvitation(@Query("token") token:string) {
         return this.acceptInvitationService.execute(token);
     }
 }

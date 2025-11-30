@@ -28,7 +28,7 @@ import { OrganizationManagementModule } from './organization-management/organiza
         if (isLocal) {
           return {
             type: 'sqlite',
-            database: ':memory:',
+            database: 'local.db',
             dropSchema: true,
             autoLoadEntities: true,
             synchronize: true,

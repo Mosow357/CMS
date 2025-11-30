@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "src/common/constant/constant";
 import { INVITATION_TEMPLATE_ID } from "../constants/templatesId";
 import { InvitationTemplateDto } from "../dto/invitationTemplate.dto";
 import { EmailNotificationBase } from "./emailNotificationBase";
@@ -14,7 +15,8 @@ export class InvitationEmailTemplate extends EmailNotificationBase{
         this.variables = {
             username: input.username,
             organizationName: input.organizationName,
-            token: input.token
+            token: input.token,
+            domain: API_BASE_URL
         };
     }
 }

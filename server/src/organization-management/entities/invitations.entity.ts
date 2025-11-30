@@ -4,11 +4,11 @@ import { Column, Entity, Index } from "typeorm";
 @Entity('invitations')
 export class Invitation extends BaseEntity {
     @Column()
-    user_id:string;
+    user_id: string;
 
     @Column()
     organizationId: string;
-    
+
     @Column()
     role_asigned: string;
 
@@ -19,7 +19,7 @@ export class Invitation extends BaseEntity {
     @Column()
     expires_at: Date;
 
-    @Column()
+    @Column({ type: 'datetime', nullable: true })
     used_at: Date | null;
 
 }

@@ -17,8 +17,7 @@ export class AcceptInvitationService {
   ) { }
 
   async execute(token: string) {
-    const hashedToken = await this.encoderService.encodeToken(token);
-    const invitation = await this.invitationsService.findByHashedToken(hashedToken);
+    const invitation = await this.invitationsService.findByHashedToken(token);
     if(!invitation) throw new NotFoundException('Invitation not found');
     
     const existsOrganization = await this.organizationsService.findOne(invitation.organizationId);
