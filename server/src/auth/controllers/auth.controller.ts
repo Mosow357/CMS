@@ -44,4 +44,14 @@ export class AuthController {
       success: true
     }
   }
+
+  @Get('confirm-email')
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  async confirmEmail(@Param('token') token: string){
+    await this.authService.confirmEmail(token);
+    return {
+      success: true
+    }
+  }
 }

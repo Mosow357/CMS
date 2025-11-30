@@ -31,7 +31,7 @@ export class inviteUserToOrganizationService {
         const existsUserInOrg = await this.userOrganizationService.findUserOrganization(invitedUser.id, input.organizationId);
         if (existsUserInOrg) throw new ConflictException('User already member of the organization');
 
-        const token = await this.generateToken();
+        const token = await this.encoderService.generateToken();
 
         let notification: InvitationEmailTemplate = new InvitationEmailTemplate({
             organizationName: organization.name,
@@ -52,9 +52,5 @@ export class inviteUserToOrganizationService {
         });
 
         return this.notificationService.sendNotificationWithTemplate(notification);
-    }
-
-    private async generateToken() {
-        return randomBytes(32).toString('hex');
     }
 }
