@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from "@nestjs/common";
 import { InviteUserToOrganizationDto } from "../dto/inviteUserToOrganization.dto";
 import { inviteUserToOrganizationService } from "../services/inviteUserToOrganization.service";
 import { AcceptInvitationService } from "../services/acceptInvitation.service";
@@ -10,10 +10,12 @@ export class OrganizationManagementController {
         private readonly acceptInvitationService:AcceptInvitationService
     ){}
     @Post('invite')
+    @HttpCode(HttpStatus.OK)
     async inviteUser(@Body() body:InviteUserToOrganizationDto) {
         return this.inviteUserToOrganization.execute(body);
     }
     @Get('invite')
+    @HttpCode(HttpStatus.OK)
     async acceptInvitation(@Query() token:string) {
         return this.acceptInvitationService.execute(token);
     }

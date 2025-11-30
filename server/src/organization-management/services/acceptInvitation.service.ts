@@ -4,6 +4,7 @@ import { EncoderService } from "src/common/services/encoder.service";
 import { OrganizationRole } from "src/common/types/userRole";
 import { UserOrganizationService } from "src/user_organization/services/userOrganization.service";
 import { OrganizationsService } from "src/organizations/services/organizations.service";
+import { UserOrganization } from "src/user_organization/entities/userOrganization.entity";
 
 @Injectable()
 export class AcceptInvitationService {
@@ -26,11 +27,14 @@ export class AcceptInvitationService {
     const existsUserInOrg = await this.userOrganizationService.findUserOrganization(invitation.user_id, invitation.organizationId);
     if (existsUserInOrg) throw new ConflictException('User already member of the organization');
 
-    const userOrganization = this.userOrganizationService.create({
+    const userOrganization = await this.userOrganizationService.create({
       userId: invitation.user_id,
       organizationId: invitation.organizationId,
       role: invitation.role_asigned as OrganizationRole,
     });
+    invitation.used_at = new Date();
+    await this.invitationsService.updateInvitation(invitation);
+
     return userOrganization;
   }
 }

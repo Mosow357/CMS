@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Invitation } from "../entities/invitations.entity";
-import { Repository } from "typeorm";
+import { Repository, UpdateResult } from "typeorm";
 
 
 @Injectable()
@@ -15,5 +15,8 @@ export class InvitationsService {
     }
     async findByHashedToken(hashedToken: string): Promise<Invitation | null> {
         return this.invitationRepository.findOne({ where: { token_hashed: hashedToken } });
+    }
+    async updateInvitation(invitation: Invitation): Promise<UpdateResult> {
+        return await this.invitationRepository.update(invitation.id,invitation);
     }
 }

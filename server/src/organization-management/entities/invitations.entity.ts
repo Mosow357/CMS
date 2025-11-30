@@ -1,5 +1,5 @@
 import { BaseEntity } from "src/common/entities/base.entity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, Index } from "typeorm";
 
 @Entity('invitations')
 export class Invitation extends BaseEntity {
@@ -12,6 +12,7 @@ export class Invitation extends BaseEntity {
     @Column()
     role_asigned: string;
 
+    @Index()
     @Column()
     token_hashed: string;
 
@@ -20,4 +21,5 @@ export class Invitation extends BaseEntity {
 
     @Column()
     used_at: Date | null;
+
 }
