@@ -11,6 +11,7 @@ import { AuthGuard } from './common/guards/auth.guard';
 import { UserOrganizationModule } from './user_organization/userOrganization.module';
 import { OrganizationModule } from './organizations/organitations.module';
 import { MediaStorageModule } from './media-storage/mediaStorage.module';
+import { OrganizationManagementModule } from './organization-management/organizationManagement.module';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { MediaStorageModule } from './media-storage/mediaStorage.module';
         if (isLocal) {
           return {
             type: 'sqlite',
-            database: ':memory:',
+            database: 'local.db',
             dropSchema: true,
             autoLoadEntities: true,
             synchronize: true,
@@ -55,7 +56,8 @@ import { MediaStorageModule } from './media-storage/mediaStorage.module';
     AuthModule,
     UserOrganizationModule,
     OrganizationModule,
-    MediaStorageModule
+    MediaStorageModule,
+    OrganizationManagementModule
   ],
   providers: [
     {
