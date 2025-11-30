@@ -16,7 +16,7 @@ export class InvitationEmailTemplate extends EmailNotificationBase{
             username: input.username,
             organizationName: input.organizationName,
             token: input.token,
-            domain: API_BASE_URL
+            domain: API_BASE_URL + "organization-management/invite"
         };
     }
 }
