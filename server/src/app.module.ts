@@ -12,6 +12,7 @@ import { UserOrganizationModule } from './user_organization/userOrganization.mod
 import { OrganizationModule } from './organizations/organitations.module';
 import { MediaStorageModule } from './media-storage/mediaStorage.module';
 import { OrganizationManagementModule } from './organization-management/organizationManagement.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -57,7 +58,8 @@ import { OrganizationManagementModule } from './organization-management/organiza
     UserOrganizationModule,
     OrganizationModule,
     MediaStorageModule,
-    OrganizationManagementModule
+    OrganizationManagementModule,
+    SeedModule
   ],
   providers: [
     {

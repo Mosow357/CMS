@@ -1,11 +1,27 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsUUID, IsOptional, IsArray, IsEnum, MinLength, MaxLength, IsInt, Min, Max } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, IsOptional, IsArray, IsEnum, MinLength, MaxLength, IsInt, Min, Max, IsEmail } from 'class-validator';
 import { MediaType } from '../enums/mediaType';
 import { TestimonialStatus } from '../enums/testimonialStatus';
 import { Type } from 'class-transformer';
 
 export class CreateTestimonialDto {
-  
+
+  @ApiPropertyOptional({
+    description: 'Email of the client submitting the testimonial.',
+    example: "client_1@example.com"
+  })
+  @IsNotEmpty({ message: 'Client email is required' })
+  @IsEmail({}, { message: 'Client email must be a valid email address' })
+  client_email: string;
+  @ApiProperty({
+    description: 'Name of the client submitting the testimonial.',
+    example: 'John Doe',
+    type: 'string',
+  })
+  @IsString()
+  @IsNotEmpty({ message: 'Client name is required' })
+  client_name: string;
+
   @ApiProperty({
     description: 'ID of the organization submitting the testimonial.',
     example: 'org_12345',
