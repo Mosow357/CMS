@@ -14,7 +14,7 @@ export class ConfirmEmailTemplate extends EmailNotificationBase{
         this.variables = {
             username: username,
             token: token,
-            domain: API_BASE_URL
+            domain: API_BASE_URL + "/auth/confirm-email"
         };
     }
 }
