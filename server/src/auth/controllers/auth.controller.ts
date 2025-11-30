@@ -1,5 +1,5 @@
 
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Redirect, Res } from '@nestjs/common';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { AuthService } from '../services/auth.service';  
@@ -8,6 +8,7 @@ import { ChangePasswordDto } from '../dto/changePassword.dto';
 import { Public, RolesG } from 'src/common/guards/roles.decorator';
 import { RequestUser } from 'src/common/types/request-user'; 
 import { GetUser } from 'src/common/decorators/get-user.decorator';
+import { FRONT_BASE_URL } from 'src/common/constant/constant';
 
 @Controller('auth')
 export class AuthController {
@@ -45,12 +46,12 @@ export class AuthController {
   }
 
   @Get('confirm-email')
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.FOUND)
+  @Redirect(FRONT_BASE_URL+ "/email-confirmed", 302)
   @Public()
-  async confirmEmail(@Param('token') token: string){
-    await this.authService.confirmEmail(token);
-    return {
-      success: true
-    }
+  async confirmEmail(@Param('token') token: string, @Res() res: Response){
+    let success = await this.authService.confirmEmail(token);
+    if (!success)
+      return {url: `${FRONT_BASE_URL}/email-confirmation-failed`};
   }
 }

@@ -121,5 +121,6 @@ export class AuthService {
     user.email_confirmed = true;
     await this.userService.update(user.id,user);
     await this.emailVerificationService.update(emailVerification);
+    return true
   }
 }
