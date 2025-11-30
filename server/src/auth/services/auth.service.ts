@@ -62,8 +62,7 @@ export class AuthService {
     return {
       ...userWithoutPassword,
       token: payload,
-      tokenExpiredAt: expiredAt,
-      organizations: user.userOrganizations
+      tokenExpiredAt: expiredAt
     };
   }
 

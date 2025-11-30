@@ -66,7 +66,7 @@ export class UsersService {
         { username: username },
         { email: username },
       ],
-      relations: { userOrganizations: { user: true, organization: true } },
+      relations: { userOrganizations: { organization: true } },
       select: ['id', 'createdAt', 'updatedAt', 'email', 'username', 'password', 'name', 'userOrganizations'],
     });
   }

@@ -7,7 +7,6 @@ import { RegisterResponseDto } from '../dto/auth-response.dto';
 import { ChangePasswordDto } from '../dto/changePassword.dto';
 import { Public, RolesG } from 'src/common/guards/roles.decorator';
 import { RequestUser } from 'src/common/types/request-user'; 
-import { OrganizationRole } from 'src/common/types/userRole';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 
 @Controller('auth')

@@ -13,7 +13,7 @@ import { UsersModule } from "src/users/users.module";
 import { Repository } from "typeorm";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User, Organization, UserOrganization,Testimonial,Category]), UsersModule],
+    imports: [TypeOrmModule.forFeature([User, Organization, UserOrganization, Testimonial, Category]), UsersModule],
 })
 export class SeedModule implements OnModuleInit {
     constructor(
@@ -33,34 +33,84 @@ export class SeedModule implements OnModuleInit {
         //create categories
         await this.createCategories(5);
         //cms user
-        let user = await this.userService.create({ email: `cms391547@gmail.com`, password: "123456789", username: `cms`, name: `Test CMS user` });
-        let org = await this.orgRepo.save({ name: `CMS Org`, description: `organization of CMS` });
-        await this.userOrgRepo.save({ organizationId: org.id, userId: user.id, role: OrganizationRole.ADMINISTRATOR });
+        let user = await this.userService.findByUsernameOrEmail(`cms391547@gmail.com`);
+        if (!user) {
+            user = await this.userService.create({
+                email: `cms391547@gmail.com`,
+                password: "password123",
+                username: `cms`,
+                name: `Test CMS user`
+            });
+        }
 
         // Create 5 random users
         await this.createUserWithoutOrg(5);
-        await this.createUsersWithOrg(5);
+        await this.createUsersWithOneOrg(5);
+        await this.createUsersWithManyOrgs(5);
     }
 
     async createUserWithoutOrg(count: number) {
         for (let i = 0; i < count; i++) {
-            let user = await this.userService.create({ email: `test${i + 1}@test.com`, password: "123456789", username: `test_username_${i + 1}`, name: `Test User ${i + 1}` });
+            const email = `test${i + 1}@test.com`;
+            const username = `test_username_${i + 1}`;
+
+            let user = await this.userService.findByUsernameOrEmail(email);
+            if (!user) {
+                await this.userService.create({ email, password: "password123", username, name: `Test User ${i + 1}` });
+            }
         }
     }
-    async createUsersWithOrg(count: number) {
+    async createUsersWithOneOrg(count: number) {
         for (let i = 0; i < count; i++) {
-            let user = await this.userService.create({ email: `userwithorg${i + 1}@test.com`, password: "123456789", username: `test_username_userwithorg_${i + 1}`, name: `Test Userwithorg ${i + 1}` });
-            let org = await this.orgRepo.save({ name: `Test Org ${i + 1}`, description: `organization ${i + 1} description` });
-            let category = await this.categoryRepo.findOne({where: {name: "Category 1"}})
-            await this.createTestimonials(3, org,category?.id || '');
+            const email = `userwithorg${i + 1}@test.com`;
+            const username = `test_username_userwithorg_${i + 1}`;
+
+            let user = await this.userService.findByUsernameOrEmail(email);
+            if (!user) {
+                user = await this.userService.create({ email, password: "password123", username, name: `Test Userwithorg ${i + 1}` });
+            } let org = await this.orgRepo.findOne({ where: { name: `CMS Org` } });
+            if (!org) {
+                org = await this.orgRepo.save({ name: `CMS Org`, description: `organization of CMS` });
+            }
+            let category = await this.categoryRepo.findOne({ where: { name: "Category 1" } })
+            await this.createTestimonials(3, org, category?.id || '');
             await this.userOrgRepo.save({ organizationId: org.id, userId: user.id, role: OrganizationRole.ADMINISTRATOR });
         }
     }
 
-    async createTestimonials(count: number, organization:Organization,categoryId:string) {
+    async createUsersWithManyOrgs(count: number) {
+        for (let i = 0; i < count; i++) {
+            const email = `userwithManyOrg${i + 1}@test.com`;
+            const username = `test_username_userwithmanyOrg_${i + 1}`;
+
+            let user = await this.userService.findByUsernameOrEmail(email);
+            if (!user) {
+                user = await this.userService.create({ email, password: "password123", username, name: `Test UserwithManyorg ${i + 1}` });
+            }
+            for (let j = 0; j < 2; j++) {
+                let orgMany = await this.orgRepo.findOne({ where: { name: `CMS Many Org ${j + 1}` } });
+                if (!orgMany) {
+                    orgMany = await this.orgRepo.save({ name: `CMS Many Org ${j + 100}`, description: `organization of CMS ${j + 100}` });
+                }
+                let categoryMany = await this.categoryRepo.findOne({ where: { name: "Category 1" } })
+                await this.createTestimonials(2, orgMany, categoryMany?.id || '');
+                await this.userOrgRepo.save({ organizationId: orgMany.id, userId: user.id, role: OrganizationRole.EDITOR });
+                let org = await this.orgRepo.findOne({ where: { name: `CMS Org ${i + 1}` } });
+                if (!org) {
+                    org = await this.orgRepo.save({ name: `CMS Org ${i + 1}`, description: `organization of CMS ${i + 1}` });
+                }
+                let category = await this.categoryRepo.findOne({ where: { name: "Category 1" } })
+                await this.createTestimonials(3, org, category?.id || '');
+                await this.userOrgRepo.save({ organizationId: org.id, userId: user.id, role: OrganizationRole.ADMINISTRATOR });
+            }
+
+        }
+    }
+
+    async createTestimonials(count: number, organization: Organization, categoryId: string) {
         for (let i = 0; i < count; i++) {
             let userNumber = i + 1;
-            let testimonial:CreateTestimonialDto = {
+            let testimonial: CreateTestimonialDto = {
                 category_id: categoryId,
                 content: `This is testimonial content for organization ${organization.name}`,
                 media_type: MediaType.TEXT,
@@ -70,13 +120,20 @@ export class SeedModule implements OnModuleInit {
                 client_email: `client_${userNumber}@example.com`,
                 client_name: `Client Name ${userNumber}`,
             }
-            await this.testimonialRepo.save(testimonial);
+            const exists = await this.testimonialRepo.findOne({
+                where: { title: `Testimonial Title ${userNumber}`, organitation_id: organization.id }
+            });
+            if (!exists) await this.testimonialRepo.save(testimonial);
         }
     }
     async createCategories(count: number) {
         for (let i = 0; i < count; i++) {
-            let category = this.categoryRepo.create({ name: `Category ${i + 1}`, description: `Description for category ${i + 1}` });
-            await this.categoryRepo.save(category);
+            const name = `Category ${i + 1}`;
+            const exists = await this.categoryRepo.findOne({ where: { name } });
+
+            if (!exists) {
+                await this.categoryRepo.save({ name, description: `Description for category ${i + 1}` });
+            }
         }
     }
 }
