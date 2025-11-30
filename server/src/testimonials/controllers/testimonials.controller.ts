@@ -22,6 +22,8 @@ import { CreateTestimonialsService } from '../services/createTestimonial.service
 import { FileSizeValidationPipe } from 'src/common/pipes/fileSizeValidationPipe';
 import { Public } from 'src/common/guards/roles.decorator';
 import { MediaType } from '../enums/mediaType';
+import { TestimonialsParamsDto } from '../dto/testimonials.params.dto';
+import { ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 
 @Controller('testimonials')
 export class TestimonialsController {
@@ -30,6 +32,8 @@ export class TestimonialsController {
   @Post()
   @Public()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a testimonial with or without media attachment' })
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   create(@Body() createTestimonialDto: CreateTestimonialDto,@UploadedFile(new FileSizeValidationPipe()) file?: Express.Multer.File) {
     if(createTestimonialDto.media_type == MediaType.TEXT || !file)
@@ -39,17 +43,11 @@ export class TestimonialsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Retrieve a list of testimonials with optional filtering and pagination' })
+  @ApiBearerAuth()
   findAll(
-    @Query() param:QueryParamsDto,
-    @Query('organitationId') organitationId?: string,
-    @Query('categoryId') categoryId?: string,
+    @Query() param:TestimonialsParamsDto,
   ) {
-    if (organitationId) {
-      return this.testimonialsService.findByOrganitation(organitationId);
-    }
-    if (categoryId) {
-      return this.testimonialsService.findByCategory(categoryId);
-    }
     return this.testimonialsService.findAll(param);
   }
 
