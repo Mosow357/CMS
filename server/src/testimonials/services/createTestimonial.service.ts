@@ -23,6 +23,14 @@ export class CreateTestimonialsService {
     fileStream: Stream.Readable,
     filename: string,
   ): Promise<Testimonial> {
+    const org = await this.organizationService.findOne(createTestimonialDto.organitation_id);
+    if (!org) {
+      throw new NotFoundException(`Organization ${createTestimonialDto.organitation_id} does not exist`);
+    }
+    const category = await this.categoryService.findOne(createTestimonialDto.category_id);
+    if (!category) {
+      throw new NotFoundException(`Category ${createTestimonialDto.category_id} does not exist`);
+    }
     const testimonial =
       this.testimonialsRepository.create(createTestimonialDto);
     testimonial.status = "pending"
