@@ -8,6 +8,8 @@ import { MulterModule } from '@nestjs/platform-express';
 import { CreateTestimonialsService } from './services/createTestimonial.service';
 import { MediaStorageService } from 'src/media-storage/services/mediaStorage.service';
 import { CloudinaryProviderImpl } from 'src/media-storage/adapters/cloudinaryProviderImpl';
+import { CategoriesModule } from 'src/categories/categories.module';
+import { OrganizationModule } from 'src/organizations/organitations.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { CloudinaryProviderImpl } from 'src/media-storage/adapters/cloudinaryPro
       dest: './upload',
     }),
     MediaStorageModule,
+    CategoriesModule,
+    OrganizationModule
   ],
   controllers: [TestimonialsController],
   providers: [TestimonialsService,MediaStorageService,CreateTestimonialsService, CloudinaryProviderImpl],

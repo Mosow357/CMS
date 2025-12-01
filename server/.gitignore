@@ -3,6 +3,7 @@ local.db
 /dist
 /node_modules
 /build
+/upload
 
 # Logs
 logs

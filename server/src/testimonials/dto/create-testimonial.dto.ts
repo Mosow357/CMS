@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsUUID, IsOptional, IsArray, IsEnum, MinLength, MaxLength, IsInt, Min, Max, IsEmail } from 'class-validator';
 import { MediaType } from '../enums/mediaType';
 import { TestimonialStatus } from '../enums/testimonialStatus';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class CreateTestimonialDto {
 
@@ -88,16 +88,17 @@ export class CreateTestimonialDto {
   stars_rating?: number;
 
   @ApiPropertyOptional({
-    description: 'List of tag IDs associated with the testimonial.',
-    example: [
-      'ec97b2a3-5b9e-4c11-8ec9-2f7b4e9af8d4',
-      '57c4c242-9f67-4d7a-b122-33cf10c1e3d0'
-    ],
-    isArray: true,
-    type: 'string',
-  })
+  type: 'array',
+  items: { type: 'string', format: 'uuid' },
+  example: ['ec97b2a3-5b9e-4c11-8ec9-2f7b4e9af8d4','57c4c242-9f67-4d7a-b122-33cf10c1e3d0']
+})
+@Transform(({ value }) => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  return value.split(',').map(v => v.trim());
+})
   @IsOptional()
   @IsArray({ message: 'Tags must be an array' })
   @IsUUID('4', { each: true, message: 'Each tag must be a valid UUID' })
-  tagIds?: string[];
+  tagIds?: string[] = [];
 }
