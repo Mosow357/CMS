@@ -6,14 +6,19 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { EncoderService } from './services/encoder.service';
+import { CommonModule } from 'src/common/common.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
+import { EmailVerificationService } from './services/emailVerification.service';
+import { EmailVerification } from './entities/emailVerification';
 
 @Module({
-  providers: [AuthService,EncoderService],
+  providers: [AuthService,EmailVerificationService],
   controllers: [AuthController],
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, EmailVerification]),
     UsersModule,
+    CommonModule,
+    NotificationsModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
