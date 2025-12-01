@@ -89,9 +89,28 @@ export function SpaceForm() {
 
     try {
       setIsSubmitting(true)
-      // Placeholder: replace with actual mutation/request when ready
-      await new Promise((resolve) => setTimeout(resolve, 800))
-      console.info("Space/company payload", formData)
+
+      // Importar dinámicamente el action
+      const { createOrganizationAction } = await import('@/lib/actions/organizations')
+
+      // Crear organización
+      const result = await createOrganizationAction({
+        name: formData.name,
+        description: formData.description,
+        questionText: 'What did you think of this experience?', // Default
+      })
+
+      if (result.success) {
+        console.log('Organización creada exitosamente:', result.data)
+        // Redirigir al dashboard
+        window.location.href = '/dashboard'
+      } else {
+        console.error('Error al crear organización:', result.error)
+        alert(result.error || 'Error al crear organización')
+      }
+    } catch (error) {
+      console.error('Error inesperado:', error)
+      alert('Error inesperado al crear organización')
     } finally {
       setIsSubmitting(false)
     }
@@ -240,11 +259,11 @@ function Stepper({ currentStep }: StepperProps) {
                 "flex size-8 items-center justify-center rounded-full border text-sm font-semibold transition-colors",
                 isCompleted && "border-primary bg-primary text-primary-foreground",
                 isActive &&
-                  !isCompleted &&
-                  "border-primary text-primary bg-primary/10",
                 !isCompleted &&
-                  !isActive &&
-                  "border-muted-foreground/40 text-muted-foreground"
+                "border-primary text-primary bg-primary/10",
+                !isCompleted &&
+                !isActive &&
+                "border-muted-foreground/40 text-muted-foreground"
               )}
             >
               {index + 1}

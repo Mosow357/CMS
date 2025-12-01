@@ -3,7 +3,28 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { apiClient } from '@/lib/api/client'
+
+// Tipo completo de Organization
+interface Organization {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+  name: string
+  description: string
+  logoUrl: string | null
+  questionText: string | null
+}
+
+// Tipo completo de UserOrganization
+interface UserOrganization {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+  userId: string
+  organizationId: string
+  role: 'admin' | 'editor'
+  organization: Organization
+}
 
 // Tipo que devuelve el backend en el login
 interface RequestUser {
@@ -12,10 +33,10 @@ interface RequestUser {
   updatedAt: Date
   email: string
   username: string
-  role: string
   name: string
   token: string
   tokenExpiredAt: Date
+  userOrganizations: UserOrganization[]
 }
 
 export interface LoginCredentials {
@@ -42,7 +63,6 @@ export interface AuthResponse {
     email: string
     name?: string
     lastname?: string
-    role: string
   }
 }
 
@@ -63,17 +83,37 @@ export async function loginAction(
   try {
     console.log('🔐 Intentando login con:', { username: credentials.username })
 
-    const response = await apiClient.auth.authControllerLogin(
-      { username: credentials.username, password: credentials.password },
-      { format: 'json' }
-    )
-    const userData = response.data as unknown as RequestUser
+    // Usar fetch directamente para evitar problemas con el API client
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: credentials.username,
+        password: credentials.password,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || 'Error al iniciar sesión')
+    }
+
+    const userData = (await response.json()) as RequestUser
+
+    if (!userData || !userData.id) {
+      console.error('❌ Datos de usuario inválidos:', userData)
+      throw new Error('Respuesta inválida del servidor')
+    }
 
     console.log('👤 Datos del usuario procesados:', {
       id: userData.id,
       username: userData.username,
-      role: userData.role,
-      hasToken: !!userData.token
+      hasToken: !!userData.token,
+      hasOrganizations: !!userData.userOrganizations,
+      orgCount: userData.userOrganizations?.length || 0,
     })
 
     const cookieOptions = {
@@ -95,6 +135,26 @@ export async function loginAction(
     const { token, tokenExpiredAt, ...userInfo } = userData
     cookieStore.set('user', JSON.stringify(userInfo), cookieOptions)
 
+    // Guardar organizaciones completas en cookies
+    cookieStore.set(
+      'user_organizations',
+      JSON.stringify(userData.userOrganizations || []),
+      cookieOptions
+    )
+
+    // Seleccionar organización por defecto (la primera)
+    if (userData.userOrganizations && userData.userOrganizations.length > 0) {
+      const defaultOrg = userData.userOrganizations[0].organization
+      cookieStore.set(
+        'current_organization',
+        JSON.stringify(defaultOrg),
+        cookieOptions
+      )
+      console.log('🏢 Organización por defecto:', defaultOrg.name)
+    } else {
+      console.log('⚠️ Usuario sin organizaciones')
+    }
+
     console.log('🍪 Cookies guardadas correctamente')
 
     // Revalida para limpiar cualquier dato de sesión cacheado
@@ -105,23 +165,22 @@ export async function loginAction(
 
     console.log('🎯 Redirigiendo a:', redirectPath)
 
-    //debe dirigir a la ruta principal
     return {
       success: true,
       data: {
         token: userData.token,
         expiredAt: userData.tokenExpiredAt,
         user: userInfo,
-        redirectPath, // Incluye la ruta de redirección en la respuesta
+        redirectPath,
       },
     }
   } catch (error: any) {
-    console.error('Login error:', error)
+    console.error('❌ Login error:', error)
 
     // Extraer mensaje de error de la respuesta
     let errorMessage = 'Error de conexión. Por favor intenta nuevamente.'
-    if (error?.error?.message) {
-      errorMessage = error.error.message
+    if (error?.message) {
+      errorMessage = error.message
     }
 
     return {
@@ -135,12 +194,52 @@ export async function registerAction(
   data: RegisterData
 ): Promise<ActionResponse<RegisterResponse>> {
   try {
-    const response = await apiClient.auth.authControllerRegister(
-      data as any,
-      { format: 'json' }
-    )
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
-    const result = response.data as unknown as RegisterResponse
+    // Concatenar name y lastname en un solo campo
+    const fullName = data.lastname
+      ? `${data.name} ${data.lastname}`.trim()
+      : data.name || ''
+
+    // Preparar datos sin lastname
+    const requestData = {
+      username: data.username,
+      email: data.email,
+      password: data.password,
+      name: fullName,
+    }
+
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    })
+
+    const contentType = response.headers.get('content-type')
+
+    if (!response.ok) {
+      // Intentar parsear como JSON si es posible
+      if (contentType?.includes('application/json')) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Backend error:', errorData)
+        throw new Error(errorData.message || 'Error al registrar usuario')
+      } else {
+        const errorText = await response.text()
+        console.error('Error response (not JSON):', errorText.substring(0, 200))
+        throw new Error('Error al registrar usuario')
+      }
+    }
+
+    // Verificar que la respuesta sea JSON
+    if (!contentType?.includes('application/json')) {
+      const responseText = await response.text()
+      console.error('Expected JSON but got:', responseText.substring(0, 200))
+      throw new Error('Respuesta inválida del servidor')
+    }
+
+    const result = (await response.json()) as RegisterResponse
 
     return {
       success: true,
@@ -149,10 +248,9 @@ export async function registerAction(
   } catch (error: any) {
     console.error('Register error:', error)
 
-    // Extraer mensaje de error de la respuesta
     let errorMessage = 'Error de conexión. Por favor intenta nuevamente.'
-    if (error?.error?.message) {
-      errorMessage = error.error.message
+    if (error?.message) {
+      errorMessage = error.message
     }
 
     return {
@@ -166,6 +264,8 @@ export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies()
   cookieStore.delete('auth_token')
   cookieStore.delete('user')
+  cookieStore.delete('user_organizations')
+  cookieStore.delete('current_organization')
 
   // Revalida para limpiar caché de sesión
   revalidatePath('/', 'layout')
