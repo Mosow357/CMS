@@ -11,7 +11,7 @@ export class TestimonialsParamsDto extends QueryParamsDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'Organization ID is required' })
-  organitationId?: string;
+  organitationId: string;
 
   @ApiPropertyOptional({
     description: 'Status to filter testimonials (e.g., approved, pending, rejected,published).',

@@ -4,15 +4,22 @@ import { Repository } from 'typeorm';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
 import { TestimonialsParamsDto } from '../dto/testimonials.params.dto';
+import { OrganizationsService } from 'src/organizations/services/organizations.service';
+import { UserOrganizationService } from 'src/user_organization/services/userOrganization.service';
 
 @Injectable()
 export class TestimonialsService {
   constructor(
     @InjectRepository(Testimonial)
     private testimonialsRepository: Repository<Testimonial>,
+    private readonly userOrganization:UserOrganizationService
   ) {}
 
-  async findAll(filters:TestimonialsParamsDto): Promise<Testimonial[]> {
+  async findAll(filters:TestimonialsParamsDto,userId:string): Promise<Testimonial[]> {
+    let org = await this.userOrganization.findUserOrganization(userId,filters.organitationId);
+    if(!org){
+      throw new NotFoundException(`User is not part of the organization ${filters.organitationId}`);
+    }
     const { page = 1, itemsPerPage = 20, sort = 'ASC' } = filters;
     const limit = itemsPerPage;
     const offset = (page - 1) * itemsPerPage;

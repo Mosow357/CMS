@@ -6,6 +6,7 @@ import { Organization } from "src/organizations/entities/organization.entity";
 import { CreateTestimonialDto } from "src/testimonials/dto/create-testimonial.dto";
 import { Testimonial } from "src/testimonials/entities/testimonial.entity";
 import { MediaType } from "src/testimonials/enums/mediaType";
+import { TestimonialStatus } from "src/testimonials/enums/testimonialStatus";
 import { UserOrganization } from "src/user_organization/entities/userOrganization.entity";
 import { User } from "src/users/entities/user.entity";
 import { UsersService } from "src/users/services/users.service";
@@ -44,9 +45,9 @@ export class SeedModule implements OnModuleInit {
         }
 
         // Create 5 random users
-        await this.createUserWithoutOrg(5);
-        await this.createUsersWithOneOrg(5);
-        await this.createUsersWithManyOrgs(5);
+        await this.createUserWithoutOrg(10);
+        await this.createUsersWithOneOrg(10);
+        await this.createUsersWithManyOrgs(10);
     }
 
     async createUserWithoutOrg(count: number) {
@@ -93,14 +94,14 @@ export class SeedModule implements OnModuleInit {
                     orgMany = await this.orgRepo.save({ name: `CMS Many Org ${j + 100}`, description: `organization of CMS ${j + 100}` });
                 }
                 let categoryMany = await this.categoryRepo.findOne({ where: { name: "Category 1" } })
-                await this.createTestimonials(2, orgMany, categoryMany?.id || '');
+                await this.createTestimonials(10, orgMany, categoryMany?.id || '');
                 await this.userOrgRepo.save({ organizationId: orgMany.id, userId: user.id, role: OrganizationRole.EDITOR });
                 let org = await this.orgRepo.findOne({ where: { name: `CMS Org ${i + 1}` } });
                 if (!org) {
                     org = await this.orgRepo.save({ name: `CMS Org ${i + 1}`, description: `organization of CMS ${i + 1}` });
                 }
                 let category = await this.categoryRepo.findOne({ where: { name: "Category 1" } })
-                await this.createTestimonials(3, org, category?.id || '');
+                await this.createTestimonials(10, org, category?.id || '');
                 await this.userOrgRepo.save({ organizationId: org.id, userId: user.id, role: OrganizationRole.ADMINISTRATOR });
             }
 
@@ -123,7 +124,8 @@ export class SeedModule implements OnModuleInit {
             const exists = await this.testimonialRepo.findOne({
                 where: { title: `Testimonial Title ${userNumber}`, organitation_id: organization.id }
             });
-            if (!exists) await this.testimonialRepo.save(testimonial);
+
+            if (!exists) await this.testimonialRepo.save({ ...testimonial, status: this.randomStatus() });
         }
     }
     async createCategories(count: number) {
@@ -135,5 +137,10 @@ export class SeedModule implements OnModuleInit {
                 await this.categoryRepo.save({ name, description: `Description for category ${i + 1}` });
             }
         }
+    }
+    private randomStatus(): TestimonialStatus {
+        const values = Object.values(TestimonialStatus);
+        const index = Math.floor(Math.random() * values.length);
+        return values[index] as TestimonialStatus;
     }
 }

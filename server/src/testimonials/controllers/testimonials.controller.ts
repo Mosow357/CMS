@@ -28,6 +28,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation } from
 import { Testimonial } from '../entities/testimonial.entity';
 import { TestimonialResponseDto } from '../dto/testimonialResponse.dto';
 import { ApiFileWithDto } from '../decorators/createTestimonialsDto.decorator';
+import { GetUser } from 'src/common/decorators/get-user.decorator';
 
 @Controller('testimonials')
 export class TestimonialsController {
@@ -62,8 +63,9 @@ export class TestimonialsController {
   })
   findAll(
     @Query() param: TestimonialsParamsDto,
+    @GetUser() user
   ): Promise<Testimonial[]> {
-    return this.testimonialsService.findAll(param);
+    return this.testimonialsService.findAll(param,user.id);
   }
 
   @Get(':id')
