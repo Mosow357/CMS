@@ -23,8 +23,10 @@ import { FileSizeValidationPipe } from 'src/common/pipes/fileSizeValidationPipe'
 import { Public } from 'src/common/guards/roles.decorator';
 import { MediaType } from '../enums/mediaType';
 import { TestimonialsParamsDto } from '../dto/testimonials.params.dto';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { ApiFileWithDto } from '../decorators/createTestimonialsDto.decorator';
+import { Testimonial } from '../entities/testimonial.entity';
+import { TestimonialResponseDto } from '../dto/testimonialResponse.dto';
 
 @Controller('testimonials')
 export class TestimonialsController {
@@ -50,9 +52,14 @@ export class TestimonialsController {
   @ApiBearerAuth('Authorization')
   @ApiOperation({ summary: 'Retrieve a list of testimonials with optional filtering and pagination' })
   @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: TestimonialResponseDto,
+    isArray: true,
+  })
   findAll(
-    @Query() param:TestimonialsParamsDto,
-  ) {
+    @Query() param: TestimonialsParamsDto,
+  ): Promise<Testimonial[]> {
     return this.testimonialsService.findAll(param);
   }
 
