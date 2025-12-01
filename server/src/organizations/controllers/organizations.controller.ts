@@ -18,12 +18,14 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { AddUserOrganizationDto } from '../dto/add-userOrganiztion.dto';
 import { ChangeRoleDto } from '../dto/update-userOrganiztion.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('organizations')
 export class organizationsController {
   constructor(private readonly organizationsService: OrganizationsService) { }
 
   @Post()
+  @ApiBearerAuth('Authorization')
   create(
     @Body() createorganizationDto: CreateOrganizationDto,
     @GetUser() user:User
@@ -32,16 +34,19 @@ export class organizationsController {
   }
 
   @Get()
+  @ApiBearerAuth('Authorization')
   findUserOrganizations(@GetUser() user: User) {
     return this.organizationsService.findUserOrganizations(user.id);
   }
 
   @Get(':id')
+  @ApiBearerAuth('Authorization')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.organizationsService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiBearerAuth('Authorization')
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateorganizationDto: UpdateOrganizationDto,
@@ -50,12 +55,14 @@ export class organizationsController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth('Authorization')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.organizationsService.remove(id);
   }
 
   //? ====================== USER ORGANIZATION =====================
   @Post(':orgId/users')
+  @ApiBearerAuth('Authorization')
   async addUserToOrganization(
     @Param('orgId') orgId: string,
     @Body() dto: AddUserOrganizationDto,
@@ -65,6 +72,7 @@ export class organizationsController {
   }
 
   @Patch(':orgId/users/:userId/role')
+  @ApiBearerAuth('Authorization')
   @HttpCode(HttpStatus.NO_CONTENT)
   async changeUserRole(
     @Param('orgId') orgId: string,
@@ -76,6 +84,7 @@ export class organizationsController {
   }
   
   @Delete(':orgId/users/:userId')
+  @ApiBearerAuth('Authorization')
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeUserFromOrganization(
     @Param('orgId') orgId: string,

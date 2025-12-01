@@ -66,11 +66,12 @@ export class CreateTestimonialDto {
     description: 'Type of media attached to the testimonial.',
     example: MediaType.TEXT,
     enum: MediaType,
-    nullable: true,
+    nullable: false,
+    default: MediaType.TEXT,
   })
-  @IsOptional()
-  @IsEnum(MediaType, { message: 'Media type must be: image, video or audio' })
-  media_type: MediaType;
+  @IsNotEmpty({ message: 'Media type cannot be empty if provided' })
+  @IsEnum(MediaType, { message: 'Media type must be: image or video' })
+  media_type: MediaType = MediaType.TEXT;
 
   @ApiPropertyOptional({
     description: 'Star rating for the testimonial. Must be an integer between 1 and 5.',

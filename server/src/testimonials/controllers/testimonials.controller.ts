@@ -23,7 +23,8 @@ import { FileSizeValidationPipe } from 'src/common/pipes/fileSizeValidationPipe'
 import { Public } from 'src/common/guards/roles.decorator';
 import { MediaType } from '../enums/mediaType';
 import { TestimonialsParamsDto } from '../dto/testimonials.params.dto';
-import { ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { ApiFileWithDto } from '../decorators/createTestimonialsDto.decorator';
 
 @Controller('testimonials')
 export class TestimonialsController {
@@ -35,14 +36,18 @@ export class TestimonialsController {
   @ApiOperation({ summary: 'Create a testimonial with or without media attachment' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
-  create(@Body() createTestimonialDto: CreateTestimonialDto,@UploadedFile(new FileSizeValidationPipe()) file?: Express.Multer.File) {
-    if(createTestimonialDto.media_type == MediaType.TEXT || !file)
+  @ApiFileWithDto(CreateTestimonialDto)
+  create(@Body() createTestimonialDto: CreateTestimonialDto, @UploadedFile(new FileSizeValidationPipe()) file?: Express.Multer.File) {
+    if (createTestimonialDto.media_type == MediaType.TEXT || !file)
       return this.createTestimonialService.createTestimonial(createTestimonialDto);
 
     return this.createTestimonialService.createTestimonialWithMedia(createTestimonialDto, file.stream, file.originalname);
   }
 
+
+
   @Get()
+  @ApiBearerAuth('Authorization')
   @ApiOperation({ summary: 'Retrieve a list of testimonials with optional filtering and pagination' })
   @ApiBearerAuth()
   findAll(
@@ -52,11 +57,13 @@ export class TestimonialsController {
   }
 
   @Get(':id')
+  @ApiBearerAuth('Authorization')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.testimonialsService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiBearerAuth('Authorization')
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTestimonialDto: UpdateTestimonialDto,
@@ -65,6 +72,7 @@ export class TestimonialsController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth('Authorization')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.testimonialsService.remove(id);
   }

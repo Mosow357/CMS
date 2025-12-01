@@ -9,6 +9,7 @@ import { Public, RolesG } from 'src/common/guards/roles.decorator';
 import { RequestUser } from 'src/common/types/request-user'; 
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { FRONT_BASE_URL } from 'src/common/constant/constant';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -29,6 +30,7 @@ export class AuthController {
   }
 
   @Patch('change-password')
+  @ApiBearerAuth('Authorization')
   @HttpCode(HttpStatus.NO_CONTENT)
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
@@ -37,6 +39,7 @@ export class AuthController {
     return await this.authService.changePassword(changePasswordDto, user.username);
   }
   @Get('validate-token')
+  @ApiBearerAuth('Authorization')
   @HttpCode(HttpStatus.OK)
   async validateToken(): Promise<{ success: boolean }> {
     // Guard will handle the validation
