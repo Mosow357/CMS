@@ -1,20 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
-import { QueryParamsDto } from 'src/common/dto/queryParams.dto';
+import { TestimonialsParamsDto } from '../dto/testimonials.params.dto';
+import { OrganizationsService } from 'src/organizations/services/organizations.service';
+import { UserOrganizationService } from 'src/user_organization/services/userOrganization.service';
 
 @Injectable()
 export class TestimonialsService {
   constructor(
     @InjectRepository(Testimonial)
     private testimonialsRepository: Repository<Testimonial>,
+    private readonly userOrganization:UserOrganizationService
   ) {}
 
-  async findAll(param: QueryParamsDto): Promise<Testimonial[]> {
-    const { page = 1, itemsPerPage = 20, sort = 'ASC',status } = param;
+  async findAll(filters:TestimonialsParamsDto,userId:string): Promise<Testimonial[]> {
+    let org = await this.userOrganization.findUserOrganization(userId,filters.organitationId);
+    if(!org){
+      throw new NotFoundException(`User is not part of the organization ${filters.organitationId}`);
+    }
+    const { page = 1, itemsPerPage = 20, sort = 'ASC' } = filters;
     const limit = itemsPerPage;
     const offset = (page - 1) * itemsPerPage;
     
@@ -25,14 +31,17 @@ export class TestimonialsService {
       order: {
         createdAt: sort,
       },
-      where: status ? { status } : undefined,
+      where:{
+        organitation_id: filters.organitationId,
+        status: filters.status,
+      }
     });
   }
   
   async findOne(id: string): Promise<Testimonial> {
     const testimonial = await this.testimonialsRepository.findOne({
       where: { id },
-      relations: ['user', 'category', 'tags'],
+      relations: ['category', 'tags'],
     });
     if (!testimonial) {
       throw new NotFoundException(`Testimonial with ID ${id} not found`);

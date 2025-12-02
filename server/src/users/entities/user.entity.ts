@@ -15,11 +15,14 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', nullable: false })
   username: string;
 
-  @Column({ type: 'varchar', nullable: false,select:false })
+  @Column({ type: 'varchar', nullable: false, select: false })
   password: string;
 
   @Column({ type: 'varchar' })
   name: string;
+
+  @Column({ type: 'boolean', default: false })
+  email_confirmed: boolean;
 
   @OneToMany(() => UserOrganization, userOrg => userOrg.user)
   userOrganizations: UserOrganization[];

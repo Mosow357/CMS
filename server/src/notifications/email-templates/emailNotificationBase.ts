@@ -1,4 +1,4 @@
-export interface EmailNotificationBase {
+export abstract class EmailNotificationBase {
   recipentEmail: string;
   username:string;
   templateId:string;
