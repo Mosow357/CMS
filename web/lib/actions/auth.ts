@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { createApiClient } from '@/lib/api/client'
 
 // Tipo completo de Organization
 interface Organization {
@@ -83,25 +84,18 @@ export async function loginAction(
   try {
     console.log('🔐 Intentando login con:', { username: credentials.username })
 
-    // Usar fetch directamente para evitar problemas con el API client
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    // Usar el cliente API generado
+    const apiClient = createApiClient()
+
+    const response = await apiClient.auth.authControllerLogin(
+      {
         username: credentials.username,
         password: credentials.password,
-      }),
-    })
+      },
+      { format: 'json' }
+    )
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.message || 'Error al iniciar sesión')
-    }
-
-    const userData = (await response.json()) as RequestUser
+    const userData = response.data as unknown as RequestUser
 
     if (!userData || !userData.id) {
       console.error('❌ Datos de usuario inválidos:', userData)
@@ -177,9 +171,13 @@ export async function loginAction(
   } catch (error: any) {
     console.error('❌ Login error:', error)
 
-    // Extraer mensaje de error de la respuesta
+    // Extraer mensaje de error de la respuesta del API client
     let errorMessage = 'Error de conexión. Por favor intenta nuevamente.'
-    if (error?.message) {
+    if (error?.error?.message) {
+      errorMessage = error.error.message
+    } else if (typeof error?.error === 'string') {
+      errorMessage = error.error
+    } else if (error?.message) {
       errorMessage = error.message
     }
 
@@ -194,52 +192,25 @@ export async function registerAction(
   data: RegisterData
 ): Promise<ActionResponse<RegisterResponse>> {
   try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-
     // Concatenar name y lastname en un solo campo
     const fullName = data.lastname
       ? `${data.name} ${data.lastname}`.trim()
       : data.name || ''
 
-    // Preparar datos sin lastname
-    const requestData = {
-      username: data.username,
-      email: data.email,
-      password: data.password,
-      name: fullName,
-    }
+    // Usar el cliente API generado
+    const apiClient = createApiClient()
 
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await apiClient.auth.authControllerRegister(
+      {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        name: fullName,
       },
-      body: JSON.stringify(requestData),
-    })
+      { format: 'json' }
+    )
 
-    const contentType = response.headers.get('content-type')
-
-    if (!response.ok) {
-      // Intentar parsear como JSON si es posible
-      if (contentType?.includes('application/json')) {
-        const errorData = await response.json().catch(() => ({}))
-        console.error('Backend error:', errorData)
-        throw new Error(errorData.message || 'Error al registrar usuario')
-      } else {
-        const errorText = await response.text()
-        console.error('Error response (not JSON):', errorText.substring(0, 200))
-        throw new Error('Error al registrar usuario')
-      }
-    }
-
-    // Verificar que la respuesta sea JSON
-    if (!contentType?.includes('application/json')) {
-      const responseText = await response.text()
-      console.error('Expected JSON but got:', responseText.substring(0, 200))
-      throw new Error('Respuesta inválida del servidor')
-    }
-
-    const result = (await response.json()) as RegisterResponse
+    const result = response.data as unknown as RegisterResponse
 
     return {
       success: true,
@@ -248,8 +219,13 @@ export async function registerAction(
   } catch (error: any) {
     console.error('Register error:', error)
 
+    // Extraer mensaje de error de la respuesta del API client
     let errorMessage = 'Error de conexión. Por favor intenta nuevamente.'
-    if (error?.message) {
+    if (error?.error?.message) {
+      errorMessage = error.error.message
+    } else if (typeof error?.error === 'string') {
+      errorMessage = error.error
+    } else if (error?.message) {
       errorMessage = error.message
     }
 
