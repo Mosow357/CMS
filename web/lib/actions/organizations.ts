@@ -1,132 +1,81 @@
 'use server'
 
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-
-interface Organization {
-    id: string
-    createdAt: Date
-    updatedAt: Date
-    name: string
-    description: string
-    logoUrl: string | null
-    questionText: string | null
-}
-
-interface UserOrganization {
-    id: string
-    createdAt: Date
-    updatedAt: Date
-    userId: string
-    organizationId: string
-    role: 'admin' | 'editor'
-    organization: Organization
-}
+import { createApiClient } from '@/lib/api/client'
+import { ActionResponse } from './auth'
 
 export interface CreateOrganizationData {
-    name: string
-    description?: string
-    questionText?: string
+  name: string
+  description?: string
+  questionText?: string
 }
 
-export interface ActionResponse<T> {
-    success: boolean
-    data?: T
-    error?: string
+export interface Organization {
+  id: string
+  name: string
+  description: string
+  logoUrl?: string
+  questionText?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export async function createOrganizationAction(
-    data: CreateOrganizationData
+  data: CreateOrganizationData
 ): Promise<ActionResponse<Organization>> {
-    try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('auth_token')?.value
 
-        // Obtener token de las cookies
-        const cookieStore = await cookies()
-        const token = cookieStore.get('auth_token')?.value
-
-        if (!token) {
-            throw new Error('No autenticado')
-        }
-
-        const response = await fetch(`${API_URL}/organizations`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify(data),
-        })
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}))
-            console.error('❌ Error creating organization:', errorData)
-            throw new Error(errorData.message || 'Error al crear organización')
-        }
-
-        const newOrganization = (await response.json()) as Organization
-
-        console.log('✅ Organización creada:', newOrganization)
-
-        // Obtener las organizaciones del usuario actualizadas
-        const userOrgsResponse = await fetch(`${API_URL}/organizations`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        })
-
-        if (userOrgsResponse.ok) {
-            const organizations = (await userOrgsResponse.json()) as Organization[]
-
-            // Actualizar cookies con las organizaciones
-            const cookieOptions = {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax' as const,
-                path: '/',
-            }
-
-            // Crear UserOrganizations simulados (el backend debería devolverlos así)
-            const userOrganizations: UserOrganization[] = organizations.map(org => ({
-                id: '', // El backend debería devolver esto
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                userId: '',
-                organizationId: org.id,
-                role: 'admin' as const,
-                organization: org,
-            }))
-
-            cookieStore.set(
-                'user_organizations',
-                JSON.stringify(userOrganizations),
-                cookieOptions
-            )
-
-            // Establecer la nueva organización como actual
-            cookieStore.set(
-                'current_organization',
-                JSON.stringify(newOrganization),
-                cookieOptions
-            )
-
-            console.log('🍪 Cookies actualizadas con nueva organización')
-        }
-
-        // Revalidar para limpiar caché
-        revalidatePath('/', 'layout')
-
-        return {
-            success: true,
-            data: newOrganization,
-        }
-    } catch (error: any) {
-        console.error('❌ Error en createOrganizationAction:', error)
-
-        return {
-            success: false,
-            error: error?.message || 'Error al crear organización',
-        }
+    if (!token) {
+      redirect('/login')
     }
+
+    const apiClient = createApiClient(token)
+
+    const response = await apiClient.organizations.organizationsControllerCreate(
+      {
+        name: data.name,
+        description: data.description,
+        questionText: data.questionText,
+      },
+      { format: 'json' }
+    )
+
+    const organization = response.data as unknown as Organization
+
+    // Revalidate the organizations list
+    revalidatePath('/dashboard/organizations')
+    revalidatePath('/dashboard')
+
+    return {
+      success: true,
+      data: organization,
+    }
+  } catch (error: any) {
+    console.error('Create organization error:', error)
+
+    // Extract error message from response
+    let errorMessage = 'Error de conexión. Por favor intenta nuevamente.'
+    if (error?.error?.message) {
+      errorMessage = error.error.message
+    } else if (error?.error?.error) {
+      errorMessage = error.error.error
+    } else if (typeof error?.error === 'string') {
+      errorMessage = error.error
+    }
+
+    // If unauthorized, redirect to login
+    if (error?.error?.statusCode === 401 || error?.status === 401) {
+      redirect('/login')
+    }
+
+    return {
+      success: false,
+      error: errorMessage,
+    }
+  }
 }
+
