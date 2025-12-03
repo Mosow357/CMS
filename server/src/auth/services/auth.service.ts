@@ -67,11 +67,9 @@ export class AuthService {
   }
 
   async register(data: RegisterDto): Promise<RegisterResponseDto> {
-    const username = data.username.trim().toLowerCase();
-    let user = await this.userService.findByUsernameOrEmail(username);
-    if (user) throw new ConflictException('User already exists');
-    let userEmail = await this.userService.findByEmail(data.email);
-    if (userEmail) throw new ConflictException('Email already in use');
+    const email = data.email.trim().toLowerCase();
+    let user = await this.userService.findByUsernameOrEmail(email);
+    if (user) throw new ConflictException('Email already exists');
     user = await this.userService.create(data);
     if (!user) throw new ServiceUnavailableException('Error creating user');
 
