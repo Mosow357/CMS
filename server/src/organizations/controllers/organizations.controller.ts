@@ -21,7 +21,7 @@ import { ChangeRoleDto } from '../dto/update-userOrganiztion.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('organizations')
-export class organizationsController {
+export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) { }
 
   @Post()
