@@ -82,6 +82,9 @@ export default function EnvioDeTestimoniosPage() {
                   />
                 )}
               </div>
+              <p className="text-left mb-3 text-foreground/70 italic">
+                ¿Qué opinas sobre el producto?
+              </p>
               <Label className="text-left mb-2 text-primary uppercase font-semibold">
                 {t("testimonial_label")}
               </Label>
