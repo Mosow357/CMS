@@ -30,7 +30,7 @@ import { SeedModule } from './seed/seed.module';
           return {
             type: 'sqlite',
             database: 'local.db',
-            dropSchema: true,
+            dropSchema: false, // Cambiado a false para persistencia de datos
             autoLoadEntities: true,
             synchronize: true,
           };

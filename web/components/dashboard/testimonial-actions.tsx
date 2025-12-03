@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { MoreVertical, Check, X, Eye, EyeOff, Trash2, Maximize2 } from "lucide-react"
 import {
     DropdownMenu,
@@ -12,56 +13,118 @@ import {
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { TestimonialPreviewDialog } from "@/components/dashboard/testimonial-preview-dialog"
-import { mockCurrentUser, canApprove, canReject, canPublish, canUnpublish, canDelete } from "@/lib/mockUser"
-import { DashboardTestimonial } from "@/lib/mockDashboardTestimonials"
+import { useUserRole } from "@/hooks/use-user-role"
+import { useToast } from "@/hooks/use-toast"
+import {
+    approveTestimonialAction,
+    rejectTestimonialAction,
+    publishTestimonialAction,
+    deleteTestimonialAction
+} from "@/lib/actions/testimonials"
 
 interface TestimonialActionsProps {
-    testimonial: DashboardTestimonial
-    onStatusChange: (newStatus: string) => void
-    onDelete: () => void
+    testimonial: any
 }
 
-export function TestimonialActions({
-    testimonial,
-    onStatusChange,
-    onDelete
-}: TestimonialActionsProps) {
+export function TestimonialActions({ testimonial }: TestimonialActionsProps) {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
     const [showPreview, setShowPreview] = useState(false)
-    const userRole = mockCurrentUser.role
-    const currentStatus = testimonial.status
+    const [isProcessing, setIsProcessing] = useState(false)
 
-    const handleAction = (action: string) => {
-        switch (action) {
-            case 'approve':
-                onStatusChange('approved')
+    const { isAdmin, hasRole, isLoading } = useUserRole()
+    const router = useRouter()
+    const { toast } = useToast()
+
+    const currentStatus = testimonial.status?.toUpperCase()
+
+    const handleAction = async (action: string) => {
+        if (action === 'view') {
+            setShowPreview(true)
+            return
+        }
+
+        if (action === 'delete') {
+            setShowDeleteConfirm(true)
+            return
+        }
+
+        setIsProcessing(true)
+        let result
+
+        try {
+            switch (action) {
+                case 'approve':
+                    result = await approveTestimonialAction(testimonial.id)
+                    break
+                case 'reject':
+                    result = await rejectTestimonialAction(testimonial.id)
+                    break
+                case 'publish':
+                    result = await publishTestimonialAction(testimonial.id)
+                    break
+                case 'unpublish':
+                    // Despublicar = volver a approved
+                    result = await approveTestimonialAction(testimonial.id)
+                    break
+                default:
+                    return
+            }
+
+            if (result.success) {
+                toast({
+                    title: "Éxito",
+                    description: result.message,
+                })
                 setShowPreview(false)
-                break
-            case 'reject':
-                onStatusChange('rejected')
-                setShowPreview(false)
-                break
-            case 'publish':
-                onStatusChange('published')
-                setShowPreview(false)
-                break
-            case 'unpublish':
-                onStatusChange('approved')
-                setShowPreview(false)
-                break
-            case 'delete':
-                setShowDeleteConfirm(true)
-                setShowPreview(false)
-                break
-            case 'view':
-                setShowPreview(true)
-                break
+                router.refresh() // Actualizar datos
+            } else {
+                toast({
+                    title: "Error",
+                    description: result.error,
+                    variant: "destructive"
+                })
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Ocurrió un error inesperado",
+                variant: "destructive"
+            })
+        } finally {
+            setIsProcessing(false)
         }
     }
 
-    const handleConfirmDelete = () => {
-        onDelete()
-        setShowDeleteConfirm(false)
+    const handleConfirmDelete = async () => {
+        setIsProcessing(true)
+
+        try {
+            const result = await deleteTestimonialAction(testimonial.id)
+
+            if (result.success) {
+                toast({
+                    title: "Eliminado",
+                    description: result.message,
+                    variant: "destructive"
+                })
+                setShowDeleteConfirm(false)
+                router.refresh()
+            } else {
+                toast({
+                    title: "Error",
+                    description: result.error,
+                    variant: "destructive"
+                })
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Ocurrió un error al eliminar",
+                variant: "destructive"
+            })
+        } finally {
+            setIsProcessing(false)
+        }
     }
 
     // Determinar qué acciones mostrar según el estado actual y el rol
@@ -76,17 +139,15 @@ export function TestimonialActions({
             variant: 'default' as const
         })
 
-        // Desde PENDING: solo aprobar o rechazar
-        if (currentStatus === 'pending') {
-            if (canApprove(userRole)) {
+        // Desde PENDING: solo aprobar o rechazar (Editor y Admin)
+        if (currentStatus === 'PENDING') {
+            if (hasRole('editor')) {
                 actions.push({
                     label: 'Aprobar',
                     icon: Check,
                     action: 'approve',
                     variant: 'default' as const
                 })
-            }
-            if (canReject(userRole)) {
                 actions.push({
                     label: 'Rechazar',
                     icon: X,
@@ -96,9 +157,9 @@ export function TestimonialActions({
             }
         }
 
-        // Desde APPROVED: publicar (admin) o rechazar (ambos)
-        if (currentStatus === 'approved') {
-            if (canPublish(userRole)) {
+        // Desde APPROVED: publicar (solo Admin) o rechazar (Editor y Admin)
+        if (currentStatus === 'APPROVED') {
+            if (isAdmin) {
                 actions.push({
                     label: 'Publicar',
                     icon: Eye,
@@ -106,7 +167,7 @@ export function TestimonialActions({
                     variant: 'default' as const
                 })
             }
-            if (canReject(userRole)) {
+            if (hasRole('editor')) {
                 actions.push({
                     label: 'Rechazar',
                     icon: X,
@@ -117,16 +178,14 @@ export function TestimonialActions({
         }
 
         // Desde PUBLISHED: solo admin puede despublicar o rechazar
-        if (currentStatus === 'published') {
-            if (canUnpublish(userRole)) {
+        if (currentStatus === 'PUBLISHED') {
+            if (isAdmin) {
                 actions.push({
                     label: 'Despublicar',
                     icon: EyeOff,
                     action: 'unpublish',
                     variant: 'default' as const
                 })
-            }
-            if (canReject(userRole)) {
                 actions.push({
                     label: 'Rechazar',
                     icon: X,
@@ -136,9 +195,9 @@ export function TestimonialActions({
             }
         }
 
-        // Desde REJECTED: aprobar (ambos) o eliminar (solo admin)
-        if (currentStatus === 'rejected') {
-            if (canApprove(userRole)) {
+        // Desde REJECTED: aprobar (Editor y Admin) o eliminar (solo Admin)
+        if (currentStatus === 'REJECTED') {
+            if (hasRole('editor')) {
                 actions.push({
                     label: 'Aprobar',
                     icon: Check,
@@ -146,7 +205,7 @@ export function TestimonialActions({
                     variant: 'default' as const
                 })
             }
-            if (canDelete(userRole)) {
+            if (isAdmin) {
                 actions.push({
                     label: 'Eliminar',
                     icon: Trash2,
@@ -161,11 +220,20 @@ export function TestimonialActions({
 
     const availableActions = getAvailableActions()
 
+    // Mostrar loading mientras se cargan los permisos
+    if (isLoading) {
+        return (
+            <Button variant="ghost" size="sm" disabled>
+                <MoreVertical className="h-4 w-4" />
+            </Button>
+        )
+    }
+
     return (
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" disabled={isProcessing}>
                         <MoreVertical className="h-4 w-4" />
                     </Button>
                 </DropdownMenuTrigger>
@@ -182,6 +250,7 @@ export function TestimonialActions({
                                 <DropdownMenuItem
                                     onClick={() => handleAction(action.action)}
                                     className={isDestructive ? 'text-destructive focus:text-destructive' : ''}
+                                    disabled={isProcessing}
                                 >
                                     <Icon className="mr-2 h-4 w-4" />
                                     {action.label}

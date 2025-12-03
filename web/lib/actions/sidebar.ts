@@ -138,6 +138,7 @@ export async function getTestimonialStatsAction() {
         const currentOrgCookie = cookieStore.get('current_organization')?.value
 
         if (!token || !currentOrgCookie) {
+            console.log('⚠️ No token or current organization found')
             return {
                 total: 0,
                 pending: 0,
@@ -148,6 +149,8 @@ export async function getTestimonialStatsAction() {
         }
 
         const currentOrg = JSON.parse(currentOrgCookie)
+        console.log('📊 Fetching stats for organization:', currentOrg.id)
+
         const apiClient = createApiClient(token)
 
         // Obtener todos los testimonios de la organización
@@ -156,20 +159,37 @@ export async function getTestimonialStatsAction() {
             { format: 'json' }
         )
 
-        const testimonials = response.data as unknown as any[]
+        console.log('📦 Response received:', {
+            status: response.status,
+            hasData: !!response.data,
+            dataType: typeof response.data,
+            isArray: Array.isArray(response.data)
+        })
+
+        // Asegurarse de que tenemos un array
+        const testimonials = Array.isArray(response.data) ? response.data : []
+
+        console.log(`✅ Found ${testimonials.length} testimonials`)
 
         // Calcular estadísticas
         const stats = {
             total: testimonials.length,
-            pending: testimonials.filter(t => t.status === 'PENDING').length,
-            approved: testimonials.filter(t => t.status === 'APPROVED').length,
-            published: testimonials.filter(t => t.status === 'PUBLISHED').length,
-            rejected: testimonials.filter(t => t.status === 'REJECTED').length,
+            pending: testimonials.filter((t: any) => t.status === 'PENDING').length,
+            approved: testimonials.filter((t: any) => t.status === 'APPROVED').length,
+            published: testimonials.filter((t: any) => t.status === 'PUBLISHED').length,
+            rejected: testimonials.filter((t: any) => t.status === 'REJECTED').length,
         }
 
+        console.log('📈 Stats calculated:', stats)
+
         return stats
-    } catch (error) {
-        console.error('Error getting testimonial stats:', error)
+    } catch (error: any) {
+        console.error('❌ Error getting testimonial stats:', {
+            message: error.message,
+            status: error.status,
+            response: error.response,
+            stack: error.stack
+        })
         return {
             total: 0,
             pending: 0,
@@ -179,3 +199,4 @@ export async function getTestimonialStatsAction() {
         }
     }
 }
+
