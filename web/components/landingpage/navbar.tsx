@@ -42,12 +42,7 @@ export default function Navbar({ simple = false }: NavbarProps) {
         <div className="absolute right-6 flex items-center gap-4">
           {!simple && (
             <>
-              <Link
-                href="/enviodetestimonios"
-                className="font-medium text-[#0F111A] dark:text-[#FFFFFF] hover:text-[#66F9C4] transition"
-              >
-                Enviar testimonio
-              </Link>
+           
 
               <Link
                 href="/login"
