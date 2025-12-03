@@ -79,3 +79,47 @@ export async function createOrganizationAction(
   }
 }
 
+export async function getUserOrganizationsAction(): Promise<ActionResponse<Organization[]>> {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('auth_token')?.value
+
+    if (!token) {
+      // Return empty array if not authenticated (user can still see "Add" option)
+      return {
+        success: true,
+        data: [],
+      }
+    }
+
+    const apiClient = createApiClient(token)
+
+    const response = await apiClient.organizations.organizationsControllerFindUserOrganizations({
+      format: 'json',
+    })
+
+    const organizations = response.data as unknown as Organization[]
+
+    return {
+      success: true,
+      data: organizations || [],
+    }
+  } catch (error: any) {
+    console.error('Get organizations error:', error)
+
+    // If unauthorized, return empty array (don't redirect, allow user to see sidebar)
+    if (error?.error?.statusCode === 401 || error?.status === 401) {
+      return {
+        success: true,
+        data: [],
+      }
+    }
+
+    // For other errors, return empty array gracefully
+    return {
+      success: true,
+      data: [],
+    }
+  }
+}
+

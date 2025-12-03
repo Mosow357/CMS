@@ -24,10 +24,45 @@ import {
 
 import { SidebarLogo } from "@/components/dashboard/sidebar/sidebar-logo";
 import { getTestimonialStats } from "@/lib/mockDashboardTestimonials";
+import { Organization } from "@/lib/actions/organizations";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  organizations = [],
+  ...props
+}: React.ComponentProps<typeof Sidebar> & {
+  organizations?: Organization[]
+}) {
   const stats = getTestimonialStats()
   const pathname = usePathname()
+
+  // Map organizations to teams format
+  const teamsFromOrganizations = organizations.map((org) => ({
+    name: org.name,
+    logo: org.logoUrl || undefined, // Will use default logo if undefined
+    plan: "Active" as string,
+  }))
+
+  // Fallback teams for development/testing (only if no organizations)
+  const fallbackTeams = [
+    {
+      name: "Acme Inc",
+      logo: GalleryVerticalEnd,
+      plan: "Enterprise",
+    },
+    {
+      name: "Acme Corp.",
+      logo: AudioWaveform,
+      plan: "Startup",
+    },
+    {
+      name: "Evil Corp.",
+      logo: Command,
+      plan: "Free",
+    },
+  ]
+
+  // Use organizations if available, otherwise fallback to mock data
+  const teams = teamsFromOrganizations.length > 0 ? teamsFromOrganizations : fallbackTeams
 
   const data = {
     user: {
@@ -35,23 +70,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       email: "m@example.com",
       avatar: "/avatars/shadcn.jpg",
     },
-    teams: [
-      {
-        name: "Acme Inc",
-        logo: GalleryVerticalEnd,
-        plan: "Enterprise",
-      },
-      {
-        name: "Acme Corp.",
-        logo: AudioWaveform,
-        plan: "Startup",
-      },
-      {
-        name: "Evil Corp.",
-        logo: Command,
-        plan: "Free",
-      },
-    ],
+    teams,
     navMain: [
       {
         title: "Testimonios",
