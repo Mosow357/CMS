@@ -10,6 +10,9 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipeBuilder,
 } from '@nestjs/common';
 import { OrganizationsService } from '../services/organizations.service';
 import { CreateOrganizationDto } from '../dto/create-organization.dto';
@@ -18,7 +21,8 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { AddUserOrganizationDto } from '../dto/add-userOrganiztion.dto';
 import { ChangeRoleDto } from '../dto/update-userOrganiztion.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('organizations')
 export class OrganizationsController {
@@ -26,11 +30,20 @@ export class OrganizationsController {
 
   @Post()
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a organization' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file', {}))
   create(
     @Body() createorganizationDto: CreateOrganizationDto,
-    @GetUser() user:User
+    @GetUser() user:User,
+    @UploadedFile(new ParseFilePipeBuilder()
+          .addMaxSizeValidator({ maxSize: 50 * 1024 * 1024 })
+          .build({
+            fileIsRequired: false,
+            errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          }),) file?: Express.Multer.File,
   ) {
-    return this.organizationsService.create(createorganizationDto,user);
+    return this.organizationsService.create(createorganizationDto,user,file);
   }
 
   @Get()
