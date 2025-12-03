@@ -4,9 +4,10 @@ import { Organization } from './entities/organization.entity';
 import { OrganizationsController } from './controllers/organizations.controller';
 import { OrganizationsService } from './services/organizations.service';
 import { UserOrganization } from 'src/user_organization/entities/userOrganization.entity';
+import { MediaStorageModule } from 'src/media-storage/mediaStorage.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Organization,UserOrganization])],
+  imports: [TypeOrmModule.forFeature([Organization,UserOrganization]),MediaStorageModule],
   controllers: [OrganizationsController],
   providers: [OrganizationsService],
   exports: [OrganizationsService],
