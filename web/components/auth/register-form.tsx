@@ -24,6 +24,9 @@ export function RegisterForm() {
     name: "",
     lastname: "",
   })
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,14 +41,23 @@ export function RegisterForm() {
       return
     }
 
-    if (formData.password.length < 6) {
+    // Front-end password rules: mínimo 8 caracteres y al menos una mayúscula
+    const minLength = 8
+    const hasUppercase = /[A-Z]/.test(formData.password)
+    if (formData.password.length < minLength || !hasUppercase) {
+      const msgs: string[] = []
+      if (formData.password.length < minLength) msgs.push(`Mínimo ${minLength} caracteres`)
+      if (!hasUppercase) msgs.push('Al menos una letra mayúscula')
+      const message = msgs.join(' · ')
+      setPasswordError(message)
       toast({
         title: "Error",
-        description: "La contraseña debe tener al menos 6 caracteres",
+        description: message,
         variant: "destructive",
       })
       return
     }
+    setPasswordError(null)
 
     setIsLoading(true)
 
@@ -83,10 +95,16 @@ export function RegisterForm() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
+    const next = {
       ...formData,
       [e.target.id]: e.target.value
-    })
+    }
+    setFormData(next)
+
+    // Clear password error while user types
+    if (e.target.id === 'password' || e.target.id === 'confirmPassword') {
+      setPasswordError(null)
+    }
   }
 
   return (
@@ -157,29 +175,63 @@ export function RegisterForm() {
           {/* Password */}
           <div className="space-y-2">
             <Label htmlFor="password">{t("password")}</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder={t("passwordPlaceholder")}
-              value={formData.password}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder={t("passwordPlaceholder")}
+                value={formData.password}
+                onChange={handleChange}
+                required
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPassword(s => !s)}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {showPassword ? 'Ocultar' : 'Mostrar'}
+              </Button>
+            </div>
+
+            {/* Validaciones por regla */}
+            <ul className="mt-2 space-y-1 text-sm">
+              <li className={formData.password.length >= 8 ? 'text-green-600' : 'text-destructive'}>
+                {formData.password.length >= 8 ? '✓' : '✕'} Mínimo 8 caracteres
+              </li>
+              <li className={/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-destructive'}>
+                {/[A-Z]/.test(formData.password) ? '✓' : '✕'} Al menos una letra mayúscula
+              </li>
+            </ul>
           </div>
 
           {/* Confirm Password */}
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder={t("confirmPasswordPlaceholder")}
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-            />
+            <div className="flex items-center gap-2">
+              <Input
+                id="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder={t("confirmPasswordPlaceholder")}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowConfirmPassword(s => !s)}
+                aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {showConfirmPassword ? 'Ocultar' : 'Mostrar'}
+              </Button>
+            </div>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4 mt-4">
@@ -190,6 +242,10 @@ export function RegisterForm() {
           >
             {isLoading ? commonT("loading") : t("submit")}
           </Button>
+          {/* Mostrar error de confirmación si no coinciden */}
+          {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+            <p className="text-sm text-destructive text-center">Las contraseñas no coinciden</p>
+          )}
           <p className="text-sm text-center text-muted-foreground">
             {t("haveAccount")}{" "}
             <a href="/login" className="text-primary hover:underline font-medium">

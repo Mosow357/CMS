@@ -41,7 +41,7 @@ export function Brand({
         <motion.span
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          className="text-2xl font-semibold"
+          className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
         >
           {name}
         </motion.span>

@@ -17,11 +17,32 @@ export function TestimonialsContent() {
 
   // Estado local para manejar los testimonios
   const [testimonials, setTestimonials] = useState<DashboardTestimonial[]>(mockDashboardTestimonials)
+  const [selectedRating, setSelectedRating] = useState<number | null>(null)
+  const [dateFrom, setDateFrom] = useState<string>('')
+  const [dateTo, setDateTo] = useState<string>('')
 
-  // Filtrar testimonios por status si existe el parámetro
-  const filteredTestimonials = status
-    ? testimonials.filter(t => t.status === status)
-    : testimonials
+  // Filtrar testimonios por status, rating y fecha
+  const filteredTestimonials = testimonials.filter(t => {
+    // Filtro por status
+    if (status && t.status !== status) return false
+    
+    // Filtro por rating
+    if (selectedRating !== null && t.stars_rating !== selectedRating) return false
+    
+    // Filtro por fecha
+    const testimonialDate = new Date(t.created_at)
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom)
+      if (testimonialDate < fromDate) return false
+    }
+    if (dateTo) {
+      const toDate = new Date(dateTo)
+      toDate.setHours(23, 59, 59, 999) // Incluir todo el día
+      if (testimonialDate > toDate) return false
+    }
+    
+    return true
+  })
 
   // Determinar el título según el filtro
   const getTitle = () => {
@@ -131,6 +152,79 @@ export function TestimonialsContent() {
             Ver mi Muro
           </Link>
         </Button>
+      </div>
+
+      {/* Filtros */}
+      <div className="mb-6 p-4 bg-muted/30 rounded-lg border">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Filtro por Rating */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium">Filtrar por Rating</label>
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={selectedRating === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedRating(null)}
+                className="text-xs"
+              >
+                Todos
+              </Button>
+              {[5, 4, 3, 2, 1].map((rating) => (
+                <Button
+                  key={rating}
+                  variant={selectedRating === rating ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedRating(rating)}
+                  className="text-xs gap-1"
+                >
+                  <span>★</span> {rating}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Filtro por Fecha - Desde */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="date-from" className="text-sm font-medium">Desde</label>
+            <input
+              id="date-from"
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="px-3 py-2 border rounded-md text-sm bg-background"
+            />
+          </div>
+
+          {/* Filtro por Fecha - Hasta */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="date-to" className="text-sm font-medium">Hasta</label>
+            <input
+              id="date-to"
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="px-3 py-2 border rounded-md text-sm bg-background"
+            />
+          </div>
+        </div>
+
+        {/* Botón para limpiar filtros */}
+        {(selectedRating !== null || dateFrom || dateTo) && (
+          <div className="mt-4 pt-4 border-t">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedRating(null)
+                setDateFrom('')
+                setDateTo('')
+              }}
+              className="text-xs"
+            >
+              Limpiar filtros
+            </Button>
+          </div>
+        )}
       </div>
 
       {filteredTestimonials.length === 0 ? (

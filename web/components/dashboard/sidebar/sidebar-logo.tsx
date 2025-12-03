@@ -11,7 +11,7 @@ interface SidebarLogoProps {
 }
 
 export function SidebarLogo({
-  src = "/logo.webp",
+  src = "logo.png",
   alt = "CMS",
   size = 40,
 }: SidebarLogoProps) {

@@ -105,12 +105,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar
+      collapsible="icon"
+      {...props}
+      style={{
+        // Set sidebar accent/primary to landing primary (green)
+        ["--sidebar-accent" as any]: "var(--primary)",
+        ["--sidebar-accent-foreground" as any]: "var(--primary-foreground)",
+        ["--sidebar-primary" as any]: "var(--primary)",
+        ["--sidebar-primary-foreground" as any]: "var(--primary-foreground)",
+      }}
+    >
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarLogo src="/logo.webp" alt="My CMS" />
+ 
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
