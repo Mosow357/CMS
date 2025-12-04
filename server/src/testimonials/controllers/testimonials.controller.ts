@@ -27,11 +27,16 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation } from
 import { Testimonial } from '../entities/testimonial.entity';
 import { TestimonialResponseDto } from '../dto/testimonialResponse.dto';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
-import multer from 'multer';
+import { InviteTestimonialDto } from '../dto/invite-testimonial.dto';
+import { TestimonialsInvitationService } from '../services/testimonialsInvitation.service';
 
 @Controller('testimonials')
 export class TestimonialsController {
-  constructor(private readonly testimonialsService: TestimonialsService,private readonly createTestimonialService:CreateTestimonialsService) {
+  constructor(
+    private readonly testimonialsService: TestimonialsService,
+    private readonly createTestimonialService:CreateTestimonialsService,
+    private readonly testimonialsInvitationService:TestimonialsInvitationService
+  ) {
   }
   
   @Post()
@@ -79,6 +84,16 @@ export class TestimonialsController {
     @GetUser() user
   ): Promise<Testimonial[]> {
     return this.testimonialsService.findAll(param,user.id);
+  }
+
+  @Post('invite')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes('application/json')
+  @ApiBody({ type: InviteTestimonialDto })
+  @ApiOperation({ summary: 'Invite an end customer (or many) to submit a testimonial.' })
+  inviteTestimonials(@Body() body: InviteTestimonialDto, @GetUser() user) {
+    return this.testimonialsInvitationService.inviteTestimonial(body.emails,body.organizationId,user.id);
   }
 
   @Get(':id')

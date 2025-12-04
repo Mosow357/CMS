@@ -11,20 +11,26 @@ import { CloudinaryProviderImpl } from 'src/media-storage/adapters/cloudinaryPro
 import { CategoriesModule } from 'src/categories/categories.module';
 import { OrganizationModule } from 'src/organizations/organitations.module';
 import { UserOrganizationModule } from 'src/user_organization/userOrganization.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
+import { CommonModule } from 'src/common/common.module';
+import { TestimonialsInvitationService } from './services/testimonialsInvitation.service';
+import { TestimonialInvitation } from './entities/testimonialInvitation.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Testimonial]),
+    TypeOrmModule.forFeature([Testimonial,TestimonialInvitation]),
     MulterModule.register({
       dest: './upload',
     }),
     MediaStorageModule,
     CategoriesModule,
     OrganizationModule,
-    UserOrganizationModule
+    UserOrganizationModule,
+    NotificationsModule,
+    CommonModule
   ],
   controllers: [TestimonialsController],
-  providers: [TestimonialsService,MediaStorageService,CreateTestimonialsService, CloudinaryProviderImpl],
+  providers: [TestimonialsService,CreateTestimonialsService, TestimonialsInvitationService],
   exports: [TestimonialsService],
 })
 export class TestimonialsModule {}
