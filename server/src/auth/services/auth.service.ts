@@ -89,8 +89,13 @@ export class AuthService {
         user.username,
         confirmEmailToken,
       );
+      try {
+        await this.notificationService.sendNotificationWithTemplate(template);
+      }
+      catch (error) {
+        console.error('Error sending confirmation email:', error);
+      }
 
-      await this.notificationService.sendNotificationWithTemplate(template);
 
       return {
         message: 'User registered successfully',
