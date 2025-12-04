@@ -129,3 +129,5 @@ export async function createOrganizationAction(
   }
 }
 
+// arreglar el erro de in organizacion, no muestra el boton de organizacion
+// ver el error, de volver sin credenciales al dashboar, controlar desde la pagina dashboard,

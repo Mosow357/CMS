@@ -45,16 +45,40 @@ export async function getUserOrganizations() {
 
         console.log('📦 UserOrganizations desde cookies:', userOrganizations)
 
-        // El backend devuelve un array de UserOrganization
-        // Cada elemento tiene: { id, userId, organizationId, role, organization: {...} }
-        return userOrganizations.map((userOrg: any) => ({
-            id: userOrg.organization.id,
-            name: userOrg.organization.name,
-            description: userOrg.organization.description,
-            logoUrl: userOrg.organization.logoUrl,
-            questionText: userOrg.organization.questionText,
-            role: userOrg.role, // admin, editor, o viewer
-        }))
+        // El backend puede devolver dos formatos diferentes:
+        // 1. Después de login: [{ id, userId, organizationId, role, organization: {...} }]
+        // 2. Después de crear org: [{ id, name, description, ... }] (organización directa)
+
+        return userOrganizations
+            .filter((item: any) => {
+                // Filtrar elementos válidos
+                return item.organization || item.id // Tiene organization anidada O es una organización directa
+            })
+            .map((item: any) => {
+                // Si tiene organization anidada (formato de login)
+                if (item.organization) {
+                    return {
+                        id: item.organization.id,
+                        name: item.organization.name,
+                        description: item.organization.description,
+                        logoUrl: item.organization.logoUrl,
+                        questionText: item.organization.questionText,
+                        role: item.role, // admin, editor, o viewer
+                    }
+                }
+
+                // Si es organización directa (formato después de crear)
+                // Necesitamos extraer el rol de userOrganizations anidado
+                const userOrg = item.userOrganizations?.[0]
+                return {
+                    id: item.id,
+                    name: item.name,
+                    description: item.description,
+                    logoUrl: item.logoUrl,
+                    questionText: item.questionText,
+                    role: userOrg?.role || 'admin', // Por defecto admin si no hay rol
+                }
+            })
     } catch (error) {
         console.error('Error getting user organizations:', error)
         return []
