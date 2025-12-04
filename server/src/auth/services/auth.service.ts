@@ -27,20 +27,20 @@ import { EmailVerificationService } from './emailVerification.service';
 export class AuthService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository:Repository<User>,
+    private readonly userRepository: Repository<User>,
     private readonly userService: UsersService,
     private jwtService: JwtService,
     private encoderService: EncoderService,
-    private notificationService:NotificationsService,
-    private emailVerificationService:EmailVerificationService,
-  ) {}
+    private notificationService: NotificationsService,
+    private emailVerificationService: EmailVerificationService,
+  ) { }
   async login(username: string, password: string): Promise<RequestUser> {
     const user = await this.userService.findOneWithPassword(username);
-    
+
     if (!user) {
       throw new UnauthorizedException('User does not exist');
     }
-    
+
     if (!bcrypt.compareSync(password, user.password)) {
       throw new UnauthorizedException('Invalid password');
     }
@@ -52,13 +52,13 @@ export class AuthService {
       { id: user.id, username: user.username },
       { expiresIn: expiresIn },
     );
-    
+
     const expiredAt = new Date();
     expiredAt.setDate(expiredAt.getDate() + expiresInDays);
-    
+
     // Remove password from response for security
     const { password: _, ...userWithoutPassword } = user;
-    
+
     return {
       ...userWithoutPassword,
       token: payload,
@@ -67,59 +67,80 @@ export class AuthService {
   }
 
   async register(data: RegisterDto): Promise<RegisterResponseDto> {
-    const username = data.username.trim().toLowerCase();
-    let user = await this.userService.findByUsernameOrEmail(username);
-    if (user) throw new ConflictException('User already exists');
-    user = await this.userService.create(data);
-    if (!user) throw new ServiceUnavailableException('Error creating user');
+    const normalizedEmail = data.email.trim().toLowerCase();
 
-    let confirmEmailToken = await this.encoderService.generateToken();
-    let expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-    this.emailVerificationService.create(data.email, confirmEmailToken, expiresAt);
+    try {
+      const user = await this.userService.create({
+        ...data,
+        email: normalizedEmail,
+      });
 
-    let confirmEmailTemplate = new ConfirmEmailTemplate(data.email, user.username, confirmEmailToken);
-    await this.notificationService.sendNotificationWithTemplate(confirmEmailTemplate);
-    return {
-      message: 'User registered successfully',
-      success: true,
-    };
+      const confirmEmailToken = await this.encoderService.generateToken();
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+      await this.emailVerificationService.create(
+        normalizedEmail,
+        confirmEmailToken,
+        expiresAt,
+      );
+
+      const template = new ConfirmEmailTemplate(
+        normalizedEmail,
+        user.username,
+        confirmEmailToken,
+      );
+
+      await this.notificationService.sendNotificationWithTemplate(template);
+
+      return {
+        message: 'User registered successfully',
+        success: true,
+      };
+
+    } catch (error) {
+      if (error.code === 'SQLITE_CONSTRAINT' || error.code === '23505') {
+        throw new ConflictException('Email or username already exists');
+      }
+
+      throw new ServiceUnavailableException('Error creating user');
+    }
   }
 
-  async changePassword(changePasswordDto: ChangePasswordDto,username:string):Promise<void>{
-    const {newPassword,oldPassword} = changePasswordDto
+  async changePassword(changePasswordDto: ChangePasswordDto, username: string): Promise<void> {
+    const { newPassword, oldPassword } = changePasswordDto
     const user = await this.userService.findOneWithPassword(username)
-    
-    if(!user)
+
+    if (!user)
       throw new NotFoundException('Username Not found')
 
-    if(newPassword === oldPassword) 
+    if (newPassword === oldPassword)
       throw new BadRequestException("The new password can't be similar to the old password")
 
-    if(!await this.encoderService.checkPassword(oldPassword,user?.password))
+    if (!await this.encoderService.checkPassword(oldPassword, user?.password))
       throw new BadRequestException('The old password does not match')
 
-    user.password = await  this.encoderService.encodePassword(newPassword);
+    user.password = await this.encoderService.encodePassword(newPassword);
     await this.userRepository.save(user)
   }
 
-  async confirmEmail(token:string){
+  async confirmEmail(token: string) {
     const emailVerification = await this.emailVerificationService.findByToken(token);
-    if(!emailVerification)
+    if (!emailVerification)
       throw new BadRequestException('Invalid token')
 
-    if(emailVerification.expiresAt < new Date())
+    if (emailVerification.expiresAt < new Date())
       throw new BadRequestException('Token expired')
 
-    if(emailVerification.usedAt)
+    if (emailVerification.usedAt)
       throw new BadRequestException('Token already used')
 
     const user = await this.userService.findByUsernameOrEmail(emailVerification.email);
-    if(!user)
+    if (!user)
       throw new NotFoundException('User not found')
 
     emailVerification.usedAt = new Date();
     user.email_confirmed = true;
-    await this.userService.update(user.id,user);
+    await this.userService.update(user.id, user);
     await this.emailVerificationService.update(emailVerification);
     return true
   }

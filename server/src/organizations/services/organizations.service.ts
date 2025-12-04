@@ -8,6 +8,7 @@ import { UserOrganization } from 'src/user_organization/entities/userOrganizatio
 import { User } from 'src/users/entities/user.entity';
 import { OrganizationRole } from 'src/common/types/userRole';
 import { AddUserOrganizationDto } from '../dto/add-userOrganiztion.dto';
+import { MediaStorageService } from 'src/media-storage/services/mediaStorage.service';
 
 @Injectable()
 export class OrganizationsService {
@@ -17,13 +18,20 @@ export class OrganizationsService {
     @InjectRepository(UserOrganization)
     private userOrganizationRepository: Repository<UserOrganization>,
     private dataSource: DataSource,
+    private readonly mediaStorageService: MediaStorageService
   ) { }
 
-  async create(createOrganizationDto: CreateOrganizationDto, user: User): Promise<Organization> {
-    const organization = this.organizationRepository.create({
-      ...createOrganizationDto
+  async create(createOrganizationDto: CreateOrganizationDto, user: User,file?:Express.Multer.File): Promise<Organization> {
+    let logoUrl: string | undefined;
+    if (file) {
+      const mediaUrl =  await this.mediaStorageService.uploadFile(file, file.filename);
+      logoUrl = mediaUrl;
+    }
+    const org = this.organizationRepository.create({
+      ...createOrganizationDto,
+      logoUrl: logoUrl
     });
-    await this.organizationRepository.save(organization)
+    let organization = await this.organizationRepository.save(org)
 
     const userOrganization = this.userOrganizationRepository.create({
       userId: user.id,

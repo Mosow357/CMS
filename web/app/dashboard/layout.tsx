@@ -8,11 +8,16 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
 import { DynamicBreadcrumb } from "@/components/dashboard/dynamicBreadcrumb";
+import { getUserOrganizationsAction } from "@/lib/actions/organizations";
 
-export default function LayoutPage({ children }: { children: React.ReactNode }) {
+export default async function LayoutPage({ children }: { children: React.ReactNode }) {
+  // Fetch organizations for the sidebar
+  const organizationsResult = await getUserOrganizationsAction()
+  const organizations = organizationsResult.success && organizationsResult.data ? organizationsResult.data : []
+
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar organizations={organizations} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4 max-h-1/2">

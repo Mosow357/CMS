@@ -59,6 +59,20 @@ export class UsersService {
     ],
   });
 }
+  async findByEmail(value: string): Promise<User | null> {
+  return this.usersRepository.findOne({
+    where: [
+      { email: value },
+    ],
+  });
+}
+  async findByUsername(value: string): Promise<User | null> {
+  return this.usersRepository.findOne({
+    where: [
+      { username: value },
+    ],
+  });
+}
 
   async findOneWithPassword(username: string): Promise<User | null> {
     return this.usersRepository.findOne({
