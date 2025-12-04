@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
@@ -18,7 +18,7 @@ export class TestimonialsService {
   async findAll(filters:TestimonialsParamsDto,userId:string): Promise<Testimonial[]> {
     let org = await this.userOrganization.findUserOrganization(userId,filters.organitationId);
     if(!org){
-      throw new NotFoundException(`User is not part of the organization ${filters.organitationId}`);
+      throw new UnauthorizedException(`User is not part of the organization ${filters.organitationId}`);
     }
     const { page = 1, itemsPerPage = 20, sort = 'ASC' } = filters;
     const limit = itemsPerPage;
