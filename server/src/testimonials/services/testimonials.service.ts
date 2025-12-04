@@ -6,6 +6,7 @@ import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
 import { TestimonialsParamsDto } from '../dto/testimonials.params.dto';
 import { OrganizationsService } from 'src/organizations/services/organizations.service';
 import { UserOrganizationService } from 'src/user_organization/services/userOrganization.service';
+import { WallTestimonialsParamsDto } from '../dto/wallTestimonials.params.dto';
 
 @Injectable()
 export class TestimonialsService {
@@ -34,6 +35,24 @@ export class TestimonialsService {
       where:{
         organitation_id: filters.organitationId,
         status: filters.status,
+      }
+    });
+  }
+
+  async findAllWallTestimonials(params:WallTestimonialsParamsDto): Promise<Testimonial[]> {
+    const { page = 1, itemsPerPage = 20, sort = 'ASC' } = params;
+    const limit = itemsPerPage;
+    const offset = (page - 1) * itemsPerPage;
+    
+    return this.testimonialsRepository.find({
+      skip: offset,
+      take: limit,
+      order: {
+        createdAt: sort,
+      },
+      where:{
+        organitation_id: params.organitationId,
+        status: 'published',
       }
     });
   }

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
 import { Type } from "class-transformer"
-import { IsNumber, IsOptional, IsString, Min, } from "class-validator"
+import { IsIn, IsNumber, IsOptional, IsString, Min, } from "class-validator"
 
 export class QueryParamsDto {
     @ApiProperty({
@@ -38,5 +38,6 @@ export class QueryParamsDto {
     @ApiPropertyOptional()
     @IsOptional()
     @IsString()
+    @IsIn(['ASC', 'DESC'])
     sort?: 'ASC' | 'DESC' = 'ASC'
 }

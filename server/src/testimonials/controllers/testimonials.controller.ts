@@ -29,6 +29,7 @@ import { TestimonialResponseDto } from '../dto/testimonialResponse.dto';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { InviteTestimonialDto } from '../dto/invite-testimonial.dto';
 import { TestimonialsInvitationService } from '../services/testimonialsInvitation.service';
+import { WallTestimonialsParamsDto } from '../dto/wallTestimonials.params.dto';
 
 @Controller('testimonials')
 export class TestimonialsController {
@@ -73,7 +74,6 @@ export class TestimonialsController {
   @Get()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Retrieve a list of testimonials with optional filtering and pagination' })
-  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     type: TestimonialResponseDto,
@@ -85,6 +85,20 @@ export class TestimonialsController {
   ): Promise<Testimonial[]> {
     return this.testimonialsService.findAll(param,user.id);
   }
+  @Get("wall")
+  @Public()
+  @ApiOperation({ summary: 'Retrieve a list of published testimonials of an organization' })
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: TestimonialResponseDto,
+    isArray: true,
+  })
+  wallTestimonials(
+    @Query() params: WallTestimonialsParamsDto,
+  ): Promise<Testimonial[]> {
+    return this.testimonialsService.findAllWallTestimonials(params);
+  }
+
 
   @Post('invite')
   @ApiBearerAuth()
