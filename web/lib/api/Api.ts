@@ -155,6 +155,19 @@ export interface TestimonialResponseDto {
   category_name?: string;
 }
 
+export interface InviteTestimonialDto {
+  /**
+   * List of email addresses to send the testimonial invitation to.
+   * @example ["customer1@mail.com","customer2@mail.com"]
+   */
+  emails: string[];
+  /**
+   * Organization ID that is sending the testimonial request.
+   * @example "c2ca55c2-d033-4320-a7b4-fb096b0db9e2"
+   */
+  organizationId: string;
+}
+
 export type UpdateTestimonialDto = object;
 
 export type CreateCategoryDto = object;
@@ -686,6 +699,28 @@ export class Api<
      * No description
      *
      * @tags Testimonials
+     * @name TestimonialsControllerInviteTestimonials
+     * @summary Invite an end customer (or many) to submit a testimonial.
+     * @request POST:/testimonials/invite
+     * @secure
+     */
+    testimonialsControllerInviteTestimonials: (
+      data: InviteTestimonialDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/testimonials/invite`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Testimonials
      * @name TestimonialsControllerFindOne
      * @request GET:/testimonials/{id}
      * @secure
@@ -855,8 +890,9 @@ export class Api<
     /**
      * No description
      *
-     * @tags organizations
+     * @tags Organizations
      * @name OrganizationsControllerCreate
+     * @summary Create a organization
      * @request POST:/organizations
      * @secure
      */
@@ -869,14 +905,14 @@ export class Api<
         method: "POST",
         body: data,
         secure: true,
-        type: ContentType.Json,
+        type: ContentType.FormData,
         ...params,
       }),
 
     /**
      * No description
      *
-     * @tags organizations
+     * @tags Organizations
      * @name OrganizationsControllerFindUserOrganizations
      * @request GET:/organizations
      * @secure
@@ -894,7 +930,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags organizations
+     * @tags Organizations
      * @name OrganizationsControllerFindOne
      * @request GET:/organizations/{id}
      * @secure
@@ -910,7 +946,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags organizations
+     * @tags Organizations
      * @name OrganizationsControllerUpdate
      * @request PATCH:/organizations/{id}
      * @secure
@@ -932,7 +968,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags organizations
+     * @tags Organizations
      * @name OrganizationsControllerRemove
      * @request DELETE:/organizations/{id}
      * @secure
@@ -948,7 +984,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags organizations
+     * @tags Organizations
      * @name OrganizationsControllerAddUserToOrganization
      * @request POST:/organizations/{orgId}/users
      * @secure
@@ -970,7 +1006,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags organizations
+     * @tags Organizations
      * @name OrganizationsControllerChangeUserRole
      * @request PATCH:/organizations/{orgId}/users/{userId}/role
      * @secure
@@ -993,7 +1029,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags organizations
+     * @tags Organizations
      * @name OrganizationsControllerRemoveUserFromOrganization
      * @request DELETE:/organizations/{orgId}/users/{userId}
      * @secure
