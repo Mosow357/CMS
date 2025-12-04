@@ -30,16 +30,24 @@ export async function getTestimonialsAction(filters?: {
             {
                 organitationId: currentOrg.id,
                 status: filters?.status,
-                category_id: filters?.categoryId,
                 page: filters?.page || 1,
                 itemsPerPage: filters?.itemsPerPage || 10,
             },
             { format: 'json' }
         )
 
+        const testimonials = response.data as unknown as any[]
+
+        // La API no devuelve metadata de paginación, así que calculamos el total
+        // Nota: Esto es una limitación - idealmente la API debería devolver el total
         return {
             success: true,
-            data: response.data as unknown as any[]
+            data: testimonials,
+            pagination: {
+                page: filters?.page || 1,
+                itemsPerPage: filters?.itemsPerPage || 10,
+                total: testimonials.length, // Esto solo muestra los items de la página actual
+            }
         }
     } catch (error: any) {
         console.error('Error getting testimonials:', error)

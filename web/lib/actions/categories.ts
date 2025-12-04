@@ -32,15 +32,14 @@ export async function getCategoriesAction() {
             { format: 'json' }
         )
 
-        console.log('📦 Categories response:', {
-            status: response.status,
-            hasData: !!response.data,
-            dataType: typeof response.data,
-            isArray: Array.isArray(response.data)
-        })
-
         // Asegurarse de que tenemos un array
         const categories = Array.isArray(response.data) ? response.data : []
+
+        console.log('📦 Categories response:', {
+            status: response.status,
+            categoriesCount: categories.length,
+            isArray: Array.isArray(categories)
+        })
 
         console.log(`✅ Found ${categories.length} categories`)
 
@@ -125,7 +124,6 @@ export async function createCategoryAction(data: {
 
         // Crear categoría
         await apiClient.categories.categoriesControllerCreate(
-            currentOrg.id,
             data as any,
             { format: 'json' }
         )

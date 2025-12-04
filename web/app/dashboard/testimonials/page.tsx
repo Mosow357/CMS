@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { getTestimonialsAction } from '@/lib/actions/testimonials'
 import { TestimonialActions } from '@/components/dashboard/testimonial-actions'
 import { UserAvatar } from '@/components/ui/user-avatar'
+import { Pagination } from '@/components/ui/pagination'
 import { CheckCircle2, Clock, Eye, XCircle, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -65,7 +66,8 @@ async function TestimonialsContent({
   page?: string
 }) {
   // Obtener testimonios del backend
-  const statusFilter = status?.toUpperCase()
+  // La API espera el status en minúsculas: "pending", "approved", "published", "rejected"
+  const statusFilter = status?.toLowerCase()
   const result = await getTestimonialsAction({
     status: statusFilter,
     page: parseInt(page || '1'),
@@ -73,6 +75,7 @@ async function TestimonialsContent({
   })
 
   const testimonials = result.success ? result.data : []
+  const pagination = result.success && result.pagination ? result.pagination : null
 
   // Determinar el título según el filtro
   const getTitle = () => {

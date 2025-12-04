@@ -248,3 +248,87 @@ export async function logoutAction(): Promise<void> {
 
   redirect('/login')
 }
+
+/**
+ * Cambia la contraseña del usuario actual
+ */
+export async function changePasswordAction(data: {
+  oldPassword: string
+  newPassword: string
+}): Promise<ActionResponse<{ message: string }>> {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('auth_token')?.value
+
+    if (!token) {
+      return {
+        success: false,
+        error: 'No autenticado'
+      }
+    }
+
+    const apiClient = createApiClient(token)
+
+    await apiClient.auth.authControllerChangePassword(
+      {
+        oldPassword: data.oldPassword,
+        newPassword: data.newPassword,
+      } as any,
+      { format: 'json' }
+    )
+
+    return {
+      success: true,
+      data: { message: 'Contraseña actualizada exitosamente' }
+    }
+  } catch (error: any) {
+    console.error('Change password error:', error)
+
+    let errorMessage = 'Error al cambiar la contraseña'
+    if (error?.error?.message) {
+      errorMessage = error.error.message
+    } else if (typeof error?.error === 'string') {
+      errorMessage = error.error
+    } else if (error?.message) {
+      errorMessage = error.message
+    }
+
+    return {
+      success: false,
+      error: errorMessage
+    }
+  }
+}
+
+/**
+ * Valida el token actual del usuario
+ */
+export async function validateTokenAction(): Promise<ActionResponse<{ valid: boolean }>> {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('auth_token')?.value
+
+    if (!token) {
+      return {
+        success: false,
+        error: 'No hay token'
+      }
+    }
+
+    const apiClient = createApiClient(token)
+
+    await apiClient.auth.authControllerValidateToken({ format: 'json' })
+
+    return {
+      success: true,
+      data: { valid: true }
+    }
+  } catch (error: any) {
+    console.error('Validate token error:', error)
+
+    return {
+      success: false,
+      error: 'Token inválido o expirado'
+    }
+  }
+}

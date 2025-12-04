@@ -154,10 +154,12 @@ export function TestimonialPreviewDialog({
             <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-3 text-xl">
-                        <UserAvatar name={testimonial.author.name} />
+                        <UserAvatar name={testimonial.author?.name || testimonial.client_name || 'Usuario'} />
                         <div className="flex flex-col">
-                            <span>{testimonial.author.name}</span>
-                            <span className="text-sm font-normal text-muted-foreground">{testimonial.author.title}</span>
+                            <span>{testimonial.author?.name || testimonial.client_name || 'Usuario'}</span>
+                            <span className="text-sm font-normal text-muted-foreground">
+                                {testimonial.author?.title || testimonial.author?.email || testimonial.client_email || ''}
+                            </span>
                         </div>
                     </DialogTitle>
                 </DialogHeader>
@@ -175,7 +177,7 @@ export function TestimonialPreviewDialog({
                             </div>
                             <div className="flex items-center text-sm text-muted-foreground">
                                 <Calendar className="w-4 h-4 mr-1" />
-                                {new Date(testimonial.created_at).toLocaleDateString('es-ES', {
+                                {new Date(testimonial.created_at || testimonial.createdAt || Date.now()).toLocaleDateString('es-ES', {
                                     year: 'numeric', month: 'long', day: 'numeric'
                                 })}
                             </div>
@@ -196,10 +198,10 @@ export function TestimonialPreviewDialog({
                         <div className="flex flex-wrap gap-2 pt-2 border-t">
                             <Badge variant="secondary" className="flex items-center gap-1">
                                 <Tag className="w-3 h-3" />
-                                {testimonial.category.name}
+                                {testimonial.category?.name || testimonial.category_name || 'Sin categoría'}
                             </Badge>
-                            {testimonial.tags.map(tag => (
-                                <Badge key={tag} variant="outline" className="text-muted-foreground">
+                            {(testimonial.tags || testimonial.tagIds || []).map((tag: string, index: number) => (
+                                <Badge key={tag || index} variant="outline" className="text-muted-foreground">
                                     #{tag}
                                 </Badge>
                             ))}

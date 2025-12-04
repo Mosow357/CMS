@@ -2,7 +2,7 @@ import * as React from "react"
 
 import { NavMain } from "@/components/dashboard/sidebar/nav-main";
 import { NavUser } from "@/components/dashboard/sidebar/nav-user";
-import { TeamSwitcher } from "@/components/dashboard/sidebar/team-switcher";
+import { OrganizationSwitcher } from "@/components/dashboard/sidebar/organization-switcher";
 import { EditorInvite } from "@/components/dashboard/sidebar/editor-invite";
 import {
   Sidebar,
@@ -27,12 +27,15 @@ export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sideb
   const currentOrg = await getCurrentOrganization()
   const stats = await getTestimonialStatsAction()
 
-  // Transformar organizaciones al formato que espera TeamSwitcher
+  // TODO: Obtener miembros de la organización actual cuando implementemos las funciones
+  const members: any[] = []
+
+  // Transformar organizaciones al formato que espera OrganizationSwitcher
   const teams = organizations.map((org: any) => ({
     id: org.id,
     name: org.name,
-    logo: "GalleryVerticalEnd",
-    plan: org.role === 'admin' ? 'Admin' : 'Editor',
+    logo: org.logoUrl || "GalleryVerticalEnd", // Usar icono por defecto si no hay logo
+    plan: org.role === 'admin' ? 'Administrador' : org.role === 'editor' ? 'Editor' : 'Viewer',
   }))
 
   // Datos del usuario
@@ -97,8 +100,11 @@ export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sideb
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={teams} currentOrgId={currentOrg?.id} />
-        <EditorInvite />
+        <OrganizationSwitcher teams={teams} currentOrgId={currentOrg?.id} />
+        <EditorInvite
+          editors={members}
+          currentOrgId={currentOrg?.id}
+        />
       </SidebarHeader>
       <SidebarContent>
         <SidebarLogo src="/logo.webp" alt="My CMS" />

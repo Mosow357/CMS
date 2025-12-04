@@ -41,24 +41,20 @@ export async function getUserOrganizations() {
             return []
         }
 
-        const organizations = JSON.parse(userOrgsCookie)
+        const userOrganizations = JSON.parse(userOrgsCookie)
 
-        console.log('📦 Organizaciones desde cookies:', organizations)
+        console.log('📦 UserOrganizations desde cookies:', userOrganizations)
 
-        // El backend devuelve un array de organizaciones directamente
-        // con userOrganizations anidado dentro de cada organización
-        return organizations.map((org: any) => {
-            // Buscar el rol del usuario en esta organización
-            const userOrg = org.userOrganizations?.[0]
-
-            return {
-                id: org.id,
-                name: org.name,
-                description: org.description,
-                logoUrl: org.logoUrl,
-                role: userOrg?.role || 'editor',
-            }
-        })
+        // El backend devuelve un array de UserOrganization
+        // Cada elemento tiene: { id, userId, organizationId, role, organization: {...} }
+        return userOrganizations.map((userOrg: any) => ({
+            id: userOrg.organization.id,
+            name: userOrg.organization.name,
+            description: userOrg.organization.description,
+            logoUrl: userOrg.organization.logoUrl,
+            questionText: userOrg.organization.questionText,
+            role: userOrg.role, // admin, editor, o viewer
+        }))
     } catch (error) {
         console.error('Error getting user organizations:', error)
         return []
@@ -171,13 +167,22 @@ export async function getTestimonialStatsAction() {
 
         console.log(`✅ Found ${testimonials.length} testimonials`)
 
-        // Calcular estadísticas
+        // Log de ejemplo para ver el formato del status
+        if (testimonials.length > 0) {
+            console.log('📝 Ejemplo de testimonial:', {
+                id: testimonials[0].id,
+                status: testimonials[0].status,
+                statusType: typeof testimonials[0].status
+            })
+        }
+
+        // Calcular estadísticas - La API devuelve status en MAYÚSCULAS
         const stats = {
             total: testimonials.length,
-            pending: testimonials.filter((t: any) => t.status === 'PENDING').length,
-            approved: testimonials.filter((t: any) => t.status === 'APPROVED').length,
-            published: testimonials.filter((t: any) => t.status === 'PUBLISHED').length,
-            rejected: testimonials.filter((t: any) => t.status === 'REJECTED').length,
+            pending: testimonials.filter((t: any) => t.status?.toUpperCase() === 'PENDING').length,
+            approved: testimonials.filter((t: any) => t.status?.toUpperCase() === 'APPROVED').length,
+            published: testimonials.filter((t: any) => t.status?.toUpperCase() === 'PUBLISHED').length,
+            rejected: testimonials.filter((t: any) => t.status?.toUpperCase() === 'REJECTED').length,
         }
 
         console.log('📈 Stats calculated:', stats)
