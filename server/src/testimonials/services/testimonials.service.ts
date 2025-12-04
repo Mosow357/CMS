@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
 import { TestimonialsParamsDto } from '../dto/testimonials.params.dto';
-import { OrganizationsService } from 'src/organizations/services/organizations.service';
 import { UserOrganizationService } from 'src/user_organization/services/userOrganization.service';
+
 
 @Injectable()
 export class TestimonialsService {
@@ -49,7 +49,7 @@ export class TestimonialsService {
     return testimonial;
   }
   
-  async findByOrganitation(organitationId: string, param:QueryParamsDto): Promise<Testimonial[]> {
+  async findByOrganitation(organitationId: string, param:TestimonialsParamsDto): Promise<Testimonial[]> {
     const {status} = param
     return this.testimonialsRepository.find({
       where: status ? { status,organitation_id: organitationId } : {organitation_id: organitationId},
