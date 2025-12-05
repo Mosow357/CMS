@@ -22,7 +22,7 @@ export class CreateTestimonialsService {
     file: Express.Multer.File,
     filename: string,
   ): Promise<Testimonial> {
-    const org = await this.organizationService.findOne(createTestimonialDto.organitation_id);
+    const org = await this.organizationService.findOneUnsafe(createTestimonialDto.organitation_id);
     if (!org) {
       throw new NotFoundException(`Organization ${createTestimonialDto.organitation_id} does not exist`);
     }
@@ -51,7 +51,7 @@ export class CreateTestimonialsService {
     }
   }
   async createTestimonial(createTestimonialDto: CreateTestimonialDto) {
-    const org = await this.organizationService.findOne(createTestimonialDto.organitation_id);
+    const org = await this.organizationService.findOneUnsafe(createTestimonialDto.organitation_id);
     if (!org) {
       throw new NotFoundException(`Organization ${createTestimonialDto.organitation_id} does not exist`);
     }

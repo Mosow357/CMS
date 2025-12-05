@@ -1,4 +1,5 @@
 import { BaseEntity } from "src/common/entities/base.entity";
+import { OrganizationRole } from "src/common/types/userRole";
 import { Column, Entity, Index } from "typeorm";
 
 @Entity('invitations')
@@ -10,7 +11,7 @@ export class Invitation extends BaseEntity {
     organizationId: string;
 
     @Column()
-    role_asigned: string;
+    role_asigned: OrganizationRole;
 
     @Index()
     @Column()

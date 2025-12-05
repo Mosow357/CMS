@@ -6,6 +6,8 @@ import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
 import { TestimonialsParamsDto } from '../dto/testimonials.params.dto';
 import { UserOrganizationService } from 'src/user_organization/services/userOrganization.service';
 import { WallTestimonialsParamsDto } from '../dto/wallTestimonials.params.dto';
+import { TestimonialStatus } from '../enums/testimonialStatus';
+import { OrganizationRole } from 'src/common/types/userRole';
 
 
 @Injectable()
@@ -13,64 +15,65 @@ export class TestimonialsService {
   constructor(
     @InjectRepository(Testimonial)
     private testimonialsRepository: Repository<Testimonial>,
-    private readonly userOrganization:UserOrganizationService
-  ) {}
+    private readonly userOrganization: UserOrganizationService
+  ) { }
 
-  async findAll(filters:TestimonialsParamsDto,userId:string): Promise<Testimonial[]> {
-    let org = await this.userOrganization.findUserOrganization(userId,filters.organitationId);
-    if(!org){
+  async findAll(filters: TestimonialsParamsDto, userId: string): Promise<Testimonial[]> {
+    let org = await this.userOrganization.findUserOrganization(userId, filters.organitationId);
+    if (!org) {
       throw new UnauthorizedException(`User is not part of the organization ${filters.organitationId}`);
     }
     const { page = 1, itemsPerPage = 20, sort = 'ASC' } = filters;
     const limit = itemsPerPage;
     const offset = (page - 1) * itemsPerPage;
-    
+
     let createdAtFilter;
 
-if (filters.createdFrom && filters.createdTo) {
-  createdAtFilter = Between(
-    new Date(filters.createdFrom),
-    new Date(filters.createdTo),
-  );
-} else if (filters.createdFrom) {
-  createdAtFilter = MoreThanOrEqual(new Date(filters.createdFrom));
-} else if (filters.createdTo) {
-  createdAtFilter = LessThanOrEqual(new Date(filters.createdTo));
-}
+    if (filters.createdFrom && filters.createdTo) {
+      createdAtFilter = Between(
+        new Date(filters.createdFrom),
+        new Date(filters.createdTo),
+      );
+    } else if (filters.createdFrom) {
+      createdAtFilter = MoreThanOrEqual(new Date(filters.createdFrom));
+    } else if (filters.createdTo) {
+      createdAtFilter = LessThanOrEqual(new Date(filters.createdTo));
+    }
 
-return this.testimonialsRepository.find({
-  relations: ['category', 'tags'],
-  skip: offset,
-  take: limit,
-  order: { createdAt: sort },
-  where: {
-    organitation_id: filters.organitationId,
-    status: filters.status,
-    stars_rating: filters.startsRating,
-    ...(createdAtFilter && { createdAt: createdAtFilter }),
-  },
-});
+    return this.testimonialsRepository.find({
+      relations: ['category', 'tags'],
+      skip: offset,
+      take: limit,
+      order: { createdAt: sort },
+      where: {
+        organitation_id: filters.organitationId,
+        status: filters.status,
+        stars_rating: filters.startsRating,
+        ...(createdAtFilter && { createdAt: createdAtFilter }),
+      },
+    });
   }
 
-  async findAllWallTestimonials(params:WallTestimonialsParamsDto): Promise<Testimonial[]> {
+  async findAllWallTestimonials(params: WallTestimonialsParamsDto): Promise<Testimonial[]> {
     const { page = 1, itemsPerPage = 20, sort = 'ASC' } = params;
     const limit = itemsPerPage;
     const offset = (page - 1) * itemsPerPage;
-    
+
     return this.testimonialsRepository.find({
       skip: offset,
       take: limit,
       order: {
         createdAt: sort,
       },
-      where:{
+      where: {
         organitation_id: params.organitationId,
         status: 'published',
       }
     });
   }
-  
-  async findOne(id: string): Promise<Testimonial> {
+
+  async findOne(id: string, userId: string): Promise<Testimonial> {
+
     const testimonial = await this.testimonialsRepository.findOne({
       where: { id },
       relations: ['category', 'tags'],
@@ -78,13 +81,17 @@ return this.testimonialsRepository.find({
     if (!testimonial) {
       throw new NotFoundException(`Testimonial with ID ${id} not found`);
     }
+    let org = await this.userOrganization.findUserOrganization(userId, testimonial.organitation_id);
+    if (!org) {
+      throw new UnauthorizedException(`User is not part of the organization ${testimonial.organitation_id}`);
+    }
     return testimonial;
   }
-  
-  async findByOrganitation(organitationId: string, param:TestimonialsParamsDto): Promise<Testimonial[]> {
-    const {status} = param
+
+  async findByOrganitation(organitationId: string, param: TestimonialsParamsDto): Promise<Testimonial[]> {
+    const { status } = param
     return this.testimonialsRepository.find({
-      where: status ? { status,organitation_id: organitationId } : {organitation_id: organitationId},
+      where: status ? { status, organitation_id: organitationId } : { organitation_id: organitationId },
       relations: ['category', 'tags'],
     });
   }
@@ -96,17 +103,60 @@ return this.testimonialsRepository.find({
     });
   }
 
+  async changeStatus(testimonialId: string, userId: string, status: TestimonialStatus): Promise<Testimonial> {
+    const testimonial = await this.testimonialsRepository.findOne({
+      where: { id: testimonialId }
+    });
+    if (!testimonial) {
+      throw new NotFoundException(`Testimonial with ID ${testimonialId} not found`);
+    }
+    let userOrg = await this.userOrganization.findUserOrganization(userId, testimonial.organitation_id);
+    if (!userOrg) {
+      throw new UnauthorizedException(`User is not part of the organization ${testimonial.organitation_id}`);
+    }
+    //if the status is the same, return the testimonial
+    if (testimonial.status === status) {
+      return testimonial;
+    }
+    //only administrators can publish testimonials
+    if (status == TestimonialStatus.PUBLISHED && userOrg.role !== OrganizationRole.ADMINISTRATOR)
+      throw new UnauthorizedException(`Only administrators can publish testimonials for the organization ${testimonial.organitation_id}`);
+
+    testimonial.status = status;
+    return this.testimonialsRepository.save(testimonial);
+  }
+
   async update(
-    id: string,
+    testimonialId: string,
+    userId: string,
     updateTestimonialDto: UpdateTestimonialDto,
   ): Promise<Testimonial> {
-    const testimonial = await this.findOne(id);
+
+    const testimonial = await this.testimonialsRepository.findOne({
+      where: { id: testimonialId }
+    });
+    if (!testimonial) {
+      throw new NotFoundException(`Testimonial with ID ${testimonialId} not found`);
+    }
+    let org = await this.userOrganization.findUserOrganization(userId, testimonial.organitation_id);
+    if (!org) {
+      throw new UnauthorizedException(`User is not part of the organization ${testimonial.organitation_id}`);
+    }
     Object.assign(testimonial, updateTestimonialDto);
     return this.testimonialsRepository.save(testimonial);
   }
 
-  async remove(id: string): Promise<void> {
-    const testimonial = await this.findOne(id);
+  async remove(testimonialId: string, userId: string): Promise<void> {
+    const testimonial = await this.testimonialsRepository.findOne({
+      where: { id: testimonialId }
+    });
+    if (!testimonial) {
+      throw new NotFoundException(`Testimonial with ID ${testimonialId} not found`);
+    }
+    let org = await this.userOrganization.findUserOrganization(userId, testimonial.organitation_id);
+    if (!org) {
+      throw new UnauthorizedException(`User is not part of the organization ${testimonial.organitation_id}`);
+    }
     await this.testimonialsRepository.remove(testimonial);
   }
 }

@@ -9,7 +9,7 @@ export class TestimonialInvitationEmailTemplate extends EmailNotificationBase{
         this.subject = `You're Invited to Share Your Testimonial!`;
         this.variables = {
             token: input.token,
-            domain: API_BASE_URL + "testimonials/submit"
+            domain: API_BASE_URL + "/testimonials/submit"
         };
     }
 }

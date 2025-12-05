@@ -30,6 +30,7 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { InviteTestimonialDto } from '../dto/invite-testimonial.dto';
 import { TestimonialsInvitationService } from '../services/testimonialsInvitation.service';
 import { WallTestimonialsParamsDto } from '../dto/wallTestimonials.params.dto';
+import { ChangeStatusDto } from '../dto/change-status.dto';
 
 @Controller('testimonials')
 export class TestimonialsController {
@@ -46,7 +47,8 @@ export class TestimonialsController {
   @ApiOperation({ summary: 'Create a testimonial with or without media attachment' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file', {}))
-  create(@Body() createTestimonialDto: CreateTestimonialDto,
+  create(
+    @Body() createTestimonialDto: CreateTestimonialDto,
     @UploadedFile(new ParseFilePipeBuilder()
       .addMaxSizeValidator({ maxSize: 50 * 1024 * 1024 })
       .build({
@@ -99,7 +101,6 @@ export class TestimonialsController {
     return this.testimonialsService.findAllWallTestimonials(params);
   }
 
-
   @Post('invite')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
@@ -112,8 +113,8 @@ export class TestimonialsController {
 
   @Get(':id')
   @ApiBearerAuth()
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.testimonialsService.findOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string,@GetUser() user) {
+    return this.testimonialsService.findOne(id,user.id);
   }
 
   @Patch(':id')
@@ -121,13 +122,22 @@ export class TestimonialsController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTestimonialDto: UpdateTestimonialDto,
+    @GetUser() user
   ) {
-    return this.testimonialsService.update(id, updateTestimonialDto);
+    return this.testimonialsService.update(id, user.id,updateTestimonialDto);
+  }
+  @Post('change-status')
+  @ApiBearerAuth()
+  changeStatus(
+    @Body() body:ChangeStatusDto,
+    @GetUser() user
+  ) {
+    return this.testimonialsService.changeStatus(body.testimonialId, user.id, body.status);
   }
 
   @Delete(':id')
   @ApiBearerAuth()
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.testimonialsService.remove(id);
+  remove(@Param('id', ParseUUIDPipe) id: string,@GetUser() user) {
+    return this.testimonialsService.remove(id,user.id);
   }
 }

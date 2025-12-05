@@ -21,13 +21,19 @@ export class inviteUserToOrganizationService {
         private readonly encoderService: EncoderService,
     ) { }
 
-    async execute(input: InviteUserToOrganizationDto) {
+    async execute(input: InviteUserToOrganizationDto, userId:string) {
+        // Verify organization exists
+        const organization = await this.organizationsService.findOneUnsafe(input.organizationId);
+        if (!organization) throw new NotFoundException('Organization not found');
+        // Verify user is admin of the organization
+        const userOrg = await this.userOrganizationService.findUserOrganization(userId, input.organizationId);
+        if(!userOrg || userOrg.role !== OrganizationRole.ADMINISTRATOR)
+            throw new ConflictException('Only administrators can invite users to the organization');
+        // Verify invited user exists
         const invitedUser = await this.userService.findByUsernameOrEmail(input.email);
         if (!invitedUser) throw new NotFoundException('User not found');
 
-        const organization = await this.organizationsService.findOne(input.organizationId);
-        if (!organization) throw new NotFoundException('Organization not found');
-
+        // Verify user is not already in the organization
         const existsUserInOrg = await this.userOrganizationService.findUserOrganization(invitedUser.id, input.organizationId);
         if (existsUserInOrg) throw new ConflictException('User already member of the organization');
 
@@ -50,7 +56,6 @@ export class inviteUserToOrganizationService {
             user_id: invitedUser.id,
             token_hashed: token
         });
-
         return this.notificationService.sendNotificationWithTemplate(notification);
     }
 }
