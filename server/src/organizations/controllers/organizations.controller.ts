@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
-  Query,
   HttpCode,
   HttpStatus,
   UseInterceptors,
@@ -30,7 +29,7 @@ export class OrganizationsController {
 
   @Post()
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a organization' })
+  @ApiOperation({ summary: 'Create an organization. For organization logo add "file" attribute with the image file' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file', {}))
   create(
@@ -54,8 +53,8 @@ export class OrganizationsController {
 
   @Get(':id')
   @ApiBearerAuth()
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.organizationsService.findOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string,@GetUser() user:User) {
+    return this.organizationsService.findOne(id,user.id);
   }
 
   @Patch(':id')
@@ -63,14 +62,15 @@ export class OrganizationsController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateorganizationDto: UpdateOrganizationDto,
+    @GetUser() user:User
   ) {
-    return this.organizationsService.update(id, updateorganizationDto);
+    return this.organizationsService.update(id,user.id, updateorganizationDto);
   }
 
   @Delete(':id')
   @ApiBearerAuth()
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.organizationsService.remove(id);
+  remove(@Param('id', ParseUUIDPipe) id: string,@GetUser() user:User) {
+    return this.organizationsService.remove(id,user.id);
   }
 
   //? ====================== USER ORGANIZATION =====================
