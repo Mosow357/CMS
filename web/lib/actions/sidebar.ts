@@ -58,6 +58,7 @@ export async function getUserOrganizations() {
                 // Si tiene organization anidada (formato de login)
                 if (item.organization) {
                     return {
+                        userOrganizationId: item.id, // ID único de la relación user-org
                         id: item.organization.id,
                         name: item.organization.name,
                         description: item.organization.description,
@@ -71,6 +72,7 @@ export async function getUserOrganizations() {
                 // Necesitamos extraer el rol de userOrganizations anidado
                 const userOrg = item.userOrganizations?.[0]
                 return {
+                    userOrganizationId: userOrg?.id || item.id, // ID único de la relación
                     id: item.id,
                     name: item.name,
                     description: item.description,
@@ -79,6 +81,20 @@ export async function getUserOrganizations() {
                     role: userOrg?.role || 'admin', // Por defecto admin si no hay rol
                 }
             })
+
+        // Deduplicar organizaciones: si un usuario tiene la misma org con múltiples roles,
+        // usar el rol más alto (admin > editor > viewer)
+        const roleHierarchy: Record<string, number> = { admin: 3, editor: 2, viewer: 1 }
+        const orgMap = new Map<string, any>()
+
+        organizations.forEach((org: any) => {
+            const existing = orgMap.get(org.id)
+            if (!existing || roleHierarchy[org.role] > roleHierarchy[existing.role]) {
+                orgMap.set(org.id, org)
+            }
+        })
+
+        return Array.from(orgMap.values())
     } catch (error) {
         console.error('Error getting user organizations:', error)
         return []
@@ -119,13 +135,20 @@ export async function switchOrganizationAction(organizationId: string) {
         const userOrgs = JSON.parse(userOrgsCookie)
 
         // Buscar la organización seleccionada
-        const selectedOrg = userOrgs.find(
-            (org: any) => org.id === organizationId
-        )
+        // Puede estar en formato: { organization: {...} } o directamente { id, name, ... }
+        const selectedUserOrg = userOrgs.find((item: any) => {
+            if (item.organization) {
+                return item.organization.id === organizationId
+            }
+            return item.id === organizationId
+        })
 
-        if (!selectedOrg) {
+        if (!selectedUserOrg) {
             return { success: false, error: 'Organización no encontrada' }
         }
+
+        // Extraer la organización del formato correcto
+        const selectedOrg = selectedUserOrg.organization || selectedUserOrg
 
         // Actualizar la cookie de organización actual
         const cookieOptions = {
@@ -140,6 +163,8 @@ export async function switchOrganizationAction(organizationId: string) {
             JSON.stringify(selectedOrg),
             cookieOptions
         )
+
+        console.log('✅ Organización cambiada a:', selectedOrg.name)
 
         return { success: true, data: selectedOrg }
     } catch (error: any) {

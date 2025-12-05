@@ -31,12 +31,18 @@ export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sideb
   const members: any[] = []
 
   // Transformar organizaciones al formato que espera OrganizationSwitcher
-  const teams = organizations.map((org: any) => ({
-    id: org.id,
-    name: org.name,
-    logo: org.logoUrl || "GalleryVerticalEnd", // Usar icono por defecto si no hay logo
-    plan: org.role === 'admin' ? 'Administrador' : org.role === 'editor' ? 'Editor' : 'Viewer',
-  }))
+  // Agregar indicador de rol al nombre para distinguir múltiples roles en la misma org
+  const teams = organizations.map((org: any) => {
+    const roleIndicator = org.role === 'admin' ? '(A)' : org.role === 'editor' ? '(E)' : '(V)'
+    return {
+      id: org.userOrganizationId, // Key único: ID de la relación user-org
+      orgId: org.id, // ID real de la organización para switchOrganizationAction
+      name: `${org.name} ${roleIndicator}`,
+      logo: org.logoUrl || "GalleryVerticalEnd",
+      plan: org.role === 'admin' ? 'Administrador' : org.role === 'editor' ? 'Editor' : 'Viewer',
+      role: org.role, // Guardar el rol para usarlo después
+    }
+  })
 
   // Datos del usuario
   const userData = user ? {

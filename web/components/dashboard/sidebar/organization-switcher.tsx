@@ -31,18 +31,20 @@ export function OrganizationSwitcher({
     currentOrgId,
 }: {
     teams: {
-        id: string
+        id: string // Key único (orgId-role)
+        orgId: string // ID real de la organización
         name: string
         logo: string | React.ElementType
         plan: string
+        role: string // Rol del usuario en esta org
     }[]
     currentOrgId?: string
 }) {
     const { isMobile } = useSidebar()
     const router = useRouter()
 
-    // Encontrar la organización actual
-    const activeTeam = teams.find(t => t.id === currentOrgId) || teams[0]
+    // Encontrar la organización actual (comparar con orgId, no con id)
+    const activeTeam = teams.find(t => t.orgId === currentOrgId) || teams[0]
 
     const [mounted, setMounted] = React.useState(false)
     const [isSwitching, setIsSwitching] = React.useState(false)
@@ -51,13 +53,14 @@ export function OrganizationSwitcher({
         setMounted(true)
     }, [])
 
-    const handleSwitchOrganization = async (teamId: string) => {
-        if (teamId === activeTeam?.id) return // Ya está en esta organización
+    const handleSwitchOrganization = async (team: any) => {
+        if (team.orgId === activeTeam?.orgId && team.role === activeTeam?.role) return // Ya está en esta org con este rol
 
         setIsSwitching(true)
 
         try {
-            const result = await switchOrganizationAction(teamId)
+            // Pasar el orgId real, no el id compuesto
+            const result = await switchOrganizationAction(team.orgId)
 
             if (result.success) {
                 // Refrescar la página para actualizar el sidebar con los nuevos datos
@@ -137,7 +140,7 @@ export function OrganizationSwitcher({
                             return (
                                 <DropdownMenuItem
                                     key={team.id}
-                                    onClick={() => handleSwitchOrganization(team.id)}
+                                    onClick={() => handleSwitchOrganization(team)}
                                     className="gap-2 p-2"
                                     disabled={isSwitching}
                                 >
