@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
-import { useUserRole } from "@/hooks/use-user-role"
+import { useUserRole } from "@/components/providers/user-role-provider"
 import { useToast } from "@/hooks/use-toast"
 import { deleteCategoryAction } from "@/lib/actions/categories"
 
@@ -25,7 +25,8 @@ export function CategoryList({ categories }: CategoryListProps) {
     const [categoryToDelete, setCategoryToDelete] = useState<any>(null)
     const [isDeleting, setIsDeleting] = useState(false)
 
-    const { isAdmin, isLoading } = useUserRole()
+
+    const { isAdmin } = useUserRole()
     const router = useRouter()
     const { toast } = useToast()
 
@@ -100,7 +101,7 @@ export function CategoryList({ categories }: CategoryListProps) {
 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="sm" disabled={isLoading}>
+                                        <Button variant="ghost" size="sm">
                                             <MoreVertical className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
@@ -148,8 +149,8 @@ export function CategoryList({ categories }: CategoryListProps) {
                 onOpenChange={setDeleteDialogOpen}
                 title="Eliminar Categoría"
                 description={`¿Estás seguro de que deseas eliminar la categoría "${categoryToDelete?.name}"? ${categoryToDelete?.testimonialCount > 0
-                        ? 'Esta categoría tiene testimonios asociados y no podrá ser eliminada.'
-                        : 'Esta acción no se puede deshacer.'
+                    ? 'Esta categoría tiene testimonios asociados y no podrá ser eliminada.'
+                    : 'Esta acción no se puede deshacer.'
                     }`}
                 onConfirm={handleConfirmDelete}
                 confirmText="Eliminar"

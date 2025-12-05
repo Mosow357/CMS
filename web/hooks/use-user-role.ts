@@ -53,11 +53,39 @@ export function useUserRole(): UseUserRoleReturn {
                 const currentOrg = JSON.parse(decodeURIComponent(currentOrgCookie))
                 const userOrgs = JSON.parse(decodeURIComponent(userOrgsCookie))
 
-                const currentUserOrg = userOrgs.find(
-                    (uo: any) => uo.organizationId === currentOrg.id
-                )
+                console.log('🔍 useUserRole - currentOrg:', currentOrg)
+                console.log('🔍 useUserRole - userOrgs:', userOrgs)
 
-                setRole(currentUserOrg?.role || null)
+                // Buscar el rol del usuario en la organización actual
+                // Manejar dos formatos:
+                // 1. { organization: {...}, role: 'admin' } - formato de login
+                // 2. { id, name, ..., userOrganizations: [{role: 'admin'}] } - formato de crear org
+
+                let userRole = null
+
+                // Intentar encontrar por organization.id (formato de login)
+                const userOrgByOrgId = userOrgs.find((uo: any) => {
+                    if (uo.organization) {
+                        return uo.organization.id === currentOrg.id
+                    }
+                    return false
+                })
+
+                if (userOrgByOrgId) {
+                    userRole = userOrgByOrgId.role
+                } else {
+                    // Intentar encontrar por organizationId directo
+                    const userOrgByDirectId = userOrgs.find((uo: any) => {
+                        return uo.organizationId === currentOrg.id || uo.id === currentOrg.id
+                    })
+
+                    if (userOrgByDirectId) {
+                        userRole = userOrgByDirectId.role || userOrgByDirectId.userOrganizations?.[0]?.role
+                    }
+                }
+
+                console.log('✅ useUserRole - Rol detectado:', userRole)
+                setRole(userRole || null)
             } catch (error) {
                 console.error('Error getting user role:', error)
                 setRole(null)

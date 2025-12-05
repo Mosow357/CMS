@@ -6,6 +6,8 @@ import { UserAvatar } from '@/components/ui/user-avatar'
 import { Pagination } from '@/components/ui/pagination'
 import { CheckCircle2, Clock, Eye, XCircle, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { cookies } from 'next/headers'
+import { getUserRoleInCurrentOrg } from '@/lib/actions/user-role'
 
 // Función para obtener el color del badge según el status
 function getStatusBadgeColor(status: string) {
@@ -65,6 +67,9 @@ async function TestimonialsContent({
   status?: string
   page?: string
 }) {
+  // Obtener rol del usuario
+  const userRole = await getUserRoleInCurrentOrg()
+
   // Obtener testimonios del backend
   // La API espera el status en minúsculas: "pending", "approved", "published", "rejected"
   const statusFilter = status?.toLowerCase()
@@ -205,7 +210,7 @@ async function TestimonialsContent({
                       </span>
                     </td>
                     <td className="p-4">
-                      <TestimonialActions testimonial={testimonial} />
+                      <TestimonialActions testimonial={testimonial} userRole={userRole} />
                     </td>
                   </tr>
                 )

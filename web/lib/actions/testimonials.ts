@@ -115,10 +115,10 @@ export async function approveTestimonialAction(testimonialId: string) {
 
         const apiClient = createApiClient(token)
 
-        // Actualizar estado a APPROVED
+        // Actualizar estado a approved
         await apiClient.testimonials.testimonialsControllerUpdate(
             testimonialId,
-            { status: 'APPROVED' } as any,
+            { status: 'approved' } as any,
             { format: 'json' }
         )
 
@@ -160,10 +160,10 @@ export async function rejectTestimonialAction(testimonialId: string) {
 
         const apiClient = createApiClient(token)
 
-        // Actualizar estado a REJECTED
+        // Actualizar estado a rejected
         await apiClient.testimonials.testimonialsControllerUpdate(
             testimonialId,
-            { status: 'REJECTED' } as any,
+            { status: 'rejected' } as any,
             { format: 'json' }
         )
 
@@ -208,7 +208,7 @@ export async function publishTestimonialAction(testimonialId: string) {
         // Actualizar estado a PUBLISHED
         await apiClient.testimonials.testimonialsControllerUpdate(
             testimonialId,
-            { status: 'PUBLISHED' } as any,
+            { status: 'published' } as any,
             { format: 'json' }
         )
 

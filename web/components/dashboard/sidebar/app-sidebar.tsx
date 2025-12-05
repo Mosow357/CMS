@@ -20,10 +20,12 @@ import {
   getTestimonialStatsAction
 } from "@/lib/actions/sidebar";
 
-export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export async function AppSidebar({ organizations, ...props }: React.ComponentProps<typeof Sidebar> & {
+  organizations?: any[]
+}) {
   // Obtener datos reales del servidor
   const user = await getCurrentUserData()
-  const organizations = await getUserOrganizations()
+  // organizations ya viene como prop desde el layout
   const currentOrg = await getCurrentOrganization()
   const stats = await getTestimonialStatsAction()
 
@@ -32,7 +34,7 @@ export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sideb
 
   // Transformar organizaciones al formato que espera OrganizationSwitcher
   // Agregar indicador de rol al nombre para distinguir múltiples roles en la misma org
-  const teams = organizations.map((org: any) => {
+  const teams = (organizations || []).map((org: any) => {
     const roleIndicator = org.role === 'admin' ? '(A)' : org.role === 'editor' ? '(E)' : '(V)'
     return {
       id: org.userOrganizationId, // Key único: ID de la relación user-org
