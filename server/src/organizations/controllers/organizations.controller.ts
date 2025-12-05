@@ -29,7 +29,7 @@ export class OrganizationsController {
 
   @Post()
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create an organization. For organization logo add "file" attribute with the image file' })
+  @ApiOperation({ summary: 'Create an organization. For upload a logo image, send a "file" field in multipart/form-data.' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file', {}))
   create(
@@ -47,6 +47,7 @@ export class OrganizationsController {
 
   @Get()
   @ApiBearerAuth()
+  @ApiOperation({ summary: "Retrieve a list of user's organizations" })
   findUserOrganizations(@GetUser() user: User) {
     return this.organizationsService.findUserOrganizations(user.id);
   }
@@ -54,7 +55,7 @@ export class OrganizationsController {
   @Get(':id')
   @ApiBearerAuth()
   findOne(@Param('id', ParseUUIDPipe) id: string,@GetUser() user:User) {
-    return this.organizationsService.findOne(id,user.id);
+    return this.organizationsService.findOneSecured(id,user.id);
   }
 
   @Patch(':id')

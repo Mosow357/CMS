@@ -30,6 +30,7 @@ import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { InviteTestimonialDto } from '../dto/invite-testimonial.dto';
 import { TestimonialsInvitationService } from '../services/testimonialsInvitation.service';
 import { WallTestimonialsParamsDto } from '../dto/wallTestimonials.params.dto';
+import { ChangeStatusDto } from '../dto/change-status.dto';
 
 @Controller('testimonials')
 export class TestimonialsController {
@@ -46,7 +47,8 @@ export class TestimonialsController {
   @ApiOperation({ summary: 'Create a testimonial with or without media attachment' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file', {}))
-  create(@Body() createTestimonialDto: CreateTestimonialDto,
+  create(
+    @Body() createTestimonialDto: CreateTestimonialDto,
     @UploadedFile(new ParseFilePipeBuilder()
       .addMaxSizeValidator({ maxSize: 50 * 1024 * 1024 })
       .build({
@@ -123,6 +125,14 @@ export class TestimonialsController {
     @GetUser() user
   ) {
     return this.testimonialsService.update(id, user.id,updateTestimonialDto);
+  }
+  @Post('change-status')
+  @ApiBearerAuth()
+  changeStatus(
+    @Body() body:ChangeStatusDto,
+    @GetUser() user
+  ) {
+    return this.testimonialsService.changeStatus(body.testimonialId, user.id, body.status);
   }
 
   @Delete(':id')

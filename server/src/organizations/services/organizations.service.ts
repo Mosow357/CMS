@@ -59,11 +59,22 @@ export class OrganizationsService {
     return organizations;
   }
 
-  async findOne(organizationId: string,userId:string): Promise<Organization> {
+  async findOneSecured(organizationId: string,userId:string): Promise<Organization> {
     let userOrg = await this.userOrganizationService.findUserOrganization(userId,organizationId);
     if(!userOrg){
       throw new UnauthorizedException(`User is not part of the organization ${organizationId}`);
     }
+    const organization = await this.organizationRepository.findOne({
+      where: { id: organizationId },
+      relations: ['userOrganizations'],
+    });
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`);
+    }
+    return organization;
+  }
+
+  async findOneUnsafe(organizationId: string): Promise<Organization> {
     const organization = await this.organizationRepository.findOne({
       where: { id: organizationId },
       relations: ['userOrganizations'],

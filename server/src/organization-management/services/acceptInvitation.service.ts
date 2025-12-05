@@ -4,7 +4,6 @@ import { EncoderService } from "src/common/services/encoder.service";
 import { OrganizationRole } from "src/common/types/userRole";
 import { UserOrganizationService } from "src/user_organization/services/userOrganization.service";
 import { OrganizationsService } from "src/organizations/services/organizations.service";
-import { UserOrganization } from "src/user_organization/entities/userOrganization.entity";
 
 @Injectable()
 export class AcceptInvitationService {
@@ -20,7 +19,7 @@ export class AcceptInvitationService {
     const invitation = await this.invitationsService.findByHashedToken(token);
     if(!invitation) throw new NotFoundException('Invitation not found');
     
-    const existsOrganization = await this.organizationsService.findOne(invitation.organizationId);
+    const existsOrganization = await this.organizationsService.findOneUnsafe(invitation.organizationId);
     if (!existsOrganization) throw new NotFoundException('Organization not found');
 
     const existsUserInOrg = await this.userOrganizationService.findUserOrganization(invitation.user_id, invitation.organizationId);

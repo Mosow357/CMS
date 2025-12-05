@@ -5,7 +5,6 @@ import { TestimonialStatus } from '../enums/testimonialStatus';
 import { Transform, Type } from 'class-transformer';
 
 export class CreateTestimonialDto {
-
   @ApiPropertyOptional({
     description: 'Email of the client submitting the testimonial.',
     example: "client_1@example.com"

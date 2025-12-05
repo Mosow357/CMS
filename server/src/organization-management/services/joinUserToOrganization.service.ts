@@ -13,7 +13,7 @@ export class JoinUserToOrganizationService {
   ) { }
 
   async execute(input: JoinUserToOrganizationDto) {
-    const existsOrganization = await this.organizationsService.findOne(input.organizationId);
+    const existsOrganization = await this.organizationsService.findOneUnsafe(input.organizationId);
     if (!existsOrganization) throw new NotFoundException('Organization not found');
 
     const existsUserInOrg = await this.userOrganizationService.findUserOrganization(input.userId, input.organizationId);

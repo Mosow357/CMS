@@ -25,7 +25,7 @@ export class inviteUserToOrganizationService {
         const invitedUser = await this.userService.findByUsernameOrEmail(input.email);
         if (!invitedUser) throw new NotFoundException('User not found');
 
-        const organization = await this.organizationsService.findOne(input.organizationId);
+        const organization = await this.organizationsService.findOneUnsafe(input.organizationId);
         if (!organization) throw new NotFoundException('Organization not found');
 
         const existsUserInOrg = await this.userOrganizationService.findUserOrganization(invitedUser.id, input.organizationId);
