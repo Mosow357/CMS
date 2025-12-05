@@ -1,13 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import Stream from 'stream';
+import { ConfigService } from '@nestjs/config';
+import Stream, { Readable } from 'stream';
+import { v2 as cloudinary } from 'cloudinary';
+import { unlink } from 'fs/promises';
 
 @Injectable()
 export class CloudinaryProviderImpl {
-  async upload_stream(
-    fileStream: Stream.Readable,
-    fileName: string,
-  ): Promise<string> {
-    //TODO:Implement
-    return `mocked_url/${fileName}`;
+
+  constructor(private config: ConfigService) {
+    cloudinary.config({
+      cloud_name: config.get<string>('CLOUDINARY_CLOUD_NAME'),
+      api_key: config.get<string>('CLOUDINARY_API_KEY'),
+      api_secret: config.get<string>('CLOUDINARY_API_SECRET')
+    });
+  }
+
+  async upload_stream(file: Express.Multer.File, fileName: string): Promise<string> {
+    try {
+      const apiResponse = await cloudinary.uploader.upload(file.path, {
+        filename_override: fileName,
+        resource_type: 'auto',
+        access_mode: 'public',
+      });
+
+      return apiResponse.secure_url;
+    } finally {
+      await unlink(file.path).catch(() => { });
+    }
   }
 }

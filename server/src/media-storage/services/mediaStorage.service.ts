@@ -7,9 +7,9 @@ export class MediaStorageService {
   constructor(private readonly mediaStorageProvider: CloudinaryProviderImpl) {}
 
   async uploadFile(
-    fileStream: Stream.Readable,
+    file: Express.Multer.File,
     fileName: string,
   ): Promise<string> {
-    return this.mediaStorageProvider.upload_stream(fileStream, fileName);
+    return this.mediaStorageProvider.upload_stream(file, fileName);
   }
 }

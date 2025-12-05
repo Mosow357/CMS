@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { Testimonial } from '../entities/testimonial.entity';
 import { MediaStorageService } from 'src/media-storage/services/mediaStorage.service';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
-import Stream from 'stream';
 import { CategoriesService } from 'src/categories/services/categories.service';
 import { OrganizationsService } from 'src/organizations/services/organizations.service';
 
@@ -20,7 +19,7 @@ export class CreateTestimonialsService {
 
   async createTestimonialWithMedia(
     createTestimonialDto: CreateTestimonialDto,
-    fileStream: Stream.Readable,
+    file: Express.Multer.File,
     filename: string,
   ): Promise<Testimonial> {
     const org = await this.organizationService.findOne(createTestimonialDto.organitation_id);
@@ -40,7 +39,7 @@ export class CreateTestimonialsService {
         filename,
       );
       let publicId = await this.mediaStorageService.uploadFile(
-        fileStream,
+        file,
         objectFilename,
       );
       testimonial.media_url = publicId;
@@ -68,12 +67,12 @@ export class CreateTestimonialsService {
   }
 
   private generateMediaFilename(
-    userId: string,
+    organizationId: string,
     originalFilename: string,
   ): string {
     const timestamp = Date.now();
     const sanitizedFilename = originalFilename.replace(/\s+/g, '_');
-    return `testimonials/${userId}/${timestamp}_${sanitizedFilename}`;
+    return `testimonials/${organizationId}/${timestamp}_${sanitizedFilename}`;
   }
 
 }

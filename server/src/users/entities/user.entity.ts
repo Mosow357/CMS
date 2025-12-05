@@ -12,7 +12,7 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', nullable: false, unique: true })
   email: string;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: false, unique: true })
   username: string;
 
   @Column({ type: 'varchar', nullable: false, select: false })
