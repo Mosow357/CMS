@@ -99,7 +99,6 @@ export class TestimonialsController {
     return this.testimonialsService.findAllWallTestimonials(params);
   }
 
-
   @Post('invite')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
@@ -112,8 +111,8 @@ export class TestimonialsController {
 
   @Get(':id')
   @ApiBearerAuth()
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.testimonialsService.findOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string,@GetUser() user) {
+    return this.testimonialsService.findOne(id,user.id);
   }
 
   @Patch(':id')
@@ -121,13 +120,14 @@ export class TestimonialsController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTestimonialDto: UpdateTestimonialDto,
+    @GetUser() user
   ) {
-    return this.testimonialsService.update(id, updateTestimonialDto);
+    return this.testimonialsService.update(id, user.id,updateTestimonialDto);
   }
 
   @Delete(':id')
   @ApiBearerAuth()
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.testimonialsService.remove(id);
+  remove(@Param('id', ParseUUIDPipe) id: string,@GetUser() user) {
+    return this.testimonialsService.remove(id,user.id);
   }
 }

@@ -70,13 +70,18 @@ return this.testimonialsRepository.find({
     });
   }
   
-  async findOne(id: string): Promise<Testimonial> {
+  async findOne(id: string,userId:string): Promise<Testimonial> {
+    
     const testimonial = await this.testimonialsRepository.findOne({
       where: { id },
       relations: ['category', 'tags'],
     });
     if (!testimonial) {
       throw new NotFoundException(`Testimonial with ID ${id} not found`);
+    }
+    let org = await this.userOrganization.findUserOrganization(userId,testimonial.organitation_id);
+    if(!org){
+      throw new UnauthorizedException(`User is not part of the organization ${testimonial.organitation_id}`);
     }
     return testimonial;
   }
@@ -97,16 +102,36 @@ return this.testimonialsRepository.find({
   }
 
   async update(
-    id: string,
+    testimonialId: string,
+    userId:string,
     updateTestimonialDto: UpdateTestimonialDto,
   ): Promise<Testimonial> {
-    const testimonial = await this.findOne(id);
+
+    const testimonial = await this.testimonialsRepository.findOne({
+      where: { id:testimonialId }
+    });
+    if (!testimonial) {
+      throw new NotFoundException(`Testimonial with ID ${testimonialId} not found`);
+    }
+    let org = await this.userOrganization.findUserOrganization(userId,testimonial.organitation_id);
+    if(!org){
+      throw new UnauthorizedException(`User is not part of the organization ${testimonial.organitation_id}`);
+    }
     Object.assign(testimonial, updateTestimonialDto);
     return this.testimonialsRepository.save(testimonial);
   }
 
-  async remove(id: string): Promise<void> {
-    const testimonial = await this.findOne(id);
+  async remove(testimonialId: string,userId:string): Promise<void> {
+    const testimonial = await this.testimonialsRepository.findOne({
+      where: { id:testimonialId }
+    });
+    if (!testimonial) {
+      throw new NotFoundException(`Testimonial with ID ${testimonialId} not found`);
+    }
+    let org = await this.userOrganization.findUserOrganization(userId,testimonial.organitation_id);
+    if(!org){
+      throw new UnauthorizedException(`User is not part of the organization ${testimonial.organitation_id}`);
+    }
     await this.testimonialsRepository.remove(testimonial);
   }
 }
