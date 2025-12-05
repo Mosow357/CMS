@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { OrganizationRole } from "src/common/types/userRole";
 
 export class InviteUserToOrganizationDto {
     @ApiProperty({
@@ -19,11 +20,11 @@ export class InviteUserToOrganizationDto {
     organizationId: string;
 
     @ApiProperty({
-        description: 'Role that will be assigned to the invited user within the organization. If omitted, a default role may be applied (EDITOR).',
+        description: 'Role that will be assigned to the invited user within the organization. If omitted, a default role may be applied (editor).',
         required: false,
-        example: 'EDITOR'
+        example: 'editor'
     })
     @IsString()
     @IsOptional()
-    role?: string;
+    role?: OrganizationRole;
 }
