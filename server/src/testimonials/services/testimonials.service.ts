@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
 import { TestimonialsParamsDto } from '../dto/testimonials.params.dto';
-import { OrganizationsService } from 'src/organizations/services/organizations.service';
 import { UserOrganizationService } from 'src/user_organization/services/userOrganization.service';
 import { WallTestimonialsParamsDto } from '../dto/wallTestimonials.params.dto';
+
 
 @Injectable()
 export class TestimonialsService {
@@ -25,18 +25,31 @@ export class TestimonialsService {
     const limit = itemsPerPage;
     const offset = (page - 1) * itemsPerPage;
     
-    return this.testimonialsRepository.find({
-      relations: ['category', 'tags'],
-      skip: offset,
-      take: limit,
-      order: {
-        createdAt: sort,
-      },
-      where:{
-        organitation_id: filters.organitationId,
-        status: filters.status,
-      }
-    });
+    let createdAtFilter;
+
+if (filters.createdFrom && filters.createdTo) {
+  createdAtFilter = Between(
+    new Date(filters.createdFrom),
+    new Date(filters.createdTo),
+  );
+} else if (filters.createdFrom) {
+  createdAtFilter = MoreThanOrEqual(new Date(filters.createdFrom));
+} else if (filters.createdTo) {
+  createdAtFilter = LessThanOrEqual(new Date(filters.createdTo));
+}
+
+return this.testimonialsRepository.find({
+  relations: ['category', 'tags'],
+  skip: offset,
+  take: limit,
+  order: { createdAt: sort },
+  where: {
+    organitation_id: filters.organitationId,
+    status: filters.status,
+    stars_rating: filters.startsRating,
+    ...(createdAtFilter && { createdAt: createdAtFilter }),
+  },
+});
   }
 
   async findAllWallTestimonials(params:WallTestimonialsParamsDto): Promise<Testimonial[]> {
@@ -56,7 +69,7 @@ export class TestimonialsService {
       }
     });
   }
-
+  
   async findOne(id: string): Promise<Testimonial> {
     const testimonial = await this.testimonialsRepository.findOne({
       where: { id },
@@ -67,10 +80,11 @@ export class TestimonialsService {
     }
     return testimonial;
   }
-
-  async findByOrganitation(organitationId: string): Promise<Testimonial[]> {
+  
+  async findByOrganitation(organitationId: string, param:TestimonialsParamsDto): Promise<Testimonial[]> {
+    const {status} = param
     return this.testimonialsRepository.find({
-      where: { organitation_id: organitationId },
+      where: status ? { status,organitation_id: organitationId } : {organitation_id: organitationId},
       relations: ['category', 'tags'],
     });
   }
