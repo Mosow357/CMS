@@ -13,6 +13,7 @@ import { OrganizationModule } from './organizations/organitations.module';
 import { MediaStorageModule } from './media-storage/mediaStorage.module';
 import { OrganizationManagementModule } from './organization-management/organizationManagement.module';
 import { SeedModule } from './seed/seed.module';
+import { ensureDatabase } from './common/services/ensure-database';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { SeedModule } from './seed/seed.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => {
+      useFactory: async (config: ConfigService) => {
         const env = config.get('NODE_ENV');
 
         const isLocal = env === 'development';
@@ -35,6 +36,7 @@ import { SeedModule } from './seed/seed.module';
             synchronize: true,
           };
         }
+        await ensureDatabase();
         return {
           type: 'postgres',
           url: process.env.DATABASE_URL,
@@ -44,7 +46,9 @@ import { SeedModule } from './seed/seed.module';
           password: process.env.DATABASE_PASSWORD || 'postgres',
           database: process.env.DATABASE_NAME || 'cms_db',
           autoLoadEntities: true,
-          synchronize: true,
+          synchronize: false,
+          migrationsRun: true,
+          migrations: [__dirname + '/migrations/*{.js,.ts}'],
           ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
         };
       },

@@ -20,7 +20,7 @@ export class Invitation extends BaseEntity {
     @Column()
     expires_at: Date;
 
-    @Column({ type: 'datetime', nullable: true })
+    @Column({ type: 'date', nullable: true })
     used_at: Date | null;
 
 }
