@@ -16,11 +16,10 @@ import { Check, X, Eye, EyeOff, Trash2, Star } from "lucide-react"
 import { useUserRole } from "@/components/providers/user-role-provider"
 import { useToast } from "@/hooks/use-toast"
 import {
-    approveTestimonialAction,
-    rejectTestimonialAction,
-    publishTestimonialAction,
+    changeTestimonialStatusAction,
     deleteTestimonialAction
 } from "@/lib/actions/testimonials"
+import { TestimonialStatus } from "@/lib/types/testimonial-status"
 
 interface TestimonialPreviewDialogProps {
     open: boolean
@@ -77,26 +76,31 @@ export function TestimonialPreviewDialog({
         }
 
         setIsProcessing(true)
-        let result
+        let newStatus: TestimonialStatus | null = null
+
+        // Mapear acción de UI a estado del enum
+        switch (action) {
+            case 'approve':
+                newStatus = TestimonialStatus.APPROVED
+                break
+            case 'reject':
+                newStatus = TestimonialStatus.REJECTED
+                break
+            case 'publish':
+                newStatus = TestimonialStatus.PUBLISHED
+                break
+            case 'unpublish':
+                // Despublicar = volver a approved
+                newStatus = TestimonialStatus.APPROVED
+                break
+            default:
+                setIsProcessing(false)
+                return
+        }
 
         try {
-            switch (action) {
-                case 'approve':
-                    result = await approveTestimonialAction(testimonial.id)
-                    break
-                case 'reject':
-                    result = await rejectTestimonialAction(testimonial.id)
-                    break
-                case 'publish':
-                    result = await publishTestimonialAction(testimonial.id)
-                    break
-                case 'unpublish':
-                    // Despublicar = volver a approved
-                    result = await approveTestimonialAction(testimonial.id)
-                    break
-                default:
-                    return
-            }
+            // ✅ Usar la función unificada
+            const result = await changeTestimonialStatusAction(testimonial.id, newStatus)
 
             if (result.success) {
                 toast({

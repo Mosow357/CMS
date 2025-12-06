@@ -4,6 +4,8 @@ import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createApiClient } from '@/lib/api/client'
 import { isCurrentUserAdmin, hasRole } from '@/lib/utils/auth-utils'
+import { TestimonialStatus, getSuccessMessage } from '@/lib/types/testimonial-status'
+import type { ChangeStatusDto } from '@/lib/types/api-dtos'
 
 /**
  * Obtiene la lista de testimonios con filtros opcionales
@@ -92,20 +94,17 @@ export async function getTestimonialByIdAction(id: string) {
 }
 
 /**
- * Aprueba un testimonio pendiente (Editor y Admin)
+ * Cambia el estado de un testimonio usando el endpoint correcto del backend
+ * 
+ * @param testimonialId - ID del testimonio a actualizar
+ * @param newStatus - Nuevo estado del testimonio
+ * @returns Resultado de la operación con success y mensaje
  */
-export async function approveTestimonialAction(testimonialId: string) {
+export async function changeTestimonialStatusAction(
+    testimonialId: string,
+    newStatus: TestimonialStatus
+) {
     try {
-        // Verificar permisos - Editor y Admin pueden aprobar
-        const canApprove = await hasRole('editor')
-
-        if (!canApprove) {
-            return {
-                success: false,
-                error: 'No tienes permisos para aprobar testimonios'
-            }
-        }
-
         const cookieStore = await cookies()
         const token = cookieStore.get('auth_token')?.value
 
@@ -115,10 +114,14 @@ export async function approveTestimonialAction(testimonialId: string) {
 
         const apiClient = createApiClient(token)
 
-        // Actualizar estado a approved
-        await apiClient.testimonials.testimonialsControllerUpdate(
+        // ✅ Usar el endpoint correcto POST /testimonials/change-status
+        const payload: ChangeStatusDto = {
             testimonialId,
-            { status: 'approved' } as any,
+            status: newStatus
+        }
+
+        await apiClient.testimonials.testimonialsControllerChangeStatus(
+            payload as any, // El DTO está como 'object' en Api.ts generado
             { format: 'json' }
         )
 
@@ -126,102 +129,26 @@ export async function approveTestimonialAction(testimonialId: string) {
         revalidatePath('/dashboard/testimonials')
         revalidatePath('/dashboard')
 
-        return { success: true, message: 'Testimonio aprobado exitosamente' }
+        return {
+            success: true,
+            message: getSuccessMessage(newStatus)
+        }
     } catch (error: any) {
-        console.error('Error approving testimonial:', error)
+        console.error('Error changing testimonial status:', error)
+
+        // Extraer mensaje de error del backend
+        let errorMessage = 'Error al cambiar el estado del testimonio'
+        if (error?.error?.message) {
+            errorMessage = error.error.message
+        } else if (typeof error?.error === 'string') {
+            errorMessage = error.error
+        } else if (error?.message) {
+            errorMessage = error.message
+        }
+
         return {
             success: false,
-            error: error.message || 'Error al aprobar testimonio'
-        }
-    }
-}
-
-/**
- * Rechaza un testimonio pendiente (Editor y Admin)
- */
-export async function rejectTestimonialAction(testimonialId: string) {
-    try {
-        // Verificar permisos - Editor y Admin pueden rechazar
-        const canReject = await hasRole('editor')
-
-        if (!canReject) {
-            return {
-                success: false,
-                error: 'No tienes permisos para rechazar testimonios'
-            }
-        }
-
-        const cookieStore = await cookies()
-        const token = cookieStore.get('auth_token')?.value
-
-        if (!token) {
-            return { success: false, error: 'No autenticado' }
-        }
-
-        const apiClient = createApiClient(token)
-
-        // Actualizar estado a rejected
-        await apiClient.testimonials.testimonialsControllerUpdate(
-            testimonialId,
-            { status: 'rejected' } as any,
-            { format: 'json' }
-        )
-
-        // Revalidar rutas
-        revalidatePath('/dashboard/testimonials')
-        revalidatePath('/dashboard')
-
-        return { success: true, message: 'Testimonio rechazado' }
-    } catch (error: any) {
-        console.error('Error rejecting testimonial:', error)
-        return {
-            success: false,
-            error: error.message || 'Error al rechazar testimonio'
-        }
-    }
-}
-
-/**
- * Publica un testimonio aprobado (Solo Admin)
- */
-export async function publishTestimonialAction(testimonialId: string) {
-    try {
-        // Verificar permisos - Solo Admin puede publicar
-        const isAdmin = await isCurrentUserAdmin()
-
-        if (!isAdmin) {
-            return {
-                success: false,
-                error: 'Solo los administradores pueden publicar testimonios'
-            }
-        }
-
-        const cookieStore = await cookies()
-        const token = cookieStore.get('auth_token')?.value
-
-        if (!token) {
-            return { success: false, error: 'No autenticado' }
-        }
-
-        const apiClient = createApiClient(token)
-
-        // Actualizar estado a PUBLISHED
-        await apiClient.testimonials.testimonialsControllerUpdate(
-            testimonialId,
-            { status: 'published' } as any,
-            { format: 'json' }
-        )
-
-        // Revalidar rutas
-        revalidatePath('/dashboard/testimonials')
-        revalidatePath('/dashboard')
-
-        return { success: true, message: 'Testimonio publicado exitosamente' }
-    } catch (error: any) {
-        console.error('Error publishing testimonial:', error)
-        return {
-            success: false,
-            error: error.message || 'Error al publicar testimonio'
+            error: errorMessage
         }
     }
 }
