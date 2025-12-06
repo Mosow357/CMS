@@ -14,6 +14,7 @@ import { MediaStorageModule } from './media-storage/mediaStorage.module';
 import { OrganizationManagementModule } from './organization-management/organizationManagement.module';
 import { SeedModule } from './seed/seed.module';
 import { ensureDatabase } from './common/services/ensure-database';
+import { ObservabilityModule } from 'src/observability/observability.module';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { ensureDatabase } from './common/services/ensure-database';
         if (isLocal) {
           return {
             type: 'sqlite',
-            database: 'local.db',
+            database: ':memory:',
             dropSchema: true,
             autoLoadEntities: true,
             synchronize: true,
@@ -63,6 +64,7 @@ import { ensureDatabase } from './common/services/ensure-database';
     OrganizationModule,
     MediaStorageModule,
     OrganizationManagementModule,
+    ObservabilityModule,
     SeedModule
   ],
   providers: [
