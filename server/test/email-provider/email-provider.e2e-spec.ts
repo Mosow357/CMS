@@ -4,7 +4,7 @@ import { APP_GUARD } from "@nestjs/core";
 import { Test } from "@nestjs/testing";
 import { getRepositoryToken, TypeOrmModule } from "@nestjs/typeorm";
 import { AuthGuard } from "src/common/guards/auth.guard";
-import { WelcomeEmailTemplate } from "src/notifications/email-templates/welcome.template";
+import { ConfirmEmailTemplate } from "src/notifications/email-templates/confirmEmail.template";
 import { NotificationsModule } from "src/notifications/notifications.module";
 import { NotificationsService } from "src/notifications/services/notifications.service";
 
@@ -41,7 +41,7 @@ describe('Notifications integration', () => {
     describe('EmailProviderService', () => {
         it('should send a welcome email', async () => {
             const emailProviderService = app.get(NotificationsService);
-            let emailPayload = new WelcomeEmailTemplate("cms391547@gmail.com","Test User");
+            let emailPayload = new ConfirmEmailTemplate("cms391547@gmail.com","Test User","sample-token-123");
             const response = await emailProviderService.sendNotificationWithTemplate(emailPayload)
             expect(response).toBeDefined();
             expect(response.statusCode).toBe(202);

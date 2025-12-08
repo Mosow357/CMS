@@ -14,7 +14,6 @@ export class UserOrganizationService{
             }
         });
     }
-
     async create(userOrganization: Partial<UserOrganization>): Promise<UserOrganization> {
         const toSave = this.userOrganizationRepository.create(userOrganization);
         return this.userOrganizationRepository.save(toSave);

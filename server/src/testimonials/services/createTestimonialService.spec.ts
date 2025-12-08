@@ -2,19 +2,18 @@ import { Repository } from 'typeorm';
 import { Testimonial } from '../entities/testimonial.entity';
 import { CreateTestimonialsService } from './createTestimonial.service';
 import { MediaStorageService } from 'src/media-storage/services/mediaStorage.service';
-import { AiService } from 'src/ia/services/ai.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreateTestimonialDto } from '../dto/create-testimonial.dto';
 import { Readable } from 'stream';
 import { MockType } from 'test/types';
 import { InternalServerErrorException } from '@nestjs/common';
+import { MediaType } from '../enums/mediaType';
 
 describe('CreateTestimonialsService', () => {
   let service: CreateTestimonialsService;
   let testimonialRepo: MockType<Repository<Testimonial>>;
   let mediaStorageService: jest.Mocked<MediaStorageService>;
-  let aiService: jest.Mocked<AiService>;
 
   const mockTestimonialRepo = {
     create: jest.fn(),
@@ -46,16 +45,11 @@ describe('CreateTestimonialsService', () => {
           provide: MediaStorageService,
           useValue: mockMediaStorageService,
         },
-        {
-          provide: AiService,
-          useValue: mockAiService,
-        },
       ],
     }).compile();
     service = module.get<CreateTestimonialsService>(CreateTestimonialsService);
     testimonialRepo = module.get(getRepositoryToken(Testimonial));
     mediaStorageService = module.get(MediaStorageService);
-    aiService = module.get(AiService);
   });
 
   afterEach(() => {
@@ -63,22 +57,25 @@ describe('CreateTestimonialsService', () => {
   });
 
   const createdTestimonialTextDto: CreateTestimonialDto = {
-    user_id: 'user-123',
     content: 'test_content',
     title: '',
-    media_type: 'text',
+    media_type: MediaType.TEXT,
+    category_id: "category-123",
+    organitation_id: "org-123",
   };
   const createdTestimonialVideoDto: CreateTestimonialDto = {
-    user_id: 'user-123',
     content: 'test_content',
     title: '',
-    media_type: 'video',
+    media_type: MediaType.VIDEO,
+    category_id: "category-123",
+    organitation_id: "org-123",
   };
   const createdTestimonialImageDto: CreateTestimonialDto = {
-    user_id: 'user-123',
     content: 'test_content',
     title: '',
-    media_type: 'image',
+    media_type: MediaType.IMAGE,
+    category_id: "category-123",
+    organitation_id: "org-123",
   };
 
   const mockFileStream = Readable.from(['fake data']);
@@ -91,16 +88,12 @@ describe('CreateTestimonialsService', () => {
       } as Testimonial;
       testimonialRepo.create?.mockReturnValue(mockTestimonial);
 
-      aiService.evaluateTestimonial.mockResolvedValue('aproved');
       testimonialRepo.save?.mockResolvedValue(mockTestimonial);
 
       const result = await service.createTestimonial(createdTestimonialTextDto);
 
       expect(testimonialRepo.create).toHaveBeenCalledWith(
         createdTestimonialTextDto,
-      );
-      expect(aiService.evaluateTestimonial).toHaveBeenCalledWith(
-        mockTestimonial,
       );
       expect(testimonialRepo.save).toHaveBeenCalledWith({
         ...mockTestimonial,
@@ -117,7 +110,6 @@ describe('CreateTestimonialsService', () => {
       } as Testimonial;
       testimonialRepo.create?.mockReturnValue(mockTestimonial);
 
-      aiService.evaluateTestimonial.mockResolvedValue('aproved');
       testimonialRepo.save?.mockResolvedValue(mockTestimonial);
 
       //act
@@ -130,9 +122,6 @@ describe('CreateTestimonialsService', () => {
       //assert
       expect(testimonialRepo.create).toHaveBeenCalledWith(
         createdTestimonialTextDto,
-      );
-      expect(aiService.evaluateTestimonial).toHaveBeenCalledWith(
-        mockTestimonial,
       );
       expect(testimonialRepo.save).toHaveBeenCalledWith({
         ...mockTestimonial,
@@ -149,7 +138,6 @@ describe('CreateTestimonialsService', () => {
       } as Testimonial;
       testimonialRepo.create?.mockReturnValue(mockTestimonial);
 
-      aiService.evaluateTestimonial.mockResolvedValue('aproved');
       testimonialRepo.save?.mockResolvedValue(mockTestimonial);
 
       //act
@@ -162,9 +150,6 @@ describe('CreateTestimonialsService', () => {
       //assert
       expect(testimonialRepo.create).toHaveBeenCalledWith(
         createdTestimonialTextDto,
-      );
-      expect(aiService.evaluateTestimonial).toHaveBeenCalledWith(
-        mockTestimonial,
       );
       expect(testimonialRepo.save).toHaveBeenCalledWith({
         ...mockTestimonial,
@@ -183,7 +168,6 @@ describe('CreateTestimonialsService', () => {
       mediaStorageService.uploadFile.mockRejectedValue(
         new Error('Storage provider error'),
       );
-      aiService.evaluateTestimonial.mockResolvedValue('aproved');
       testimonialRepo.save?.mockResolvedValue(mockTestimonial);
 
       // act and assert
