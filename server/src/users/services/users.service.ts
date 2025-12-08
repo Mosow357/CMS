@@ -59,6 +59,20 @@ export class UsersService {
     ],
   });
 }
+  async findByEmail(value: string): Promise<User | null> {
+  return this.usersRepository.findOne({
+    where: [
+      { email: value },
+    ],
+  });
+}
+  async findByUsername(value: string): Promise<User | null> {
+  return this.usersRepository.findOne({
+    where: [
+      { username: value },
+    ],
+  });
+}
 
   async findOneWithPassword(username: string): Promise<User | null> {
     return this.usersRepository.findOne({
@@ -72,8 +86,13 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
-
+    const user = await this.usersRepository.findOne({
+      where: [{ id }
+      ],
+    });
+    if (!user) {
+      throw new NotFoundException(`User not found`);
+    }
     /* if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }*/

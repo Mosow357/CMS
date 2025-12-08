@@ -1,15 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import Stream from 'stream';
-import { CloudinaryProviderImpl } from '../adapters/cloudinaryProviderImpl';
+import { Injectable, Logger } from '@nestjs/common';
+import { MediaStorageProvider } from '../ports/mediaStorageProvider';
 
 @Injectable()
 export class MediaStorageService {
-  constructor(private readonly mediaStorageProvider: CloudinaryProviderImpl) {}
+  private readonly logger = new Logger(MediaStorageService.name);
+  constructor(private readonly mediaStorageProvider: MediaStorageProvider) {}
 
   async uploadFile(
-    fileStream: Stream.Readable,
+    file: Express.Multer.File,
     fileName: string,
   ): Promise<string> {
-    return this.mediaStorageProvider.upload_stream(fileStream, fileName);
+    this.logger.log(`Uploading file: ${fileName}`);
+    return this.mediaStorageProvider.upload_stream(file, fileName);
   }
 }

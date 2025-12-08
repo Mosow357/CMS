@@ -5,7 +5,6 @@ import { TestimonialStatus } from '../enums/testimonialStatus';
 import { Transform, Type } from 'class-transformer';
 
 export class CreateTestimonialDto {
-
   @ApiPropertyOptional({
     description: 'Email of the client submitting the testimonial.',
     example: "client_1@example.com"
@@ -29,7 +28,7 @@ export class CreateTestimonialDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'Organization ID is required' })
-  organitation_id: string;
+  organization_id: string;
 
   @ApiProperty({
     description: 'Category ID associated with the testimonial. Must be a valid UUID v4.',

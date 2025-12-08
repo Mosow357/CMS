@@ -51,12 +51,8 @@ export default function Navbar({ simple = false }: NavbarProps) {
                 {text.login}
               </Link>
 
-          <Link
-            href="/register"
-            className="px-5 py-2 bg-[#66F9C4] text-[#0F111A] font-medium rounded-lg hover:bg-[#55dfad] transition"
-          >
-            {text.signup}
-          </Link>
+            </>
+          )}
           <LanguageToggle />
           <ThemeToggle />
         </div>

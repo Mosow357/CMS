@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-
+import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 import {
   Card,
   CardContent,
@@ -17,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { MediaUpload } from "@/components/ui/media-upload"
 import { cn } from "@/lib/utils"
+import { createOrganizationAction } from "@/lib/actions/organizations"
 
 type Step = {
   id: string
@@ -45,6 +47,7 @@ const steps: Step[] = [
 type FormData = {
   name: string
   description: string
+  questionText: string
   image: File | null
   logo: File | null
 }
@@ -52,14 +55,56 @@ type FormData = {
 const initialData: FormData = {
   name: "",
   description: "",
+  questionText: "",
   image: null,
   logo: null,
 }
 
 export function SpaceForm() {
+  const router = useRouter()
+  const { toast } = useToast()
   const [currentStep, setCurrentStep] = React.useState(0)
   const [formData, setFormData] = React.useState<FormData>(initialData)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [imagePreviewUrl, setImagePreviewUrl] = React.useState<string | null>(null)
+  const [logoPreviewUrl, setLogoPreviewUrl] = React.useState<string | null>(null)
+
+  // Create and cleanup object URLs for file previews
+  React.useEffect(() => {
+    if (formData.image) {
+      const url = URL.createObjectURL(formData.image)
+      setImagePreviewUrl(url)
+      return () => {
+        URL.revokeObjectURL(url)
+      }
+    } else {
+      setImagePreviewUrl(null)
+    }
+  }, [formData.image])
+
+  React.useEffect(() => {
+    if (formData.logo) {
+      const url = URL.createObjectURL(formData.logo)
+      setLogoPreviewUrl(url)
+      return () => {
+        URL.revokeObjectURL(url)
+      }
+    } else {
+      setLogoPreviewUrl(null)
+    }
+  }, [formData.logo])
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl)
+      }
+      if (logoPreviewUrl) {
+        URL.revokeObjectURL(logoPreviewUrl)
+      }
+    }
+  }, [imagePreviewUrl, logoPreviewUrl])
 
   function handleInputChange(
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -89,9 +134,34 @@ export function SpaceForm() {
 
     try {
       setIsSubmitting(true)
-      // Placeholder: replace with actual mutation/request when ready
-      await new Promise((resolve) => setTimeout(resolve, 800))
-      console.info("Space/company payload", formData)
+
+      const result = await createOrganizationAction({
+        name: formData.name,
+        description: formData.description || undefined,
+        questionText: formData.questionText || undefined,
+      })
+
+      if (result.success && result.data) {
+        toast({
+          title: "¡Organización creada!",
+          description: "Tu espacio o compañía ha sido registrado exitosamente.",
+        })
+        // Redirect to dashboard
+        router.push("/dashboard")
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Error al crear la organización",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error)
+      toast({
+        title: "Error",
+        description: "Error de conexión. Por favor intenta nuevamente.",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -123,7 +193,6 @@ export function SpaceForm() {
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={5}
-                required
               />
             </div>
 
@@ -151,18 +220,98 @@ export function SpaceForm() {
         )
       case "details":
         return (
-          <div className="text-sm text-muted-foreground">
-            Próximamente: campos adicionales para datos de contacto, redes,
-            ubicación, etc.
+          <div className="space-y-6">
+            <div className="grid gap-2">
+              <Label htmlFor="questionText">
+                Pregunta para testimonios
+              </Label>
+              <Textarea
+                id="questionText"
+                name="questionText"
+                placeholder="Ej. ¿Qué opinas de tu experiencia con nosotros?"
+                value={formData.questionText}
+                onChange={handleInputChange}
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">
+                Esta pregunta se mostrará a los usuarios cuando envíen testimonios.
+                Puedes editarla más tarde.
+              </p>
+            </div>
           </div>
         )
       case "review":
         return (
-          <div className="space-y-2 text-sm">
-            <p className="text-muted-foreground">
-              Revisa la información antes de enviar. Esta sección se puede
-              extender con un resumen de todos los datos capturados.
-            </p>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold mb-3">Resumen de la información</h3>
+                <div className="space-y-4 rounded-lg border bg-card p-4">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Nombre del espacio o compañía</Label>
+                    <p className="text-sm font-medium mt-1">{formData.name || "—"}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Descripción</Label>
+                    <p className="text-sm mt-1 whitespace-pre-wrap">
+                      {formData.description || (
+                        <span className="text-muted-foreground italic">No proporcionada</span>
+                      )}
+                    </p>
+                  </div>
+
+                  {formData.questionText && (
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Pregunta para testimonios</Label>
+                      <p className="text-sm mt-1">{formData.questionText}</p>
+                    </div>
+                  )}
+
+                  <div className="grid gap-4 md:grid-cols-2 pt-2 border-t">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Imagen destacada</Label>
+                      <div className="mt-2">
+                        {formData.image && imagePreviewUrl ? (
+                          <div className="flex items-center gap-2">
+                            <div className="size-16 rounded-md border overflow-hidden bg-muted">
+                              <img
+                                src={imagePreviewUrl}
+                                alt="Preview"
+                                className="size-full object-cover"
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground">{formData.image.name}</p>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">No seleccionada</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Logo</Label>
+                      <div className="mt-2">
+                        {formData.logo && logoPreviewUrl ? (
+                          <div className="flex items-center gap-2">
+                            <div className="size-16 rounded-md border overflow-hidden bg-muted">
+                              <img
+                                src={logoPreviewUrl}
+                                alt="Logo preview"
+                                className="size-full object-cover"
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground">{formData.logo.name}</p>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">No seleccionado</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )
       default:
