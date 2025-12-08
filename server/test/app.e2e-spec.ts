@@ -1,51 +1,29 @@
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { APP_GUARD } from "@nestjs/core";
-import { JwtModule } from "@nestjs/jwt";
 import { Test } from "@nestjs/testing";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { AuthModule } from "src/auth/auth.module";
-import { CategoriesModule } from "src/categories/categories.module";
-import { Category } from "src/categories/entities/category.entity";
-import { AuthGuard } from "src/common/guards/auth.guard";
-import { MediaStorageModule } from "src/media-storage/mediaStorage.module";
-import { Organization } from "src/organizations/entities/organization.entity";
-import { OrganizationModule } from "src/organizations/organitations.module";
-import { Tag } from "src/tags/entities/tag.entity";
-import { TagsModule } from "src/tags/tags.module";
-import { Testimonial } from "src/testimonials/entities/testimonial.entity";
-import { TestimonialsModule } from "src/testimonials/testimonials.module";
-import { UserOrganization } from "src/user_organization/entities/userOrganization.entity";
-import { User } from "src/users/entities/user.entity";
-import { UsersModule } from 'src/users/users.module';
+import { AppModule } from "src/app.module";
+import { MediaStorageProviderFakeImpl } from "src/media-storage/adapters/mediaStorageProviderFakeImpl";
+import { MediaStorageProvider } from "src/media-storage/ports/mediaStorageProvider";
+import { EmailProviderFakeImpl } from "src/notifications/adapters/emailProviderFakeImpl";
+import { EmailProvider } from "src/notifications/ports/emailProvider";
 import * as request from 'supertest';
+import { DataSource } from "typeorm";
 
-describe('Testimonials integration', () => {
+describe('App integration', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({
-          envFilePath: '.env',
-          isGlobal: true,
-        }),
-        TypeOrmModule.forRoot({
-          type: 'sqlite',
-          database: ':memory:',
-          dropSchema: true,
-          entities: [User, Testimonial, Tag, Category, Organization, UserOrganization],
-          synchronize: true,
-        }),
-        UsersModule,
-        TestimonialsModule,
-        CategoriesModule,
-        TagsModule,
-        AuthModule,
-        OrganizationModule,
-        MediaStorageModule,
-      ],
-    }).compile();
+      imports: [ConfigModule.forRoot({
+        envFilePath: '.env',
+        isGlobal: true,
+      }), AppModule]
+    })
+      .overrideProvider(MediaStorageProvider)
+      .useClass(MediaStorageProviderFakeImpl)
+      .overrideProvider(EmailProvider)
+      .useClass(EmailProviderFakeImpl)
+      .compile();
 
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(
@@ -53,12 +31,23 @@ describe('Testimonials integration', () => {
     );
 
     await app.init();
+  }, 60000);
+
+  afterAll(async () => {
+    if (!app) return;
+    const dataSource = app.get(DataSource);
+
+    await dataSource.destroy();
+    await app.close();
+
+    jest.clearAllTimers();
+    jest.resetAllMocks();
   });
+
   it('should run the app', async () => {
-        
-        const res = await request
-          .default(app.getHttpServer())
-          .get('/')
-          expect(res.status).toBe(404);
-      });
+    const res = await request
+      .default(app.getHttpServer())
+      .get('/health')
+    expect(res.status).toBe(200);
+  });
 });

@@ -11,5 +11,5 @@ export type RequestUser = {
   name: string;
   token: string;
   tokenExpiredAt: Date;
-  organizations: UserOrganization[]
+  userOrganizations: UserOrganization[]
 };

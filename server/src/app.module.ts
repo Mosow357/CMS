@@ -11,6 +11,10 @@ import { AuthGuard } from './common/guards/auth.guard';
 import { UserOrganizationModule } from './user_organization/userOrganization.module';
 import { OrganizationModule } from './organizations/organitations.module';
 import { MediaStorageModule } from './media-storage/mediaStorage.module';
+import { OrganizationManagementModule } from './organization-management/organizationManagement.module';
+import { SeedModule } from './seed/seed.module';
+import { ensureDatabase } from './common/services/ensure-database';
+import { ObservabilityModule } from 'src/observability/observability.module';
 
 @Module({
   imports: [
@@ -19,7 +23,7 @@ import { MediaStorageModule } from './media-storage/mediaStorage.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => {
+      useFactory: async (config: ConfigService) => {
         const env = config.get('NODE_ENV');
 
         const isLocal = env === 'development';
@@ -33,6 +37,7 @@ import { MediaStorageModule } from './media-storage/mediaStorage.module';
             synchronize: true,
           };
         }
+        await ensureDatabase();
         return {
           type: 'postgres',
           url: process.env.DATABASE_URL,
@@ -42,7 +47,9 @@ import { MediaStorageModule } from './media-storage/mediaStorage.module';
           password: process.env.DATABASE_PASSWORD || 'postgres',
           database: process.env.DATABASE_NAME || 'cms_db',
           autoLoadEntities: true,
-          synchronize: true,
+          synchronize: false,
+          migrationsRun: true,
+          migrations: [__dirname + '/migrations/*{.js,.ts}'],
           ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
         };
       },
@@ -55,7 +62,10 @@ import { MediaStorageModule } from './media-storage/mediaStorage.module';
     AuthModule,
     UserOrganizationModule,
     OrganizationModule,
-    MediaStorageModule
+    MediaStorageModule,
+    OrganizationManagementModule,
+    ObservabilityModule,
+    SeedModule
   ],
   providers: [
     {
@@ -65,3 +75,17 @@ import { MediaStorageModule } from './media-storage/mediaStorage.module';
   ],
 })
 export class AppModule { }
+
+
+    //  TypeOrmModule.forRoot({
+    //   type: 'postgres',
+    //   url: process.env.DATABASE_URL,
+    //   host: process.env.DATABASE_HOST || 'localhost',
+    //   port: parseInt(process.env.DATABASE_PORT || '5432'),
+    //   username: process.env.DATABASE_USER || 'postgres',
+    //   password: process.env.DATABASE_PASSWORD || 'postgres',
+    //   database: process.env.DATABASE_NAME || 'cms_db',
+    //   autoLoadEntities:true,
+    //   synchronize: true,
+    //   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    // }),
