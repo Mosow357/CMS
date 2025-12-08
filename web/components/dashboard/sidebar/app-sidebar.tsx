@@ -37,9 +37,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    alert(`Emails enviados:\n${emails}`)
-    setEmails("")
-    setShowReviewForm(false)
+    // Parse emails separados por comas
+    const emailArray = emails
+      .split(',')
+      .map((email) => email.trim())
+      .filter((email) => email.length > 0)
+
+    if (emailArray.length === 0) {
+      alert('Por favor ingresa al menos un email')
+      return
+    }
+
+    // Validar formato básico de emails
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const invalidEmails = emailArray.filter((email) => !emailRegex.test(email))
+    if (invalidEmails.length > 0) {
+      alert(`Emails inválidos: ${invalidEmails.join(', ')}`)
+      return
+    }
+
+    // Enviar solicitud al backend
+    fetch('/api/testimonials/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emails: emailArray }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        alert(`Solicitud enviada: ${emailArray.length} email(s)`)
+        setEmails("")
+        setShowReviewForm(false)
+      })
+      .catch((error) => {
+        alert(`Error: ${error.message}`)
+      })
   }
 
   const stats = getTestimonialStats()
