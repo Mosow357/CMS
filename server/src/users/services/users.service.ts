@@ -62,9 +62,12 @@ export class UsersService {
 
   async findOneWithPassword(username: string): Promise<User | null> {
     return this.usersRepository.findOne({
-      where: { username },
-      relations:{userOrganizations:{user:true,organization:true}},
-      select: ['id', 'createdAt', 'updatedAt', 'email', 'username', 'password', 'name','userOrganizations'],
+      where: [
+        { username: username },
+        { email: username },
+      ],
+      relations: { userOrganizations: { organization: true } },
+      select: ['id', 'createdAt', 'updatedAt', 'email', 'username', 'password', 'name', 'userOrganizations'],
     });
   }
 

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import Stream from 'stream';
-import { MockMediaStorageProviderImpl } from '../adapters/mockMediaStorageProviderImpl';
+import { CloudinaryProviderImpl } from '../adapters/cloudinaryProviderImpl';
 
 @Injectable()
 export class MediaStorageService {
-  constructor(private readonly mediaStorageProvider: MockMediaStorageProviderImpl) {}
+  constructor(private readonly mediaStorageProvider: CloudinaryProviderImpl) {}
 
   async uploadFile(
     fileStream: Stream.Readable,

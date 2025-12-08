@@ -15,6 +15,7 @@ import { usePathname } from "next/navigation"
 import { NavMain } from "@/components/dashboard/sidebar/nav-main";
 import { NavUser } from "@/components/dashboard/sidebar/nav-user";
 import { TeamSwitcher } from "@/components/dashboard/sidebar/team-switcher";
+import { EditorInvite } from "@/components/dashboard/sidebar/editor-invite";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -204,6 +205,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
  
+        <EditorInvite />
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarLogo src="/logo.webp" alt="My CMS" />
+        
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
