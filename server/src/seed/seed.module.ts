@@ -32,13 +32,13 @@ export class SeedModule implements OnModuleInit {
 
     async run() {
         //create categories
-        await this.createCategories(5);
+        await this.createCategories();
         //cms user
         let user = await this.userService.findByUsernameOrEmail(`cms391547@gmail.com`);
         if (!user) {
             user = await this.userService.create({
                 email: `cms391547@gmail.com`,
-                password: "password123",
+                password: "Password123",
                 username: `cms`,
                 name: `Test CMS user`
             });
@@ -57,7 +57,7 @@ export class SeedModule implements OnModuleInit {
 
             let user = await this.userService.findByUsernameOrEmail(email);
             if (!user) {
-                await this.userService.create({ email, password: "password123", username, name: `Test User ${i + 1}` });
+                await this.userService.create({ email, password: "Password123", username, name: `Test User ${i + 1}` });
             }
         }
     }
@@ -68,10 +68,12 @@ export class SeedModule implements OnModuleInit {
 
             let user = await this.userService.findByUsernameOrEmail(email);
             if (!user) {
-                user = await this.userService.create({ email, password: "password123", username, name: `Test Userwithorg ${i + 1}` });
-            } let org = await this.orgRepo.findOne({ where: { name: `CMS Org` } });
+                user = await this.userService.create({ email, password: "Password123", username, name: `Test Userwithorg ${i + 1}` });
+            }
+            let org = await this.orgRepo.findOne({ where: { name: `CMS Org ${i + 1}` } });
+            if (org) continue;
             if (!org) {
-                org = await this.orgRepo.save({ name: `CMS Org`, description: `organization of CMS` });
+                org = await this.orgRepo.save({ name: `CMS Org ${i + 1}`, description: `organization of CMS ${i + 1}` });
             }
             let category = await this.categoryRepo.findOne({ where: { name: "Category 1" } })
             await this.createTestimonials(3, org, category?.id || '');
@@ -86,21 +88,22 @@ export class SeedModule implements OnModuleInit {
 
             let user = await this.userService.findByUsernameOrEmail(email);
             if (!user) {
-                user = await this.userService.create({ email, password: "password123", username, name: `Test UserwithManyorg ${i + 1}` });
+                user = await this.userService.create({ email, password: "Password123", username, name: `Test UserwithManyorg ${i + 1}` });
             }
             for (let j = 0; j < 2; j++) {
                 let orgMany = await this.orgRepo.findOne({ where: { name: `CMS Many Org ${j + 1}` } });
                 if (!orgMany) {
                     orgMany = await this.orgRepo.save({ name: `CMS Many Org ${j + 100}`, description: `organization of CMS ${j + 100}` });
                 }
-                let categoryMany = await this.categoryRepo.findOne({ where: { name: "Category 1" } })
+                let categoryMany = await this.categoryRepo.findOne({ where: { name: "Service" } })
                 await this.createTestimonials(10, orgMany, categoryMany?.id || '');
                 await this.userOrgRepo.save({ organizationId: orgMany.id, userId: user.id, role: OrganizationRole.EDITOR });
-                let org = await this.orgRepo.findOne({ where: { name: `CMS Org ${i + 1}` } });
+                let org = await this.orgRepo.findOne({ where: { name: `CMS Many-i Org ${i + 1}` } });
+                if (org) continue;
                 if (!org) {
-                    org = await this.orgRepo.save({ name: `CMS Org ${i + 1}`, description: `organization of CMS ${i + 1}` });
+                    org = await this.orgRepo.save({ name: `CMS Many-i Org ${i + 1}`, description: `organization of CMS ${i + 1}` });
                 }
-                let category = await this.categoryRepo.findOne({ where: { name: "Category 1" } })
+                let category = await this.categoryRepo.findOne({ where: { name: "Product" } })
                 await this.createTestimonials(10, org, category?.id || '');
                 await this.userOrgRepo.save({ organizationId: org.id, userId: user.id, role: OrganizationRole.ADMINISTRATOR });
             }
@@ -115,27 +118,31 @@ export class SeedModule implements OnModuleInit {
                 category_id: categoryId,
                 content: `This is testimonial content for organization ${organization.name}`,
                 media_type: MediaType.TEXT,
-                organitation_id: organization.id,
+                organization_id: organization.id,
                 title: `Testimonial Title ${userNumber}`,
                 stars_rating: Math.floor(Math.random() * 5) + 1,
                 client_email: `client_${userNumber}@example.com`,
                 client_name: `Client Name ${userNumber}`,
             }
             const exists = await this.testimonialRepo.findOne({
-                where: { title: `Testimonial Title ${userNumber}`, organitation_id: organization.id }
+                where: { title: `Testimonial Title ${userNumber}`, organization_id: organization.id }
             });
 
             if (!exists) await this.testimonialRepo.save({ ...testimonial, status: this.randomStatus() });
         }
     }
-    async createCategories(count: number) {
-        for (let i = 0; i < count; i++) {
-            const name = `Category ${i + 1}`;
-            const exists = await this.categoryRepo.findOne({ where: { name } });
+    async createCategories() {
+        const categoryServiceName = "Service";
+        const categoryProductName = "Product"
 
-            if (!exists) {
-                await this.categoryRepo.save({ name, description: `Description for category ${i + 1}` });
-            }
+        const categoryServiceExist = await this.categoryRepo.findOne({ where: { name:categoryServiceName} });
+        if (!categoryServiceExist) {
+            await this.categoryRepo.save({ name:categoryServiceName, description: `Service testimonial` });
+        }
+
+        const categoryProductExists = await this.categoryRepo.findOne({ where: { name:"Product" } });
+        if (!categoryProductExists) {
+            await this.categoryRepo.save({ name:categoryProductName, description: `Product testimonial` });
         }
     }
     private randomStatus(): TestimonialStatus {

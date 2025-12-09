@@ -1,5 +1,5 @@
 import { BaseEntity } from "src/common/entities/base.entity";
-import { Column, Entity, Index } from "typeorm";
+import { Column, CreateDateColumn, Entity, Index } from "typeorm";
 
 
 @Entity('testimonial_invitations')
@@ -12,8 +12,11 @@ export class TestimonialInvitation extends BaseEntity {
     token: string;
 
     @Column()
+    categoryId:string;
+
+    @CreateDateColumn({nullable: false})
     expires_at: Date;
 
-    @Column({ type: 'datetime', nullable: true })
+    @CreateDateColumn({nullable: true})
     used_at: Date | null;
 }
