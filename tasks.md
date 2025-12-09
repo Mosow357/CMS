@@ -10,3 +10,11 @@ BACKEND:
 
 FRONTEND: 
 1- 
+
+
+
+
+pasos para cambiar archivos que alteren la funcionalidad de usar postgres
+- cambiar todas las entities que lleven valor datetime por date
+- cambiar el fragmento de configuracion de forRoot de typeorm en el modulo por el fragmento de codigo debajo de todo el codigo
+(no subir tales cambios, solo mantenerlo en local)
