@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 export async function POST(req: Request) {
     try {
         const body = await req.json()
-        const { emails, organizationId } = body
+        const { emails, organizationId, categoryId } = body
 
         if (!emails || !Array.isArray(emails) || emails.length === 0) {
             return NextResponse.json({ error: 'No emails provided' }, { status: 400 })
@@ -21,6 +21,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
         }
 
+        console.log('🚀 Sending invite request:', {
+            url: `${process.env.NEXT_PUBLIC_API_URL || 'https://cms-dev-1ft6.onrender.com'}/testimonials/invite`,
+            emails,
+            organizationId,
+            categoryId,
+            hasToken: !!token
+        })
+
         // Forward request to backend
         const apiRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://cms-dev-1ft6.onrender.com'}/testimonials/invite`, {
             method: 'POST',
@@ -30,7 +38,8 @@ export async function POST(req: Request) {
             },
             body: JSON.stringify({
                 emails,
-                organizationId
+                organizationId,
+                categoryId
             }),
         })
 

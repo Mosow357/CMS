@@ -35,8 +35,8 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
 export function EditorInvite({
     editors,
@@ -64,6 +64,10 @@ export function EditorInvite({
         setMounted(true)
     }, [])
 
+
+
+    // ... existing code ...
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -85,6 +89,7 @@ export function EditorInvite({
         setIsSubmitting(false)
         setOpen(false)
     }
+
 
     const handleDeleteEditor = async () => {
         if (!editorToDelete || !currentOrgId) return
