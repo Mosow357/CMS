@@ -11,14 +11,38 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarMenuButton, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar"
 
+import { getCategoriesAction } from "@/lib/actions/categories"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
 interface ReviewInviteProps {
     currentOrgId?: string
 }
 
 export function ReviewInvite({ currentOrgId }: ReviewInviteProps) {
+    const [isMounted, setIsMounted] = useState(false)
     const [showReviewForm, setShowReviewForm] = useState(false)
     const [emails, setEmails] = useState("")
-    const [inviteType, setInviteType] = useState<"PRODUCT" | "CATEGORY">("PRODUCT")
+    const [categories, setCategories] = useState<any[]>([])
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string>("")
+
+    React.useEffect(() => {
+        setIsMounted(true)
+        if (currentOrgId) {
+            getCategoriesAction().then(res => {
+                if (res.success) {
+                    setCategories(res.data)
+                }
+            })
+        }
+    }, [currentOrgId])
+
+    if (!isMounted) return null
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -38,14 +62,19 @@ export function ReviewInvite({ currentOrgId }: ReviewInviteProps) {
             return
         }
 
+        if (!selectedCategoryId) {
+            alert('Por favor selecciona una categoría')
+            return
+        }
+
         // Call API
         fetch('/api/testimonials/invite', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 emails: emailArray,
-                inviteType,
-                organizationId: currentOrgId
+                organizationId: currentOrgId,
+                categoryId: selectedCategoryId
             }),
         })
             .then((res) => res.json())
@@ -53,6 +82,7 @@ export function ReviewInvite({ currentOrgId }: ReviewInviteProps) {
                 if (data.error) throw new Error(data.error)
                 alert(`Solicitud enviada a ${emailArray.length} destinatarios.`)
                 setEmails("")
+                setSelectedCategoryId("")
                 setShowReviewForm(false)
             })
             .catch((error) => {
@@ -84,28 +114,20 @@ export function ReviewInvite({ currentOrgId }: ReviewInviteProps) {
                                 <p className="text-xs text-muted-foreground">Envía invitaciones para dejar una reseña.</p>
                             </div>
 
-                            {/* Selector de Tipo (Producto / Categoria) */}
-                            <div className="flex bg-muted p-1 rounded-md mb-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setInviteType("PRODUCT")}
-                                    className={`flex-1 text-xs py-1 rounded-sm transition-all ${inviteType === "PRODUCT"
-                                            ? "bg-background shadow text-foreground font-medium"
-                                            : "text-muted-foreground hover:bg-background/50"
-                                        }`}
-                                >
-                                    Producto
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setInviteType("CATEGORY")}
-                                    className={`flex-1 text-xs py-1 rounded-sm transition-all ${inviteType === "CATEGORY"
-                                            ? "bg-background shadow text-foreground font-medium"
-                                            : "text-muted-foreground hover:bg-background/50"
-                                        }`}
-                                >
-                                    Categoría
-                                </button>
+                            <div className="mb-3">
+                                <label className="text-xs font-medium block mb-2">Categoría</label>
+                                <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecciona una categoría" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {categories.map((category) => (
+                                            <SelectItem key={category.id} value={category.id}>
+                                                {category.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             <label className="text-xs font-medium block mb-2">Correos electrónicos</label>
