@@ -257,7 +257,7 @@ export async function submitTestimonialAction(testimonial: createNewTestimonialD
             stars_rating: testimonial.stars_rating,
             client_email: testimonial.client_email,
             title: "Amazing service",
-            ...(testimonial.file && { file: testimonial.file }) // ← magia
+            ...(testimonial.file && { file: testimonial.file }) //en caso de que no se envie un file, se omite
         };
 
         await apiClient.request<void, any>({
@@ -271,13 +271,12 @@ export async function submitTestimonialAction(testimonial: createNewTestimonialD
         return { success: true, message: 'Testimonio enviado exitosamente' }
     } catch (error: any) {
         if (error instanceof Response) {
-            const raw = await error.text();   // <-- aquí lo consumes
+            const raw = await error.text();
             console.log("ERROR RAW BODY:", raw);
 
             try {
                 console.log("PARSED JSON:", JSON.parse(raw));
             } catch (_) {
-                // No era JSON
             }
             return;
         }
