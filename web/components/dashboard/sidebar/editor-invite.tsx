@@ -37,28 +37,29 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { inviteUserToOrganizationAction } from "@/lib/actions/organizations"
 
 export function EditorInvite({
     editors,
+    currentOrgId,
 }: {
     editors?: {
         name: string
         email: string
         role: string
+        userId?: string
     }[]
+    currentOrgId?: string
 }) {
     const { isMobile } = useSidebar()
     const [open, setOpen] = React.useState(false)
     const [email, setEmail] = React.useState("")
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [mounted, setMounted] = React.useState(false)
-    const [editorToDelete, setEditorToDelete] = React.useState<string | null>(null)
+    const [editorToDelete, setEditorToDelete] = React.useState<{ email: string; userId?: string } | null>(null)
 
-    // Default editors if none provided
-    const editorsList = editors || [
-        { name: "Editor Principal", email: "editor@example.com", role: "Admin" },
-        { name: "Editor Secundario", email: "editor2@example.com", role: "Editor" },
-    ]
+    // Usar los editores reales o un array vacío
+    const editorsList = editors || []
 
     React.useEffect(() => {
         setMounted(true)
@@ -66,13 +67,21 @@ export function EditorInvite({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        if (!currentOrgId) {
+            alert('No hay organización seleccionada')
+            return
+        }
+
         setIsSubmitting(true)
 
-        // TODO: Implement the actual invitation logic here
-        // For now, just simulate an API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await inviteUserToOrganizationAction({
+            email: email,
+            organizationId: currentOrgId,
+            role: 'editor'
+        });
 
-        console.log("Inviting editor:", email)
+        console.log("Invitando editor:", email, "a organización:", currentOrgId)
 
         // Reset form and close dialog
         setEmail("")
@@ -81,10 +90,11 @@ export function EditorInvite({
     }
 
     const handleDeleteEditor = async () => {
-        if (!editorToDelete) return
+        if (!editorToDelete || !currentOrgId) return
 
-        // TODO: Implement the actual delete logic here
-        console.log("Deleting editor:", editorToDelete)
+        // TODO: Implementar la lógica de eliminación cuando tengamos las funciones del servidor
+        console.log("Eliminando editor:", editorToDelete.email, "de organización:", currentOrgId)
+        alert('Funcionalidad de eliminación pendiente de implementar')
 
         // Close the alert dialog
         setEditorToDelete(null)
@@ -95,11 +105,11 @@ export function EditorInvite({
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg">
-                        <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                            <UserCircle className="size-4" />
+                        <div className=" bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                            <UserCircle className="size-4 " />
                         </div>
                         <div className="grid flex-1 text-left text-sm leading-tight">
-                            <span className="truncate font-medium">Editores</span>
+                            <span className="truncate font-medium  ">Editores</span>
                             <span className="truncate text-xs">{editorsList.length} colaboradores</span>
                         </div>
                         <ChevronsUpDown className="ml-auto" />
@@ -118,11 +128,11 @@ export function EditorInvite({
                             size="lg"
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
-                            <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                                <UserCircle className="size-4" />
+                            <div className="bg-[#66F9C4] text-[#0F111A] flex aspect-square size-8 items-center justify-center rounded-lg">
+                                <UserCircle className="size-4 " />
                             </div>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">Editores</span>
+                            <div className="grid flex-1 text-left text-sm leading-tight ">
+                                <span className="truncate font-medium ">Editores</span>
                                 <span className="truncate text-xs">{editorsList.length} colaboradores</span>
                             </div>
                             <ChevronsUpDown className="ml-auto" />
@@ -134,7 +144,7 @@ export function EditorInvite({
                         side={isMobile ? "bottom" : "right"}
                         sideOffset={4}
                     >
-                        <DropdownMenuLabel className="text-muted-foreground text-xs">
+                        <DropdownMenuLabel className="text-muted-foreground text-xs ">
                             Editores
                         </DropdownMenuLabel>
                         {editorsList.map((editor) => (
@@ -158,7 +168,10 @@ export function EditorInvite({
                                     className="h-6 w-6 text-muted-foreground hover:text-destructive"
                                     onClick={(e) => {
                                         e.stopPropagation()
-                                        setEditorToDelete(editor.email)
+                                        setEditorToDelete({
+                                            email: editor.email,
+                                            userId: editor.userId
+                                        })
                                     }}
                                 >
                                     <Trash2 className="size-3.5 hover:text-destructive hover:size-6" />
@@ -178,7 +191,7 @@ export function EditorInvite({
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Dialog open={open} onOpenChange={setOpen}>
+                <Dialog open={open} onOpenChange={setOpen} >
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>Invitar Editor</DialogTitle>
@@ -187,7 +200,7 @@ export function EditorInvite({
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleSubmit}>
-                            <div className="grid gap-4 py-4">
+                            <div className="grid gap-4 py-4 ">
                                 <div className="grid gap-2">
                                     <Input
                                         id="email"

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -13,6 +13,8 @@ import { OrganizationModule } from './organizations/organitations.module';
 import { MediaStorageModule } from './media-storage/mediaStorage.module';
 import { OrganizationManagementModule } from './organization-management/organizationManagement.module';
 import { SeedModule } from './seed/seed.module';
+import { ensureDatabase } from './common/services/ensure-database';
+import { ObservabilityModule } from 'src/observability/observability.module';
 
 @Module({
   imports: [
@@ -21,15 +23,16 @@ import { SeedModule } from './seed/seed.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => {
+      useFactory: async (config: ConfigService) => {
+        const logger = new Logger('Typeorm Factory')
         const env = config.get('NODE_ENV');
 
         const isLocal = env === 'development';
-
+        logger.log(`Database: ${isLocal ? 'Sqlite' : 'Postgres'}`)
         if (isLocal) {
           return {
             type: 'sqlite',
-            database: 'local.db',
+            database: ':memory:',
             dropSchema: true,
             autoLoadEntities: true,
             synchronize: true,
@@ -45,7 +48,8 @@ import { SeedModule } from './seed/seed.module';
           database: process.env.DATABASE_NAME || 'cms_db',
           autoLoadEntities: true,
           synchronize: true,
-          ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+          migrationsRun: true,
+          migrations: [__dirname + '/migrations/*{.js,.ts}'],
         };
       },
       inject: [ConfigService],
@@ -59,6 +63,7 @@ import { SeedModule } from './seed/seed.module';
     OrganizationModule,
     MediaStorageModule,
     OrganizationManagementModule,
+    ObservabilityModule,
     SeedModule
   ],
   providers: [
@@ -69,3 +74,17 @@ import { SeedModule } from './seed/seed.module';
   ],
 })
 export class AppModule { }
+
+
+    //  TypeOrmModule.forRoot({
+    //   type: 'postgres',
+    //   url: process.env.DATABASE_URL,
+    //   host: process.env.DATABASE_HOST || 'localhost',
+    //   port: parseInt(process.env.DATABASE_PORT || '5432'),
+    //   username: process.env.DATABASE_USER || 'postgres',
+    //   password: process.env.DATABASE_PASSWORD || 'postgres',
+    //   database: process.env.DATABASE_NAME || 'cms_db',
+    //   autoLoadEntities:true,
+    //   synchronize: true,
+    //   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    // }),

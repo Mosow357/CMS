@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
-import { APIResponse } from 'mailersend/lib/services/request.service';
 import { EmailNotificationBase } from '../email-templates/emailNotificationBase';
+import { EmailProvider } from '../ports/emailProvider';
 @Injectable()
-export class EmailProviderService {
+export class EmailProviderMailerSendImpl implements EmailProvider {
 
     constructor(private config: ConfigService) { }
 
-    async sendEmail(emailNotificationDto:EmailNotificationBase): Promise<APIResponse> {
+    async sendEmail(emailNotificationDto:EmailNotificationBase): Promise<boolean> {
         const apiKey = this.config.get('MAILERSEND_API_TOKEN');
         const domain = this.config.get('MAILERSEND_DOMAIN');
 
@@ -33,7 +33,7 @@ export class EmailProviderService {
             email: emailNotificationDto.recipentEmail,
             data: emailNotificationDto.variables
         }]
-
-        return await mailerSend.email.send(emailParams);
+        let result = await mailerSend.email.send(emailParams);
+        return result.statusCode == 202;
     }
 }

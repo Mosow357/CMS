@@ -1,7 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsArray, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 import { TestimonialStatus } from "../enums/testimonialStatus";
 import { QueryParamsDto } from "src/common/dto/queryParams.dto";
+import { Type } from "class-transformer";
 
 export class TestimonialsParamsDto extends QueryParamsDto {
   @ApiProperty({
@@ -11,7 +12,7 @@ export class TestimonialsParamsDto extends QueryParamsDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'Organization ID is required' })
-  organitationId: string;
+  organizationId: string;
 
   @ApiPropertyOptional({
     description: 'Status to filter testimonials (e.g., approved, pending, rejected,published).',
@@ -21,4 +22,39 @@ export class TestimonialsParamsDto extends QueryParamsDto {
   @IsOptional()
   @IsString()
   status?: TestimonialStatus;
+
+  @ApiPropertyOptional({
+    description: 'Stars rating (1 to 5)',
+    minimum: 1,
+    maximum: 5,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  @Type(() => Number)
+  startsRating?: number;
+
+  @ApiPropertyOptional({
+    description: 'Filter testimonials created from this date (ISO)',
+  })
+  @IsOptional()
+  @IsDateString()
+  createdFrom?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filter testimonials created until this date (ISO)',
+  })
+  @IsOptional()
+  @IsDateString()
+  createdTo?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filter testimonials that match any of the provided tags',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
 }

@@ -1,8 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { ChevronsUpDown, Plus } from "lucide-react"
+import { ChevronsUpDown, Plus, GalleryVerticalEnd, type LucideIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { switchOrganizationAction } from "@/lib/actions/sidebar"
 
 import {
   DropdownMenu,
@@ -20,24 +21,61 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+// Mapeo de nombres de iconos a componentes
+const iconMap: Record<string, LucideIcon> = {
+  GalleryVerticalEnd,
+}
+
 export function TeamSwitcher({
   teams,
+  currentOrgId,
 }: {
   teams: {
+    id: string
     name: string
-    logo: React.ElementType
+    logo: string | React.ElementType
     plan: string
   }[]
+  currentOrgId?: string
 }) {
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
   const router = useRouter()
 
+  // Encontrar la organización actual
+  const activeTeam = teams.find(t => t.id === currentOrgId) || teams[0]
+
   const [mounted, setMounted] = React.useState(false)
+  const [isSwitching, setIsSwitching] = React.useState(false)
 
   React.useEffect(() => {
     setMounted(true)
   }, [])
+
+  const handleSwitchOrganization = async (teamId: string) => {
+    if (teamId === activeTeam?.id) return // Ya está en esta organización
+
+    setIsSwitching(true)
+
+    try {
+      const result = await switchOrganizationAction(teamId)
+
+      if (result.success) {
+        // Refrescar la página para actualizar el sidebar con los nuevos datos
+        router.refresh()
+      } else {
+        console.error('Error switching organization:', result.error)
+      }
+    } catch (error) {
+      console.error('Error switching organization:', error)
+    } finally {
+      setIsSwitching(false)
+    }
+  }
+
+  // Convertir logo string a componente
+  const LogoComponent = typeof activeTeam?.logo === 'string'
+    ? (iconMap[activeTeam.logo] || GalleryVerticalEnd)
+    : (activeTeam?.logo || GalleryVerticalEnd)
 
   if (!activeTeam) {
     return null
@@ -49,7 +87,7 @@ export function TeamSwitcher({
         <SidebarMenuItem>
           <SidebarMenuButton size="lg">
             <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-              <activeTeam.logo className="size-4" />
+              <LogoComponent className="size-4" />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{activeTeam.name}</span>
@@ -70,9 +108,10 @@ export function TeamSwitcher({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              disabled={isSwitching}
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <activeTeam.logo className="size-4" />
+                <LogoComponent className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{activeTeam.name}</span>
@@ -90,23 +129,31 @@ export function TeamSwitcher({
             <DropdownMenuLabel className="text-muted-foreground text-xs">
               Organizaciones
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
-              <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
-                className="gap-2 p-2"
-              >
-                <div className="flex size-6 items-center justify-center rounded-md border">
-                  <team.logo className="size-3.5 shrink-0" />
-                </div>
-                {team.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            ))}
+            {teams.map((team, index) => {
+              const TeamLogo = typeof team.logo === 'string'
+                ? (iconMap[team.logo] || GalleryVerticalEnd)
+                : (team.logo || GalleryVerticalEnd)
+
+              return (
+                <DropdownMenuItem
+                  key={team.id}
+                  onClick={() => handleSwitchOrganization(team.id)}
+                  className="gap-2 p-2"
+                  disabled={isSwitching}
+                >
+                  <div className="flex size-6 items-center justify-center rounded-md border">
+                    <TeamLogo className="size-3.5 shrink-0" />
+                  </div>
+                  {team.name}
+                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              )
+            })}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="gap-2 p-2"
               onClick={() => router.push('/dashboard/organizations/new')}
+              disabled={isSwitching}
             >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Plus className="size-4" />

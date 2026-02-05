@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CreateOrganizationDto } from '../dto/create-organization.dto';
@@ -8,31 +8,27 @@ import { UserOrganization } from 'src/user_organization/entities/userOrganizatio
 import { User } from 'src/users/entities/user.entity';
 import { OrganizationRole } from 'src/common/types/userRole';
 import { AddUserOrganizationDto } from '../dto/add-userOrganiztion.dto';
+import { MediaStorageService } from 'src/media-storage/services/mediaStorage.service';
+import { UserOrganizationService } from 'src/user_organization/services/userOrganization.service';
 
 @Injectable()
 export class OrganizationsService {
   constructor(
     @InjectRepository(Organization)
     private organizationRepository: Repository<Organization>,
-    @InjectRepository(UserOrganization)
-    private userOrganizationRepository: Repository<UserOrganization>,
     private dataSource: DataSource,
+    private readonly mediaStorageService: MediaStorageService,
+    private readonly userOrganizationService: UserOrganizationService
   ) { }
 
-  async create(createOrganizationDto: CreateOrganizationDto, user: User): Promise<Organization> {
-    const organization = this.organizationRepository.create({
-      ...createOrganizationDto
+  async create(name: string, description: string, questionText: string, logoUrl: string | undefined): Promise<Organization> {
+    let organization = this.organizationRepository.create({
+      name,
+      description,
+      logoUrl: logoUrl || '',
+      questionText
     });
-    await this.organizationRepository.save(organization)
-
-    const userOrganization = this.userOrganizationRepository.create({
-      userId: user.id,
-      organizationId: organization.id,
-      role: OrganizationRole.ADMINISTRATOR,
-    })
-    await this.userOrganizationRepository.save(userOrganization);
-
-    return organization
+    return await this.organizationRepository.save(organization);
   }
 
   async findUserOrganizations(userId: string): Promise<Organization[]> {
@@ -52,52 +48,84 @@ export class OrganizationsService {
     return organizations;
   }
 
-  async findOne(id: string): Promise<Organization> {
+  async findOneSecured(organizationId: string, userId: string): Promise<Organization> {
+    let userOrg = await this.userOrganizationService.findUserOrganization(userId, organizationId);
+    if (!userOrg) {
+      throw new UnauthorizedException(`User is not part of the organization ${organizationId}`);
+    }
     const organization = await this.organizationRepository.findOne({
-      where: { id },
+      where: { id: organizationId },
       relations: ['userOrganizations'],
     });
     if (!organization) {
-      throw new NotFoundException(`Organization with ID ${id} not found`);
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`);
     }
     return organization;
   }
 
-  async update(id: string, updateOrganizationDto: UpdateOrganizationDto): Promise<Organization> {
-    const organization = await this.findOne(id);
+  async findOneUnsafe(organizationId: string): Promise<Organization> {
+    const organization = await this.organizationRepository.findOne({
+      where: { id: organizationId },
+      relations: ['userOrganizations'],
+    });
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`);
+    }
+    return organization;
+  }
+
+  async update(organizationId: string, userId: string, updateOrganizationDto: UpdateOrganizationDto): Promise<Organization> {
+    let userOrg = await this.userOrganizationService.findUserOrganization(userId, organizationId);
+    if (!userOrg) {
+      throw new UnauthorizedException(`User is not part of the organization ${organizationId}`);
+    }
+    const organization = await this.organizationRepository.findOne({
+      where: { id: organizationId },
+      relations: ['userOrganizations'],
+    });
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`);
+    }
     Object.assign(organization, updateOrganizationDto);
     return this.organizationRepository.save(organization);
   }
 
-  async remove(id: string): Promise<void> {
-    const organization = await this.findOne(id);
+  async remove(organizationId: string, userId: string,): Promise<void> {
+    let userOrg = await this.userOrganizationService.findUserOrganization(userId, organizationId);
+    if (!userOrg) {
+      throw new UnauthorizedException(`User is not part of the organization ${organizationId}`);
+    }
+    const organization = await this.organizationRepository.findOne({
+      where: { id: organizationId },
+      relations: ['userOrganizations'],
+    });
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`);
+    }
     await this.organizationRepository.remove(organization);
   }
   //? ====================== USER ORGANIZATION =====================
   async addUserOrganization(addDto: AddUserOrganizationDto): Promise<UserOrganization> {
-    const existsOrganization = await this.organizationRepository.findOne({ where: { id: addDto.organizationId }});
+    const existsOrganization = await this.organizationRepository.findOne({ where: { id: addDto.organizationId } });
     if (!existsOrganization) throw new NotFoundException('Organization not found');
 
-    const existsUserInOrg = await this.userOrganizationRepository.findOne({
-      where: { organizationId: addDto.organizationId, userId: addDto.userId },
-    });
+    const existsUserInOrg = await this.userOrganizationService.findUserOrganization(addDto.userId, addDto.organizationId);
     if (existsUserInOrg) throw new ConflictException('User already member of the organization');
 
-    const toSave = this.userOrganizationRepository.create({
+    const userOrg = this.userOrganizationService.create({
       userId: addDto.userId,
       organizationId: addDto.organizationId,
       role: addDto.role ?? OrganizationRole.EDITOR,
     });
-    const saved = await this.userOrganizationRepository.save(toSave);
 
-    return saved;
+    return userOrg;
   }
 
-   async changeUserRole(
+  async changeUserRole(
     organizationId: string,
     targetUserId: string,
     newRole: OrganizationRole,
-    user:User
+    user: User
   ): Promise<UserOrganization> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -113,10 +141,10 @@ export class OrganizationsService {
       if (!membership) {
         throw new NotFoundException('User is not a member of the organization');
       }
-      
+
       const currentUser = await queryRunner.manager.findOne(UserOrganization, {
         where: { organizationId, userId: user.id },
-      }); 
+      });
       if (currentUser?.role === OrganizationRole.EDITOR) {
         throw new BadRequestException("The current user doesn't have permissions to change the role");
       }
@@ -137,7 +165,7 @@ export class OrganizationsService {
       }
 
       membership.role = newRole;
-      const saved = await queryRunner.manager.save(membership); 
+      const saved = await queryRunner.manager.save(membership);
 
       await queryRunner.commitTransaction();
       return saved;

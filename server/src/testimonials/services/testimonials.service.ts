@@ -1,39 +1,81 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { UpdateTestimonialDto } from '../dto/update-testimonial.dto';
 import { Testimonial } from 'src/testimonials/entities/testimonial.entity';
 import { TestimonialsParamsDto } from '../dto/testimonials.params.dto';
-import { OrganizationsService } from 'src/organizations/services/organizations.service';
 import { UserOrganizationService } from 'src/user_organization/services/userOrganization.service';
+import { WallTestimonialsParamsDto } from '../dto/wallTestimonials.params.dto';
+import { TestimonialStatus } from '../enums/testimonialStatus';
+import { OrganizationRole } from 'src/common/types/userRole';
+
 
 @Injectable()
 export class TestimonialsService {
+  private readonly logger = new Logger(TestimonialsService.name);
   constructor(
     @InjectRepository(Testimonial)
     private testimonialsRepository: Repository<Testimonial>,
-    private readonly userOrganization:UserOrganizationService
-  ) {}
+    private readonly userOrganization: UserOrganizationService
+  ) { }
 
-  async findAll(filters:TestimonialsParamsDto,userId:string): Promise<Testimonial[]> {
-    let org = await this.userOrganization.findUserOrganization(userId,filters.organitationId);
-    if(!org){
-      throw new NotFoundException(`User is not part of the organization ${filters.organitationId}`);
+  async create(createTestimonial: Partial<Testimonial>): Promise<Testimonial> {
+    const testimonial = this.testimonialsRepository.create(createTestimonial);
+    return this.testimonialsRepository.save(testimonial);
+  }
+
+  async findAll(filters: TestimonialsParamsDto, userId: string): Promise<Testimonial[]> {
+    this.logger.log('intent for get all testimonials');
+    let org = await this.userOrganization.findUserOrganization(userId, filters.organizationId);
+    if (!org) {
+      this.logger.log(`intent for get all testimonials: User is not part of the organization ${filters.organizationId}`);
+      throw new UnauthorizedException(`User is not part of the organization ${filters.organizationId}`);
     }
     const { page = 1, itemsPerPage = 20, sort = 'ASC' } = filters;
     const limit = itemsPerPage;
     const offset = (page - 1) * itemsPerPage;
-    
+
+    let createdAtFilter;
+
+    if (filters.createdFrom && filters.createdTo) {
+      createdAtFilter = Between(
+        new Date(filters.createdFrom),
+        new Date(filters.createdTo),
+      );
+    } else if (filters.createdFrom) {
+      createdAtFilter = MoreThanOrEqual(new Date(filters.createdFrom));
+    } else if (filters.createdTo) {
+      createdAtFilter = LessThanOrEqual(new Date(filters.createdTo));
+    }
+
     return this.testimonialsRepository.find({
       relations: ['category', 'tags'],
+      skip: offset,
+      take: limit,
+      order: { createdAt: sort },
+      where: {
+        organization_id: filters.organizationId,
+        status: filters.status,
+        stars_rating: filters.startsRating,
+        ...(createdAtFilter && { createdAt: createdAtFilter }),
+      },
+    });
+  }
+
+  async findAllWallTestimonials(params: WallTestimonialsParamsDto): Promise<Testimonial[]> {
+    const { page = 1, itemsPerPage = 20, sort = 'ASC' } = params;
+    const limit = itemsPerPage;
+    const offset = (page - 1) * itemsPerPage;
+
+    return this.testimonialsRepository.find({
       skip: offset,
       take: limit,
       order: {
         createdAt: sort,
       },
-      where:{
-        organitation_id: filters.organitationId,
-        status: filters.status,
+      where: {
+        organization_id: params.organizationId,
+        status: 'published',
       }
     });
   }
@@ -49,9 +91,10 @@ export class TestimonialsService {
     return testimonial;
   }
 
-  async findByOrganitation(organitationId: string): Promise<Testimonial[]> {
+  async findByOrganization(organitationId: string, param: TestimonialsParamsDto): Promise<Testimonial[]> {
+    const { status } = param
     return this.testimonialsRepository.find({
-      where: { organitation_id: organitationId },
+      where: status ? { status, organization_id: organitationId } : { organization_id: organitationId },
       relations: ['category', 'tags'],
     });
   }
@@ -64,16 +107,23 @@ export class TestimonialsService {
   }
 
   async update(
-    id: string,
-    updateTestimonialDto: UpdateTestimonialDto,
+    testimonialId: string,
+    updateTestimonial: Testimonial,
   ): Promise<Testimonial> {
-    const testimonial = await this.findOne(id);
-    Object.assign(testimonial, updateTestimonialDto);
+
+    const testimonial = await this.testimonialsRepository.findOne({
+      where: { id: testimonialId }
+    });
+    if (!testimonial) {
+      throw new NotFoundException(`Testimonial with ID ${testimonialId} not found`);
+    }
+    Object.assign(testimonial, updateTestimonial);
     return this.testimonialsRepository.save(testimonial);
   }
 
-  async remove(id: string): Promise<void> {
-    const testimonial = await this.findOne(id);
-    await this.testimonialsRepository.remove(testimonial);
+  async removeById(testimonialId: string): Promise<boolean> {
+    const result = await this.testimonialsRepository.delete(testimonialId);
+    if (!result.affected) return false;
+    return true;
   }
 }
